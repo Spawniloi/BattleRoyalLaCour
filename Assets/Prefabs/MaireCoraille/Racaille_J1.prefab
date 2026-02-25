@@ -63,8 +63,8 @@ Rigidbody2D:
     m_Bits: 0
   m_Interpolate: 0
   m_SleepingMode: 1
-  m_CollisionDetection: 0
-  m_Constraints: 0
+  m_CollisionDetection: 1
+  m_Constraints: 4
 --- !u!58 &6153778890055955662
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -115,10 +115,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   config: {fileID: 11400000, guid: 911ed3adebc5d3e4e9f002edd406c5e2, type: 2}
   playerID: 1
-  isMayor: 1
+  isMayor: 0
   sliderValue: 0
   isFrozen: 0
   isStunned: 0
+  gameManager: {fileID: 0}
 --- !u!114 &5828815982665504560
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -193,6 +194,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 46e1c9738aae4db46bb4ad66935c5a2b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerID: 1
 --- !u!1 &1826398357198875708
 GameObject:
   m_ObjectHideFlags: 0

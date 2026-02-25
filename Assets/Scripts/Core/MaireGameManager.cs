@@ -124,7 +124,7 @@ public class MaireGameManager : MonoBehaviour
         {
             yield return new WaitForSeconds(1f);
             tempsRestant -= 1f;
-            Debug.Log($"[Timer] {tempsRestant}s restantes");
+            //Debug.Log($"[Timer] {tempsRestant}s restantes");
             if (tempsRestant <= 0) TerminerPartie();
         }
     }
