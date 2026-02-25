@@ -16,7 +16,7 @@ public class RacailleController : MonoBehaviour
     private Rigidbody2D rb;
     private SpriteRenderer sr;
     private InputHandler inputHandler;
-    private MaireGameManager gameManager;
+    public MaireGameManager gameManager;
 
     // Input
     private Vector2 moveInput;
