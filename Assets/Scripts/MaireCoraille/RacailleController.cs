@@ -16,6 +16,7 @@ public class RacailleController : MonoBehaviour
     private Rigidbody2D rb;
     private SpriteRenderer sr;
     private InputHandler inputHandler;
+    private MaireGameManager gameManager;
 
     // Input
     private Vector2 moveInput;
@@ -28,6 +29,7 @@ public class RacailleController : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         sr = GetComponent<SpriteRenderer>();
         inputHandler = GetComponent<InputHandler>();
+        gameManager = FindFirstObjectByType<MaireGameManager>();
     }
 
     void Update()
@@ -130,5 +132,16 @@ public class RacailleController : MonoBehaviour
     {
         isMayor = mayor;
         // TODO Étape suivante : changer sprite aileron/queue
+    }
+
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (!isMayor) return;  // seul le maire peut déclencher le transfert
+
+        RacailleController cible = other.GetComponent<RacailleController>();
+        if (cible == null) return;
+        if (cible == this) return;
+
+        gameManager?.TenterTransfert(this, cible);
     }
 }
