@@ -15,6 +15,7 @@ public class RacailleController : MonoBehaviour
     // Références
     private Rigidbody2D rb;
     private SpriteRenderer sr;
+    private InputHandler inputHandler;
 
     // Input
     private Vector2 moveInput;
@@ -26,6 +27,7 @@ public class RacailleController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         sr = GetComponent<SpriteRenderer>();
+        inputHandler = GetComponent<InputHandler>();
     }
 
     void Update()
@@ -46,11 +48,8 @@ public class RacailleController : MonoBehaviour
 
     void ReadInput()
     {
-        // Chaque joueur a ses propres axes — à connecter via Input System
-        // Pour l'instant : clavier ZQSD pour J1, flèches pour J2
-        string hAxis = playerID == 1 ? "Horizontal" : "Horizontal2";
-        string vAxis = playerID == 1 ? "Vertical" : "Vertical2";
-        moveInput = new Vector2(Input.GetAxis(hAxis), Input.GetAxis(vAxis));
+        if (inputHandler == null) return;
+        moveInput = inputHandler.MoveInput;
     }
 
     void MoveWithIce()
