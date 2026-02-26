@@ -15,6 +15,12 @@ public class MaireGameManager : MonoBehaviour
     [Header("Positions de spawn")]
     public Transform[] spawnPoints; // <- 4 points dans la scène
 
+    [Header("Terrain")]
+    public TerrainManager terrainManager;
+
+    [Header("UI")]
+    public SliderUIManager sliderUIManager;
+
     [Header("Corailles")]
     public GameObject coraillePrefab;
     public int nombreCorailles2J = 4;
@@ -34,6 +40,8 @@ public class MaireGameManager : MonoBehaviour
     void Start()
     {
         tempsRestant = config.roundDuration;
+        terrainManager?.InitTerrain(GameData.nombreJoueurs);
+        sliderUIManager?.InitSliders(GameData.nombreJoueurs);
         SpawnerJoueurs();
     }
 
@@ -144,26 +152,21 @@ public class MaireGameManager : MonoBehaviour
         if (attaquant != mayorActuel) return;
         if (cible == mayorActuel) return;
 
-        // Direction de séparation entre les 2
         Vector2 dir = (cible.transform.position
                      - attaquant.transform.position).normalized;
-
         if (dir == Vector2.zero)
             dir = Random.insideUnitCircle.normalized;
 
-        // Knockback ÉGAL sur les 2 AVANT le changement de rôle
-        float force = 4f;
+        // Knockback depuis le config
         attaquant.GetComponent<Rigidbody2D>()
-            .AddForce(-dir * force, ForceMode2D.Impulse);
+            .AddForce(-dir * config.knockbackTransfert, ForceMode2D.Impulse);
         cible.GetComponent<Rigidbody2D>()
-            .AddForce(dir * force, ForceMode2D.Impulse);
+            .AddForce(dir * config.knockbackTransfert, ForceMode2D.Impulse);
 
-        attaquant.SyncVelocity(-dir * force);
-        cible.SyncVelocity(dir * force);
+        attaquant.SyncVelocity(-dir * config.knockbackTransfert);
+        cible.SyncVelocity(dir * config.knockbackTransfert);
 
-        // Changement de rôle après le knockback
         SetMayor(cible);
-
         Debug.Log($"[Transfert] J{attaquant.playerID} → J{cible.playerID}");
     }
 
@@ -204,7 +207,7 @@ public class MaireGameManager : MonoBehaviour
                           nb == 3 ? nombreCorailles3J : nombreCorailles4J;
 
         Vector2 terrainSize = config.GetTerrainSize(nb);
-        float distanceMin = 3.0f; // distance minimum entre 2 corailles
+        float distanceMin = config.distanceMinCorailles; // distance minimum entre 2 corailles
         int maxEssais = 50;   // évite boucle infinie
 
         List<Vector2> positionsDejaUtilisees = new List<Vector2>();

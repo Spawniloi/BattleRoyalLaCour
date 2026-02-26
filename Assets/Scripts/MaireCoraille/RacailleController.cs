@@ -120,14 +120,9 @@ public class RacailleController : MonoBehaviour
         isMayor = mayor;
 
         if (mayor)
-        {
-            // Nouveau maire — cooldown avant de pouvoir retransférer
-            transfertCooldown = 1.5f;
-            // Pas de freeze sur le maire — il peut contrôler après le knockback
-        }
+            transfertCooldown = config.transfertCooldownDuree;
         else
         {
-            // Nouveau poisson — freeze inputs seulement
             transfertCooldown = 0f;
             StartCoroutine(FreezeInputs(config.freezeDuration));
         }
@@ -173,30 +168,28 @@ public class RacailleController : MonoBehaviour
         if (autre == null) return;
         if (autre == this) return;
 
-        // ── Maire touche poisson → transfert ─────────────────────────────────────
+        // Maire touche poisson → transfert
         if (isMayor && !autre.isMayor)
         {
             if (isFrozen || isStunned || transfertCooldown > 0) return;
-            transfertCooldown = 1.5f;
+            transfertCooldown = config.transfertCooldownDuree;
             gameManager?.TenterTransfert(this, autre);
             return;
         }
 
-        // ── Poisson touche poisson → léger knockback des 2 ───────────────────────
+        // Poisson touche poisson → knockback léger
         if (!isMayor && !autre.isMayor)
         {
             Vector2 dir = (autre.transform.position
                          - transform.position).normalized;
+            if (dir == Vector2.zero)
+                dir = Random.insideUnitCircle.normalized;
 
-            if (dir == Vector2.zero) dir = Random.insideUnitCircle.normalized;
-
-            float force = 5f; // moins fort qu'un transfert
-            rb.AddForce(-dir * force, ForceMode2D.Impulse);
-            SyncVelocity(-dir * force);
-            // L'autre côté se gère dans son propre OnCollisionEnter2D
-            return;
+            rb.AddForce(-dir * config.knockbackPoissonPoisson, ForceMode2D.Impulse);
+            SyncVelocity(rb.linearVelocity);
         }
     }
+
 
     // Appelé depuis le Hub/JSON
     public void SetCouleur(Color couleur)

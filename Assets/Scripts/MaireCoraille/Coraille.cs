@@ -48,20 +48,17 @@ public class Coraille : MonoBehaviour
             collision.gameObject.GetComponent<RacailleController>();
         if (racaille == null) return;
 
-        Rigidbody2D rb = racaille.GetComponent<Rigidbody2D>();
-
-        // Direction de rebond = depuis le centre du coraille vers le joueur
         Vector2 dirRebond = ((Vector2)racaille.transform.position
                            - (Vector2)transform.position).normalized;
 
-        // Remet à zéro et applique une force fixe — indépendant de la vitesse d'arrivée
-        rb.linearVelocity = Vector2.zero;
-        rb.AddForce(dirRebond * 4f, ForceMode2D.Impulse);
+        Rigidbody2D rb = racaille.GetComponent<Rigidbody2D>();
+        Vector2 vitesseReflechie = Vector2.Reflect(rb.linearVelocity, dirRebond);
 
-        // Sync currentVelocity dans RacailleController
-        racaille.SyncVelocity(dirRebond * 4f);
+        if (vitesseReflechie.magnitude < config.corailleRebondForceMin)
+            vitesseReflechie = dirRebond * config.corailleRebondForceMin;
 
-        Debug.Log($"[Coraille] Rebond J{racaille.playerID} !");
+        rb.linearVelocity = vitesseReflechie * config.knockbackMultiplier;
+        racaille.SyncVelocity(rb.linearVelocity);
     }
 
     // ── Tentative d'accrochage (appelé par CorailleCoteDetector) ─────────────
@@ -111,20 +108,18 @@ public class Coraille : MonoBehaviour
     // ── Rebond simple — comme une balle sur un mur ────────────────────────────
     void Repulsion(RacailleController racaille)
     {
-        Vector2 dirRepulsion = ((Vector2)racaille.transform.position
-                              - (Vector2)transform.position).normalized;
+        Vector2 dir = ((Vector2)racaille.transform.position
+                     - (Vector2)transform.position).normalized;
 
         Rigidbody2D rb = racaille.GetComponent<Rigidbody2D>();
+        Vector2 vitesseReflechie = Vector2.Reflect(rb.linearVelocity, dir);
 
-        // Réflexion de la vitesse + boost
-        Vector2 vitesseReflechie = Vector2.Reflect(rb.linearVelocity, dirRepulsion);
-
-        float forceMin = 6f;
-        if (vitesseReflechie.magnitude < forceMin)
-            vitesseReflechie = dirRepulsion * forceMin;
+        if (vitesseReflechie.magnitude < config.corailleRebondForceMin)
+            vitesseReflechie = dir * config.corailleRebondForceMin;
 
         rb.linearVelocity = Vector2.zero;
-        rb.AddForce(vitesseReflechie * 1.3f, ForceMode2D.Impulse);
+        rb.AddForce(vitesseReflechie * config.knockbackMultiplier, ForceMode2D.Impulse);
+        racaille.SyncVelocity(vitesseReflechie * config.knockbackMultiplier);
     }
 
     // ── Fusion réussie ────────────────────────────────────────────────────────

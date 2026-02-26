@@ -3,7 +3,7 @@ using UnityEngine;
 
 public static class GameData
 {
-    public static int nombreJoueurs = 2;
+    public static int nombreJoueurs = 4;
 
     // Données par défaut — overridées par le Hub via JSON
     public static List<PlayerData> joueurs = new List<PlayerData>()
