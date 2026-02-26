@@ -2,40 +2,23 @@
 
 public class RacailleVisuel : MonoBehaviour
 {
-    [Header("Sprites formes")]
-    public Sprite spriteCercle;
-    public Sprite spriteCarre;
-    public Sprite spriteTriangle;
-    public Sprite spriteEtoile;
-    public Sprite spriteLosange;
-
-    [Header("Sprites role")]
-    public Sprite spriteAileron;  // maire
-    public Sprite spriteQueue;    // fugitif
-
     [Header("References")]
-    public SpriteRenderer srCorps;    // sprite principal
-    public SpriteRenderer srRole;     // aileron ou queue
-    public SpriteRenderer srObjet;    // accessoire
+    public SpriteRenderer srCorps;
+    public SpriteRenderer srRole;
 
-    // ── Applique les données du joueur ────────────────────────────────────────
+    // ── Applique les données joueur ───────────────────────────────────────────
     public void AppliquerData(PlayerData data)
     {
-        // Couleur
-        if (srCorps != null)
-        {
-            srCorps.color = data.GetCouleur();
-            srCorps.sprite = GetSpriteForme(data.forme);
-        }
+        if (srCorps == null) return;
 
-        // Accessoire (TODO quand les sprites seront prêts)
-        // AppliquerObjet(data.objet);
+        // Génère le sprite selon forme + couleur
+        srCorps.sprite = SpriteFactory.Creer(data.forme, data.GetCouleur());
+        srCorps.color = Color.white; // couleur déjà dans le sprite
 
-        Debug.Log($"[RacailleVisuel] J{data.playerID} " +
-                  $"→ {data.forme} {data.couleur}");
+        Debug.Log($"[RacailleVisuel] J{data.playerID} → {data.forme} {data.couleur}");
     }
 
-    // ── Role visuel — requin ou poisson ───────────────────────────────────────
+    // ── Visuel rôle requin/poisson ────────────────────────────────────────────
     public void SetRoleVisuel(bool isMayor)
     {
         if (srRole == null) return;
@@ -44,27 +27,17 @@ public class RacailleVisuel : MonoBehaviour
 
         if (isMayor)
         {
-            srRole.sprite = spriteAileron;
-            srRole.color = Color.white;
+            // Aileron = triangle blanc au dessus
+            srRole.sprite = SpriteFactory.Creer("triangle", Color.white);
+            srRole.transform.localPosition = new Vector3(0, 0.6f, 0);
+            srRole.transform.localScale = new Vector3(0.4f, 0.5f, 1f);
         }
         else
         {
-            srRole.sprite = spriteQueue;
-            srRole.color = Color.white;
+            // Queue = losange derrière
+            srRole.sprite = SpriteFactory.Creer("losange", Color.white);
+            srRole.transform.localPosition = new Vector3(0, -0.6f, 0);
+            srRole.transform.localScale = new Vector3(0.5f, 0.4f, 1f);
         }
-    }
-
-    // ── Helper forme → sprite ─────────────────────────────────────────────────
-    Sprite GetSpriteForme(string forme)
-    {
-        return forme switch
-        {
-            "cercle" => spriteCercle,
-            "carre" => spriteCarre,
-            "triangle" => spriteTriangle,
-            "etoile" => spriteEtoile,
-            "losange" => spriteLosange,
-            _ => spriteCercle,
-        };
     }
 }

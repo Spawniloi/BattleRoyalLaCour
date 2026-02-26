@@ -496,6 +496,10 @@ MonoBehaviour:
   - {fileID: 1935286733}
   - {fileID: 1157490038}
   - {fileID: 1665238528}
+  coraillePrefab: {fileID: 6933714296645249138, guid: 773d3eb9708f7a945ad283dada566a6e, type: 3}
+  nombreCorailles2J: 4
+  nombreCorailles3J: 6
+  nombreCorailles4J: 8
   mayorActuel: {fileID: 0}
   tempsRestant: 0
   partieEnCours: 0

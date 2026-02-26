@@ -28,89 +28,98 @@ public class Coraille : MonoBehaviour
     {
         if (slotA != null && spriteA != null)
         {
-            SpriteRenderer srA = slotA.GetComponent<SpriteRenderer>();
-            if (srA != null)
-            {
-                spriteA.sprite = srA.sprite;
-                spriteA.color = srA.color;
-            }
+            PlayerData dataA = GameData.GetJoueur(slotA.playerID);
+            spriteA.sprite = SpriteFactory.Creer(dataA.forme, dataA.GetCouleur());
+            spriteA.color = Color.white;
         }
 
         if (slotB != null && spriteB != null)
         {
-            SpriteRenderer srB = slotB.GetComponent<SpriteRenderer>();
-            if (srB != null)
-            {
-                spriteB.sprite = srB.sprite;
-                spriteB.color = srB.color;
-            }
+            PlayerData dataB = GameData.GetJoueur(slotB.playerID);
+            spriteB.sprite = SpriteFactory.Creer(dataB.forme, dataB.GetCouleur());
+            spriteB.color = Color.white;
         }
     }
 
     // ── Tentative d'accrochage ────────────────────────────────────────────────
-    public void TenterAccrochage(RacailleController poisson, bool entreParCoteA)
+    public void TenterAccrochage(RacailleController racaille, bool entreParCoteA)
     {
-        // Seul un fugitif peut s'accrocher
-        if (poisson.isMayor)
+        // ── Le MAIRE (requin) → toujours répulsion + mini freeze ─────────────────
+        if (racaille.isMayor)
         {
-            Debug.Log("[Coraille] Le requin ne peut pas s'accrocher !");
+            Debug.Log($"[Coraille] Requin J{racaille.playerID} → Répulsion !");
+            RepulsionAvecFreeze(racaille, entreParCoteA);
             return;
         }
+
+        // ── FUGITIF (poisson) ─────────────────────────────────────────────────────
 
         // Cooldown actif ?
         if (enCooldown)
         {
-            Debug.Log("[Coraille] En cooldown !");
-            Repulsion(poisson);
+            RepulsionAvecFreeze(racaille, entreParCoteA);
             return;
         }
 
-        // Vérifie si une racaille alliée est dans le binôme
-        bool alliePresent = ContientEquipe(poisson.playerID);
-
-        if (!alliePresent)
+        // Vérifie si allié présent
+        if (!ContientEquipe(racaille.playerID))
         {
-            Debug.Log($"[Coraille] Pas d'allié pour J{poisson.playerID} → Répulsion");
-            Repulsion(poisson);
+            Debug.Log($"[Coraille] Pas d'allié J{racaille.playerID} → Répulsion");
+            RepulsionAvecFreeze(racaille, entreParCoteA);
             return;
         }
 
         // Vérifie le bon côté
-        // Le poisson doit entrer par le côté de l'ennemi
-        RacailleController allie = GetAllie(poisson.playerID);
+        RacailleController allie = GetAllie(racaille.playerID);
         bool allieEstCoteA = (allie == slotA);
         bool doitEntrerParCoteA = !allieEstCoteA;
 
         if (entreParCoteA != doitEntrerParCoteA)
         {
-            Debug.Log($"[Coraille] Mauvais côté J{poisson.playerID} → Répulsion");
-            Repulsion(poisson);
+            Debug.Log($"[Coraille] Mauvais côté J{racaille.playerID} → Répulsion");
+            RepulsionAvecFreeze(racaille, entreParCoteA);
             return;
         }
 
         // ✅ Fusion réussie !
-        Debug.Log($"[Coraille] Fusion réussie J{poisson.playerID} !");
-        FusionReussie(poisson);
+        Debug.Log($"[Coraille] Fusion réussie J{racaille.playerID} !");
+        FusionReussie(racaille, entreParCoteA);
+    }
+
+    void RepulsionAvecFreeze(RacailleController racaille, bool entreParCoteA)
+    {
+        // Repousse dans le sens opposé d'où il venait
+        Vector2 dirRepulsion = entreParCoteA ?
+            -(Vector2)transform.right :   // venait de la gauche → repousse à gauche
+             (Vector2)transform.right;    // venait de la droite → repousse à droite
+
+        Rigidbody2D rb = racaille.GetComponent<Rigidbody2D>();
+        rb.linearVelocity = Vector2.zero;
+        rb.AddForce(dirRepulsion * config.corailleRepulsionForce * 3f,
+                    ForceMode2D.Impulse);
+
+        // Mini freeze
+        racaille.ApplyStun(config.stunDuration);
     }
 
     // ── Fusion réussie ────────────────────────────────────────────────────────
-    void FusionReussie(RacailleController poisson)
+    void FusionReussie(RacailleController poisson, bool entreParCoteA)
     {
-        // Direction d'entrée du poisson vers le coraille
-        Vector2 dirEntree = (transform.position
-                           - poisson.transform.position).normalized;
+        // TP de l'autre côté
+        Vector2 dirTP = entreParCoteA ?
+             (Vector2)transform.right :   // entré par gauche → TP à droite
+            -(Vector2)transform.right;    // entré par droite → TP à gauche
 
-        // TP de l'autre côté du coraille
-        Vector3 posTP = transform.position + (Vector3)(dirEntree * 1.2f);
+        Vector3 posTP = transform.position + (Vector3)(dirTP * 1.2f);
         poisson.transform.position = posTP;
 
-        // Impulsion forte dans le même sens que le TP
+        // Impulsion dans le même sens que le TP
         Rigidbody2D rb = poisson.GetComponent<Rigidbody2D>();
         rb.linearVelocity = Vector2.zero;
-        rb.AddForce(dirEntree * config.propulsionForce, ForceMode2D.Impulse);
+        rb.AddForce(dirTP * config.propulsionForce, ForceMode2D.Impulse);
 
-        // Effet visuel du coraille
-        StartCoroutine(EffetVisuelCoraille(dirEntree));
+        // Effet visuel
+        StartCoroutine(EffetVisuelCoraille(dirTP));
 
         // Cooldown
         StartCoroutine(DemarrerCooldown());
