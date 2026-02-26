@@ -150,12 +150,22 @@ public class MaireGameManager : MonoBehaviour
     void SetMayor(RacailleController nouveau)
     {
         if (mayorActuel != null)
+        {
             mayorActuel.SetMayor(false);
+
+            // Répulsion entre les 2 joueurs
+            Vector2 dir = (nouveau.transform.position
+                         - mayorActuel.transform.position).normalized;
+
+            mayorActuel.GetComponent<Rigidbody2D>()
+                .AddForce(-dir * 6f, ForceMode2D.Impulse);
+            nouveau.GetComponent<Rigidbody2D>()
+                .AddForce(dir * 6f, ForceMode2D.Impulse);
+        }
 
         mayorActuel = nouveau;
         nouveau.SetMayor(true);
         nouveau.ApplyFreeze(config.freezeDuration);
-        Debug.Log($"[Maire] Nouveau maire : {nouveau.name}");
     }
 
     void TerminerPartie()
@@ -182,19 +192,49 @@ public class MaireGameManager : MonoBehaviour
                           nb == 3 ? nombreCorailles3J : nombreCorailles4J;
 
         Vector2 terrainSize = config.GetTerrainSize(nb);
+        float distanceMin = 3.0f; // distance minimum entre 2 corailles
+        int maxEssais = 50;   // évite boucle infinie
+
+        List<Vector2> positionsDejaUtilisees = new List<Vector2>();
+
+        float[] angles = { 0f, 90f, 45f, -45f };
 
         for (int i = 0; i < nbCorailles; i++)
         {
-            // Position aléatoire dans le terrain
-            Vector2 pos = new Vector2(
-                Random.Range(-terrainSize.x / 2 + 1f, terrainSize.x / 2 - 1f),
-                Random.Range(-terrainSize.y / 2 + 1f, terrainSize.y / 2 - 1f)
-            );
+            Vector2 pos = Vector2.zero;
+            bool trovee = false;
 
-            // Rotation aléatoire (horizontal, vertical, diagonal)
-            float[] angles = { 0f, 90f, 45f, -45f };
+            for (int essai = 0; essai < maxEssais; essai++)
+            {
+                pos = new Vector2(
+                    Random.Range(-terrainSize.x / 2f + 2f, terrainSize.x / 2f - 2f),
+                    Random.Range(-terrainSize.y / 2f + 2f, terrainSize.y / 2f - 2f)
+                );
+
+                // Vérifie que la position est assez loin des autres
+                bool tropProche = false;
+                foreach (Vector2 posExistante in positionsDejaUtilisees)
+                {
+                    if (Vector2.Distance(pos, posExistante) < distanceMin)
+                    {
+                        tropProche = true;
+                        break;
+                    }
+                }
+
+                if (!tropProche)
+                {
+                    trovee = true;
+                    break;
+                }
+            }
+
+            if (!trovee)
+                Debug.LogWarning($"[Coraille] Impossible de trouver position pour coraille {i + 1}");
+
+            positionsDejaUtilisees.Add(pos);
+
             float angle = angles[Random.Range(0, angles.Length)];
-
             GameObject go = Instantiate(coraillePrefab,
                                         new Vector3(pos.x, pos.y, 0),
                                         Quaternion.Euler(0, 0, angle));
@@ -202,10 +242,7 @@ public class MaireGameManager : MonoBehaviour
 
             Coraille c = go.GetComponent<Coraille>();
             c.config = config;
-
-            // Assigne les racailles au binôme selon le nombre de joueurs
             AssignerBinome(c, i, nb);
-
             corailles.Add(c);
         }
     }

@@ -105,23 +105,22 @@ public class Coraille : MonoBehaviour
     // ── Fusion réussie ────────────────────────────────────────────────────────
     void FusionReussie(RacailleController poisson, bool entreParCoteA)
     {
-        // TP de l'autre côté
-        Vector2 dirTP = entreParCoteA ?
-             (Vector2)transform.right :   // entré par gauche → TP à droite
-            -(Vector2)transform.right;    // entré par droite → TP à gauche
+        // Direction d'entrée = position joueur → centre coraille
+        Vector2 dirEntree = ((Vector2)transform.position
+                           - (Vector2)poisson.transform.position).normalized;
 
-        Vector3 posTP = transform.position + (Vector3)(dirTP * 1.2f);
+        // TP de l'autre côté = continue dans la même direction
+        Vector3 posTP = transform.position + (Vector3)(dirEntree * 1.5f);
         poisson.transform.position = posTP;
 
         // Impulsion dans le même sens que le TP
         Rigidbody2D rb = poisson.GetComponent<Rigidbody2D>();
         rb.linearVelocity = Vector2.zero;
-        rb.AddForce(dirTP * config.propulsionForce, ForceMode2D.Impulse);
+        rb.AddForce(dirEntree * config.propulsionForce, ForceMode2D.Impulse);
 
-        // Effet visuel
-        StartCoroutine(EffetVisuelCoraille(dirTP));
+        // Effet visuel — passe la direction d'entrée pour le flip
+        StartCoroutine(EffetVisuelCoraille(dirEntree));
 
-        // Cooldown
         StartCoroutine(DemarrerCooldown());
     }
 

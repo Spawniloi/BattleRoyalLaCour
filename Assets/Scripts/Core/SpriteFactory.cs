@@ -35,7 +35,7 @@ public static class SpriteFactory
         tex.Apply();
         return Sprite.Create(tex,
             new Rect(0, 0, size, size),
-            new Vector2(0.5f, 0.5f), 32f);
+            new Vector2(0.5f, 0.5f), 64f);
     }
 
     // ── Carré ─────────────────────────────────────────────────────────────────
@@ -56,7 +56,7 @@ public static class SpriteFactory
         tex.Apply();
         return Sprite.Create(tex,
             new Rect(0, 0, size, size),
-            new Vector2(0.5f, 0.5f), 32f);
+            new Vector2(0.5f, 0.5f), 64f);
     }
 
     // ── Triangle ──────────────────────────────────────────────────────────────
@@ -82,7 +82,7 @@ public static class SpriteFactory
         tex.Apply();
         return Sprite.Create(tex,
             new Rect(0, 0, size, size),
-            new Vector2(0.5f, 0.5f), 32f);
+            new Vector2(0.5f, 0.5f), 64f);
     }
 
     // ── Losange ───────────────────────────────────────────────────────────────
@@ -105,7 +105,7 @@ public static class SpriteFactory
         tex.Apply();
         return Sprite.Create(tex,
             new Rect(0, 0, size, size),
-            new Vector2(0.5f, 0.5f), 32f);
+            new Vector2(0.5f, 0.5f), 64f);
     }
 
     // ── Etoile ────────────────────────────────────────────────────────────────
@@ -138,6 +138,6 @@ public static class SpriteFactory
         tex.Apply();
         return Sprite.Create(tex,
             new Rect(0, 0, size, size),
-            new Vector2(0.5f, 0.5f), 32f);
+            new Vector2(0.5f, 0.5f), 64f);
     }
 }

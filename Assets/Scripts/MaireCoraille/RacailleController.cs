@@ -21,6 +21,7 @@ public class RacailleController : MonoBehaviour
     private SpriteRenderer sr;
     private InputHandler inputHandler;
     private RacailleVisuel visuel;
+    private float transfertCooldown = 0f;
 
     // Mouvement avec effet glace
     private Vector2 currentVelocity;
@@ -69,6 +70,8 @@ public class RacailleController : MonoBehaviour
     void Update()
     {
         if (isFrozen || isStunned) return;
+        if (transfertCooldown > 0)
+            transfertCooldown -= Time.deltaTime;
     }
 
     void FixedUpdate()
@@ -137,10 +140,20 @@ public class RacailleController : MonoBehaviour
     public void SetMayor(bool mayor)
     {
         isMayor = mayor;
+
+        if (mayor)
+        {
+            transfertCooldown = 1.5f; // le nouveau maire ne peut pas retransférer immédiatement
+        }
+        else
+        {
+            transfertCooldown = 0f;
+            ApplyFreeze(config.freezeDuration); // <- freeze aussi le nouveau poisson
+        }
+
         visuel?.SetRoleVisuel(mayor);
-        // TODO — changer sprite aileron/queue (étape suivante)
-        Debug.Log($"[RacailleController] J{playerID} est maintenant " +
-                  $"{(mayor ? "MAIRE (requin)" : "FUGITIF (poisson)")}");
+        Debug.Log($"[RacailleController] J{playerID} → " +
+                  $"{(mayor ? "MAIRE" : "FUGITIF")}");
     }
 
     // ── Freeze & Stun ─────────────────────────────────────────────────────────
@@ -173,13 +186,20 @@ public class RacailleController : MonoBehaviour
     // ── Collision avec autre racaille ─────────────────────────────────────────
     void OnCollisionEnter2D(Collision2D collision)
     {
+        Debug.Log($"[Collision] J{playerID} isMayor={isMayor} cooldown={transfertCooldown:F2}");
+
         if (!isMayor) return;
+        if (isFrozen) return; // <- ajoute ça — le freeze bloque le transfert
+        if (isStunned) return; // <- ajoute ça
+        if (transfertCooldown > 0) return;
 
         RacailleController cible =
             collision.gameObject.GetComponent<RacailleController>();
         if (cible == null) return;
         if (cible == this) return;
 
+        Debug.Log($"[Transfert] J{playerID} → J{cible.playerID}");
+        transfertCooldown = 1.5f; // <- augmente à 1.5s
         gameManager?.TenterTransfert(this, cible);
     }
 }
