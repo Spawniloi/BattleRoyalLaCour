@@ -1,139 +1,185 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Coraille : MonoBehaviour
+public class RacailleController : MonoBehaviour
 {
     [Header("Config")]
     public MaireBalanceConfig config;
-
-    [Header("Slots du binome")]
-    public RacailleController slotA; // racaille côté A
-    public RacailleController slotB; // racaille côté B
-
-    [Header("Colliders des côtés")]
-    public Collider2D colliderCoteA; // trigger côté A
-    public Collider2D colliderCoteB; // trigger côté B
+    public int playerID = 1;
 
     [Header("Etat")]
-    public bool enCooldown = false;
-    public float cooldownRestant = 0f;
+    public bool isMayor = false;
+    public float sliderValue = 0f;
+    public bool isFrozen = false;
+    public bool isStunned = false;
 
-    // ── Vérifications ─────────────────────────────────────────────────────────
+    [Header("References")]
+    public MaireGameManager gameManager;
 
-    // Est-ce qu'une racaille d'une équipe est dans ce binôme ?
-    public bool ContientEquipe(int playerID)
+    // Composants
+    private Rigidbody2D rb;
+    private SpriteRenderer sr;
+    private InputHandler inputHandler;
+    private RacailleVisuel visuel;
+
+    // Mouvement avec effet glace
+    private Vector2 currentVelocity;
+
+    // ── Couleurs par défaut par joueur ────────────────────────────────────────
+    private static readonly Color[] couleursDefaut = new Color[]
     {
-        if (slotA != null && slotA.playerID == playerID) return true;
-        if (slotB != null && slotB.playerID == playerID) return true;
-        return false;
+        new Color(0.90f, 0.22f, 0.27f), // J1 rouge
+        new Color(0.27f, 0.48f, 0.62f), // J2 bleu
+        new Color(0.16f, 0.61f, 0.56f), // J3 vert
+        new Color(0.91f, 0.77f, 0.41f), // J4 jaune
+    };
+
+    // ── Awake ─────────────────────────────────────────────────────────────────
+    void Awake()
+    {
+        rb = GetComponent<Rigidbody2D>();
+        sr = GetComponent<SpriteRenderer>();
+        inputHandler = GetComponent<InputHandler>();
+        gameManager = FindFirstObjectByType<MaireGameManager>();
+        visuel = GetComponent<RacailleVisuel>();
     }
 
-    // Retourne la racaille alliée dans le binôme
-    public RacailleController GetAllie(int playerID)
+    void Start()
     {
-        if (slotA != null && slotA.playerID == playerID) return slotA;
-        if (slotB != null && slotB.playerID == playerID) return slotB;
-        return null;
+        // Charge les données du Hub (ou défaut si Hub pas encore fait)
+        PlayerData data = GameData.GetJoueur(playerID);
+        visuel?.AppliquerData(data);
     }
 
-    // Retourne la racaille ennemie dans le binôme
-    public RacailleController GetEnnemi(int playerID)
+    // ── Couleur ───────────────────────────────────────────────────────────────
+    void AppliquerCouleurDefaut()
     {
-        if (slotA != null && slotA.playerID != playerID) return slotA;
-        if (slotB != null && slotB.playerID != playerID) return slotB;
-        return null;
+        if (sr == null) return;
+        int idx = Mathf.Clamp(playerID - 1, 0, couleursDefaut.Length - 1);
+        sr.color = couleursDefaut[idx];
     }
 
-    // ── Tentative d'accrochage ────────────────────────────────────────────────
-    public void TenterAccrochage(RacailleController poisson, bool entreParCoteA)
+    // Appelé depuis le Hub/JSON pour override la couleur
+    public void SetCouleur(Color couleur)
     {
-        // Seul un fugitif peut s'accrocher
-        if (poisson.isMayor)
+        if (sr != null) sr.color = couleur;
+    }
+
+    // ── Update ────────────────────────────────────────────────────────────────
+    void Update()
+    {
+        if (isFrozen || isStunned) return;
+    }
+
+    void FixedUpdate()
+    {
+        if (isFrozen || isStunned)
         {
-            Debug.Log("[Coraille] Le requin ne peut pas s'accrocher !");
+            rb.linearVelocity = Vector2.zero;
             return;
         }
-
-        // Cooldown actif ?
-        if (enCooldown)
-        {
-            Debug.Log("[Coraille] En cooldown !");
-            Repulsion(poisson);
-            return;
-        }
-
-        // Vérifie si une racaille alliée est dans le binôme
-        bool alliePresent = ContientEquipe(poisson.playerID);
-
-        if (!alliePresent)
-        {
-            // Cas 1 : pas d'allié → répulsion + stun
-            Debug.Log($"[Coraille] Pas d'allié pour J{poisson.playerID} → Répulsion");
-            Repulsion(poisson);
-            return;
-        }
-
-        // Vérifie le bon côté
-        // Le poisson doit entrer par le côté de l'ennemi
-        RacailleController allie = GetAllie(poisson.playerID);
-        RacailleController ennemi = GetEnnemi(poisson.playerID);
-
-        bool allieEstCoteA = (allie == slotA);
-        bool doitEntrerParCoteA = !allieEstCoteA; // entre par le côté opposé
-
-        if (entreParCoteA != doitEntrerParCoteA)
-        {
-            // Cas 2 : mauvais côté → répulsion + stun
-            Debug.Log($"[Coraille] Mauvais côté pour J{poisson.playerID} → Répulsion");
-            Repulsion(poisson);
-            return;
-        }
-
-        // ✅ Fusion réussie !
-        Debug.Log($"[Coraille] Fusion réussie pour J{poisson.playerID} !");
-        FusionReussie(poisson, ennemi);
+        MoveWithIce();
     }
 
-    void FusionReussie(RacailleController poisson, RacailleController ennemi)
+    // ── Mouvement effet glace ─────────────────────────────────────────────────
+    void MoveWithIce()
     {
-        // Propulsion pour fuir
-        Vector2 dirFuite = (poisson.transform.position
-                          - transform.position).normalized;
-        poisson.GetComponent<Rigidbody2D>()
-               .AddForce(dirFuite * config.propulsionForce, ForceMode2D.Impulse);
+        if (inputHandler == null) return;
 
-        // Démarre le cooldown
-        StartCoroutine(DemarrerCooldown());
+        float speed = config.GetSpeedFromSlider(sliderValue);
+        Vector2 targetVelocity = inputHandler.MoveInput * speed;
 
-        Debug.Log($"[Coraille] Propulsion J{poisson.playerID} !");
-    }
-
-    void Repulsion(RacailleController poisson)
-    {
-        // Repousse le poisson
-        Vector2 dirRepulsion = (poisson.transform.position
-                              - transform.position).normalized;
-        poisson.GetComponent<Rigidbody2D>()
-               .AddForce(dirRepulsion * config.corailleRepulsionForce,
-                         ForceMode2D.Impulse);
-
-        // Stun
-        poisson.ApplyStun(config.stunDuration);
-    }
-
-    IEnumerator DemarrerCooldown()
-    {
-        enCooldown = true;
-        cooldownRestant = config.corailleCooldown;
-
-        while (cooldownRestant > 0)
+        if (inputHandler.MoveInput.magnitude > 0.1f)
         {
-            cooldownRestant -= Time.deltaTime;
-            yield return null;
+            // Accélération douce
+            currentVelocity = Vector2.MoveTowards(
+                currentVelocity,
+                targetVelocity,
+                config.iceAcceleration * Time.fixedDeltaTime
+            );
+        }
+        else
+        {
+            // Décélération (glissement)
+            currentVelocity = Vector2.MoveTowards(
+                currentVelocity,
+                Vector2.zero,
+                config.iceDeceleration * Time.fixedDeltaTime
+            );
         }
 
-        enCooldown = false;
-        cooldownRestant = 0f;
-        Debug.Log("[Coraille] Cooldown terminé !");
+        rb.linearVelocity = currentVelocity;
+
+        // Rotation vers la direction de mouvement
+        if (currentVelocity.magnitude > 0.1f)
+        {
+            float angle = Mathf.Atan2(currentVelocity.y, currentVelocity.x)
+                        * Mathf.Rad2Deg - 90f;
+            float current = transform.rotation.eulerAngles.z;
+            float newAngle = Mathf.LerpAngle(
+                current, angle,
+                config.iceTurnSpeed * Time.fixedDeltaTime
+            );
+            transform.rotation = Quaternion.Euler(0, 0, newAngle);
+        }
+    }
+
+    // ── Slider ────────────────────────────────────────────────────────────────
+    public void UpdateSlider(bool estMaire)
+    {
+        if (estMaire)
+            sliderValue += config.sliderRiseRate * config.mayorTimeTickRate;
+        else
+            sliderValue -= config.sliderFallRate * config.mayorTimeTickRate;
+    }
+
+    // ── Rôle Maire / Fugitif ──────────────────────────────────────────────────
+    public void SetMayor(bool mayor)
+    {
+        isMayor = mayor;
+        visuel?.SetRoleVisuel(mayor);
+        // TODO — changer sprite aileron/queue (étape suivante)
+        Debug.Log($"[RacailleController] J{playerID} est maintenant " +
+                  $"{(mayor ? "MAIRE (requin)" : "FUGITIF (poisson)")}");
+    }
+
+    // ── Freeze & Stun ─────────────────────────────────────────────────────────
+    public void ApplyFreeze(float duration)
+    {
+        StartCoroutine(FreezeCoroutine(duration));
+    }
+
+    public void ApplyStun(float duration)
+    {
+        StartCoroutine(StunCoroutine(duration));
+    }
+
+    IEnumerator FreezeCoroutine(float duration)
+    {
+        isFrozen = true;
+        currentVelocity = Vector2.zero;
+        yield return new WaitForSeconds(duration);
+        isFrozen = false;
+    }
+
+    IEnumerator StunCoroutine(float duration)
+    {
+        isStunned = true;
+        currentVelocity = Vector2.zero;
+        yield return new WaitForSeconds(duration);
+        isStunned = false;
+    }
+
+    // ── Collision avec autre racaille ─────────────────────────────────────────
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (!isMayor) return;
+
+        RacailleController cible =
+            collision.gameObject.GetComponent<RacailleController>();
+        if (cible == null) return;
+        if (cible == this) return;
+
+        gameManager?.TenterTransfert(this, cible);
     }
 }

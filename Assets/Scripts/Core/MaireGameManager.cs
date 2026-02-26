@@ -15,6 +15,12 @@ public class MaireGameManager : MonoBehaviour
     [Header("Positions de spawn")]
     public Transform[] spawnPoints; // <- 4 points dans la scène
 
+    [Header("Corailles")]
+    public GameObject coraillePrefab;
+    public int nombreCorailles2J = 4;
+    public int nombreCorailles3J = 6;
+    public int nombreCorailles4J = 8;
+
     [Header("Etat")]
     public RacailleController mayorActuel;
     public float tempsRestant;
@@ -22,6 +28,8 @@ public class MaireGameManager : MonoBehaviour
 
     private List<RacailleController> joueursActifs
         = new List<RacailleController>();
+
+    private List<Coraille> corailles = new List<Coraille>();
 
     void Start()
     {
@@ -101,6 +109,7 @@ public class MaireGameManager : MonoBehaviour
 
     void DemarrerPartie()
     {
+        SpawnerCorailles();
         SetMayor(joueursActifs[0]);
         partieEnCours = true;
         StartCoroutine(SliderUpdateLoop());
@@ -165,4 +174,63 @@ public class MaireGameManager : MonoBehaviour
     void Test3J() { GameData.nombreJoueurs = 3; }
     [ContextMenu("Test 4 joueurs")]
     void Test4J() { GameData.nombreJoueurs = 4; }
+
+    void SpawnerCorailles()
+    {
+        int nb = GameData.nombreJoueurs;
+        int nbCorailles = nb == 2 ? nombreCorailles2J :
+                          nb == 3 ? nombreCorailles3J : nombreCorailles4J;
+
+        Vector2 terrainSize = config.GetTerrainSize(nb);
+
+        for (int i = 0; i < nbCorailles; i++)
+        {
+            // Position aléatoire dans le terrain
+            Vector2 pos = new Vector2(
+                Random.Range(-terrainSize.x / 2 + 1f, terrainSize.x / 2 - 1f),
+                Random.Range(-terrainSize.y / 2 + 1f, terrainSize.y / 2 - 1f)
+            );
+
+            // Rotation aléatoire (horizontal, vertical, diagonal)
+            float[] angles = { 0f, 90f, 45f, -45f };
+            float angle = angles[Random.Range(0, angles.Length)];
+
+            GameObject go = Instantiate(coraillePrefab,
+                                        new Vector3(pos.x, pos.y, 0),
+                                        Quaternion.Euler(0, 0, angle));
+            go.name = $"Coraille_{i + 1}";
+
+            Coraille c = go.GetComponent<Coraille>();
+            c.config = config;
+
+            // Assigne les racailles au binôme selon le nombre de joueurs
+            AssignerBinome(c, i, nb);
+
+            corailles.Add(c);
+        }
+    }
+
+    void AssignerBinome(Coraille c, int index, int nbJoueurs)
+    {
+        int[,] combos2J = { { 0, 1 }, { 0, 1 }, { 0, 1 }, { 0, 1 } };
+        int[,] combos3J = { { 0, 1 }, { 0, 2 }, { 1, 2 }, { 0, 1 }, { 0, 2 }, { 1, 2 } };
+        int[,] combos4J = { { 0, 1 }, { 0, 2 }, { 0, 3 }, { 1, 2 }, { 1, 3 }, { 2, 3 }, { 0, 1 }, { 2, 3 } };
+
+        int[,] combos = nbJoueurs == 2 ? combos2J :
+                        nbJoueurs == 3 ? combos3J : combos4J;
+
+        int idxA = combos[index, 0];
+        int idxB = combos[index, 1];
+
+        if (idxA < joueursActifs.Count && idxB < joueursActifs.Count)
+        {
+            c.slotA = joueursActifs[idxA];
+            c.slotB = joueursActifs[idxB];
+
+            // ← Initialise les visuels après avoir assigné les slots
+            c.InitVisuel();
+
+            Debug.Log($"[Coraille] {c.name} → J{idxA + 1} + J{idxB + 1}");
+        }
+    }
 }
