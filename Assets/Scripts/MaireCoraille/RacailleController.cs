@@ -10,8 +10,8 @@ public class RacailleController : MonoBehaviour
     [Header("Etat")]
     public bool isMayor = false;
     public float sliderValue = 0f;
-    public bool isFrozen = false;
-    public bool isStunned = false;
+    public bool isFrozen = false;  // bloque les inputs seulement
+    public bool isStunned = false;  // bloque les inputs seulement
 
     [Header("References")]
     public MaireGameManager gameManager;
@@ -26,15 +26,6 @@ public class RacailleController : MonoBehaviour
     // Mouvement avec effet glace
     private Vector2 currentVelocity;
 
-    // ── Couleurs par défaut par joueur ────────────────────────────────────────
-    private static readonly Color[] couleursDefaut = new Color[]
-    {
-        new Color(0.90f, 0.22f, 0.27f), // J1 rouge
-        new Color(0.27f, 0.48f, 0.62f), // J2 bleu
-        new Color(0.16f, 0.61f, 0.56f), // J3 vert
-        new Color(0.91f, 0.77f, 0.41f), // J4 jaune
-    };
-
     // ── Awake ─────────────────────────────────────────────────────────────────
     void Awake()
     {
@@ -47,40 +38,29 @@ public class RacailleController : MonoBehaviour
 
     void Start()
     {
-        // Charge les données du Hub (ou défaut si Hub pas encore fait)
         PlayerData data = GameData.GetJoueur(playerID);
         visuel?.AppliquerData(data);
-    }
-
-    // ── Couleur ───────────────────────────────────────────────────────────────
-    void AppliquerCouleurDefaut()
-    {
-        if (sr == null) return;
-        int idx = Mathf.Clamp(playerID - 1, 0, couleursDefaut.Length - 1);
-        sr.color = couleursDefaut[idx];
-    }
-
-    // Appelé depuis le Hub/JSON pour override la couleur
-    public void SetCouleur(Color couleur)
-    {
-        if (sr != null) sr.color = couleur;
     }
 
     // ── Update ────────────────────────────────────────────────────────────────
     void Update()
     {
-        if (isFrozen || isStunned) return;
         if (transfertCooldown > 0)
             transfertCooldown -= Time.deltaTime;
     }
 
     void FixedUpdate()
     {
+        // Freeze/Stun bloquent les INPUTS mais pas le Rigidbody
+        // → le knockback physique fonctionne toujours
         if (isFrozen || isStunned)
         {
-            rb.linearVelocity = Vector2.zero;
+            // On laisse le Rigidbody glisser naturellement
+            // Juste on décélère progressivement (effet glace post-knockback)
+            currentVelocity = rb.linearVelocity;
             return;
         }
+
         MoveWithIce();
     }
 
@@ -94,7 +74,6 @@ public class RacailleController : MonoBehaviour
 
         if (inputHandler.MoveInput.magnitude > 0.1f)
         {
-            // Accélération douce
             currentVelocity = Vector2.MoveTowards(
                 currentVelocity,
                 targetVelocity,
@@ -103,7 +82,6 @@ public class RacailleController : MonoBehaviour
         }
         else
         {
-            // Décélération (glissement)
             currentVelocity = Vector2.MoveTowards(
                 currentVelocity,
                 Vector2.zero,
@@ -143,12 +121,15 @@ public class RacailleController : MonoBehaviour
 
         if (mayor)
         {
-            transfertCooldown = 1.5f; // le nouveau maire ne peut pas retransférer immédiatement
+            // Nouveau maire — cooldown avant de pouvoir retransférer
+            transfertCooldown = 1.5f;
+            // Pas de freeze sur le maire — il peut contrôler après le knockback
         }
         else
         {
+            // Nouveau poisson — freeze inputs seulement
             transfertCooldown = 0f;
-            ApplyFreeze(config.freezeDuration); // <- freeze aussi le nouveau poisson
+            StartCoroutine(FreezeInputs(config.freezeDuration));
         }
 
         visuel?.SetRoleVisuel(mayor);
@@ -156,50 +137,74 @@ public class RacailleController : MonoBehaviour
                   $"{(mayor ? "MAIRE" : "FUGITIF")}");
     }
 
-    // ── Freeze & Stun ─────────────────────────────────────────────────────────
+    // ── Freeze inputs seulement (le Rigidbody continue de bouger) ─────────────
     public void ApplyFreeze(float duration)
     {
-        StartCoroutine(FreezeCoroutine(duration));
+        StartCoroutine(FreezeInputs(duration));
     }
 
     public void ApplyStun(float duration)
     {
-        StartCoroutine(StunCoroutine(duration));
+        StartCoroutine(StunInputs(duration));
     }
 
-    IEnumerator FreezeCoroutine(float duration)
+    IEnumerator FreezeInputs(float duration)
     {
         isFrozen = true;
-        currentVelocity = Vector2.zero;
         yield return new WaitForSeconds(duration);
         isFrozen = false;
+        // Sync currentVelocity avec le vrai Rigidbody après le knockback
+        currentVelocity = rb.linearVelocity;
     }
 
-    IEnumerator StunCoroutine(float duration)
+    IEnumerator StunInputs(float duration)
     {
         isStunned = true;
-        currentVelocity = Vector2.zero;
         yield return new WaitForSeconds(duration);
         isStunned = false;
+        currentVelocity = rb.linearVelocity;
     }
 
     // ── Collision avec autre racaille ─────────────────────────────────────────
     void OnCollisionEnter2D(Collision2D collision)
     {
-        Debug.Log($"[Collision] J{playerID} isMayor={isMayor} cooldown={transfertCooldown:F2}");
-
-        if (!isMayor) return;
-        if (isFrozen) return; // <- ajoute ça — le freeze bloque le transfert
-        if (isStunned) return; // <- ajoute ça
-        if (transfertCooldown > 0) return;
-
-        RacailleController cible =
+        RacailleController autre =
             collision.gameObject.GetComponent<RacailleController>();
-        if (cible == null) return;
-        if (cible == this) return;
+        if (autre == null) return;
+        if (autre == this) return;
 
-        Debug.Log($"[Transfert] J{playerID} → J{cible.playerID}");
-        transfertCooldown = 1.5f; // <- augmente à 1.5s
-        gameManager?.TenterTransfert(this, cible);
+        // ── Maire touche poisson → transfert ─────────────────────────────────────
+        if (isMayor && !autre.isMayor)
+        {
+            if (isFrozen || isStunned || transfertCooldown > 0) return;
+            transfertCooldown = 1.5f;
+            gameManager?.TenterTransfert(this, autre);
+            return;
+        }
+
+        // ── Poisson touche poisson → léger knockback des 2 ───────────────────────
+        if (!isMayor && !autre.isMayor)
+        {
+            Vector2 dir = (autre.transform.position
+                         - transform.position).normalized;
+
+            if (dir == Vector2.zero) dir = Random.insideUnitCircle.normalized;
+
+            float force = 5f; // moins fort qu'un transfert
+            rb.AddForce(-dir * force, ForceMode2D.Impulse);
+            SyncVelocity(-dir * force);
+            // L'autre côté se gère dans son propre OnCollisionEnter2D
+            return;
+        }
+    }
+
+    // Appelé depuis le Hub/JSON
+    public void SetCouleur(Color couleur)
+    {
+        if (sr != null) sr.color = couleur;
+    }
+    public void SyncVelocity(Vector2 nouvelleVelocity)
+    {
+        currentVelocity = nouvelleVelocity;
     }
 }

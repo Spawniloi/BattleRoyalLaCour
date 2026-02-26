@@ -139,33 +139,45 @@ public class MaireGameManager : MonoBehaviour
     }
 
     public void TenterTransfert(RacailleController attaquant,
-                                RacailleController cible)
+                            RacailleController cible)
     {
         if (attaquant != mayorActuel) return;
         if (cible == mayorActuel) return;
-        Debug.Log($"[Transfert] {attaquant.name} -> {cible.name}");
+
+        // Direction de séparation entre les 2
+        Vector2 dir = (cible.transform.position
+                     - attaquant.transform.position).normalized;
+
+        if (dir == Vector2.zero)
+            dir = Random.insideUnitCircle.normalized;
+
+        // Knockback ÉGAL sur les 2 AVANT le changement de rôle
+        float force = 4f;
+        attaquant.GetComponent<Rigidbody2D>()
+            .AddForce(-dir * force, ForceMode2D.Impulse);
+        cible.GetComponent<Rigidbody2D>()
+            .AddForce(dir * force, ForceMode2D.Impulse);
+
+        attaquant.SyncVelocity(-dir * force);
+        cible.SyncVelocity(dir * force);
+
+        // Changement de rôle après le knockback
         SetMayor(cible);
+
+        Debug.Log($"[Transfert] J{attaquant.playerID} → J{cible.playerID}");
     }
 
     void SetMayor(RacailleController nouveau)
     {
+        // Retire le rôle à l'ancien maire
         if (mayorActuel != null)
-        {
             mayorActuel.SetMayor(false);
 
-            // Répulsion entre les 2 joueurs
-            Vector2 dir = (nouveau.transform.position
-                         - mayorActuel.transform.position).normalized;
-
-            mayorActuel.GetComponent<Rigidbody2D>()
-                .AddForce(-dir * 6f, ForceMode2D.Impulse);
-            nouveau.GetComponent<Rigidbody2D>()
-                .AddForce(dir * 6f, ForceMode2D.Impulse);
-        }
-
+        // Donne le rôle au nouveau
         mayorActuel = nouveau;
         nouveau.SetMayor(true);
-        nouveau.ApplyFreeze(config.freezeDuration);
+
+        Debug.Log($"[Maire] Nouveau maire : {nouveau.name}");
     }
 
     void TerminerPartie()
