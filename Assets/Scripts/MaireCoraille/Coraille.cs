@@ -148,36 +148,52 @@ public class Coraille : MonoBehaviour
     // ── Effet visuel coraille ─────────────────────────────────────────────────
     IEnumerator EffetVisuelCoraille(Vector2 dirEntree)
     {
-        // Flip du sprite
-        Vector3 scaleOriginal = transform.localScale;
-        transform.localScale = new Vector3(
-            -scaleOriginal.x,
-             scaleOriginal.y,
-             scaleOriginal.z
+        // Position FIXE — ne bouge jamais
+        Vector3 posFixe = transform.position;
+        Vector3 scaleActuel = transform.localScale;
+        Vector3 scaleAbs = new Vector3(
+            Mathf.Abs(scaleActuel.x),
+            Mathf.Abs(scaleActuel.y),
+            1f
         );
 
-        // Légèrement dans le sens opposé au TP (effet d'accrochage)
-        Vector3 posOriginal = transform.position;
-        Vector3 posDecalee = posOriginal + (Vector3)(-dirEntree * 0.3f);
+        // ── Flip immédiat ─────────────────────────────────────────────────────────
+        Vector3 scaleFlip = new Vector3(
+            -scaleActuel.x,
+             scaleAbs.y,
+             1f
+        );
+        transform.localScale = scaleFlip;
+        transform.position = posFixe; // force position
+
+        // ── Squeeze ───────────────────────────────────────────────────────────────
+        Vector3 scaleSquish = new Vector3(
+            scaleFlip.x * 1.2f,
+            scaleFlip.y * 0.8f,
+            1f
+        );
 
         float t = 0f;
-        while (t < 0.15f)
+        while (t < 0.08f)
         {
-            transform.position = Vector3.Lerp(posOriginal, posDecalee, t / 0.15f);
+            transform.localScale = Vector3.Lerp(scaleFlip, scaleSquish, t / 0.08f);
+            transform.position = posFixe; // force position à chaque frame
             t += Time.deltaTime;
             yield return null;
         }
 
-        // Revient à la position originale
+        // ── Retour scale flippé ───────────────────────────────────────────────────
         t = 0f;
-        while (t < 0.15f)
+        while (t < 0.12f)
         {
-            transform.position = Vector3.Lerp(posDecalee, posOriginal, t / 0.15f);
+            transform.localScale = Vector3.Lerp(scaleSquish, scaleFlip, t / 0.12f);
+            transform.position = posFixe; // force position à chaque frame
             t += Time.deltaTime;
             yield return null;
         }
 
-        transform.position = posOriginal;
+        transform.localScale = scaleFlip;
+        transform.position = posFixe;
     }
 
     // ── Cooldown ──────────────────────────────────────────────────────────────
