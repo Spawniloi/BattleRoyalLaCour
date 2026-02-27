@@ -55,17 +55,19 @@ public class MaireBalanceConfig : ScriptableObject
     // ── Calcul vitesse selon slider ───────────────────────────────────────────
     public float GetSpeedFromSlider(float sliderValue)
     {
-        if (sliderValue >= 0)
+        // Positif = longtemps fugitif = plus lent (fatigué)
+        // Négatif = longtemps maire = plus rapide (motivé)
+        if (sliderValue <= 0)
         {
-            // Plus le slider monte, plus on est rapide
-            float t = Mathf.Clamp01(sliderValue / sliderValeurMax);
+            // Maire depuis longtemps → plus rapide
+            float t = Mathf.Clamp01(-sliderValue / sliderValeurMax);
             float bonus = Mathf.Pow(t, sliderExpCurve) * maxSpeedBonus;
             return baseSpeed + bonus;
         }
         else
         {
-            // Plus le slider descend, plus on est lent
-            float t = Mathf.Clamp01(-sliderValue / sliderValeurMax);
+            // Fugitif depuis longtemps → plus lent
+            float t = Mathf.Clamp01(sliderValue / sliderValeurMax);
             float penalty = Mathf.Pow(t, sliderExpCurve) * maxSpeedPenalty;
             return Mathf.Max(0.5f, baseSpeed - penalty);
         }

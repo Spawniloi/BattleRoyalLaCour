@@ -109,9 +109,9 @@ public class RacailleController : MonoBehaviour
     public void UpdateSlider(bool estMaire)
     {
         if (estMaire)
-            sliderValue += config.sliderRiseRate * config.mayorTimeTickRate;
+            sliderValue -= config.sliderRiseRate * config.mayorTimeTickRate; // descend
         else
-            sliderValue -= config.sliderFallRate * config.mayorTimeTickRate;
+            sliderValue += config.sliderFallRate * config.mayorTimeTickRate;  // monte
     }
 
     // ── Rôle Maire / Fugitif ──────────────────────────────────────────────────

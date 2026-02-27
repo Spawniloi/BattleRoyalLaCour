@@ -36,9 +36,9 @@ MonoBehaviour:
   propulsionForce: 8
   corailleSwapDelay: 0.5
   corailleRebondForceMin: 5
-  terrainSize2J: {x: 9.5, y: 9.2}
-  terrainSize3J: {x: 13, y: 9.2}
-  terrainSize4J: {x: 17.5, y: 9.2}
+  terrainSize2J: {x: 15, y: 10}
+  terrainSize3J: {x: 17, y: 10}
+  terrainSize4J: {x: 19, y: 10}
   distanceMinCorailles: 3
   roundDuration: 90
   mayorTimeTickRate: 0.1

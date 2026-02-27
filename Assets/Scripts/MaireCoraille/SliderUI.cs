@@ -8,19 +8,15 @@ public class SliderUI : MonoBehaviour
     public MaireBalanceConfig config;
     public int playerID = 1;
 
-    [Header("UI — Slider unique centré")]
-    public Slider slider;         // 1 seul slider, value -1 à 1
-    public Image handleImage;    // sprite sur le handle
-    public Sprite spriteAileron;  // maire (positif)
-    public Sprite spriteQueue;    // fugitif (negatif)
-
-    [Header("Labels")]
+    [Header("UI")]
+    public Slider slider;
+    public Image handleImage;
+    public Sprite spriteAileron; // maire
+    public Sprite spriteQueue;   // fugitif
     public TextMeshProUGUI labelJoueur;
     public TextMeshProUGUI labelValeur;
-
-    [Header("Couleurs")]
-    public Image fillPositif; // image fill du côté positif
-    public Image fillNegatif; // image fill du côté négatif
+    public Image fillGauche;    // côté négatif (maire = rouge)
+    public Image fillDroit;     // côté positif (fugitif = vert)
 
     private RacailleController racaille;
 
@@ -29,14 +25,13 @@ public class SliderUI : MonoBehaviour
         if (config == null)
             config = FindFirstObjectByType<MaireGameManager>()?.config;
 
-        // Slider de -1 à 1, commence à 0
         if (slider != null)
         {
             slider.minValue = -1f;
             slider.maxValue = 1f;
             slider.value = 0f;
             slider.interactable = false;
-            slider.direction = Slider.Direction.BottomToTop;
+            slider.direction = Slider.Direction.LeftToRight;
         }
 
         if (labelJoueur != null)
@@ -56,7 +51,6 @@ public class SliderUI : MonoBehaviour
             }
             yield return new WaitForSeconds(0.2f);
         }
-        Debug.Log($"[SliderUI] J{playerID} racaille trouvée !");
     }
 
     void Update()
@@ -69,35 +63,36 @@ public class SliderUI : MonoBehaviour
     {
         float valeurMax = config.sliderValeurMax;
 
-        // Normalise entre -1 et 1
+        // Maire = négatif, fugitif = positif
+        // On inverse : sliderValue monte quand fugitif, descend quand maire
         float valeurNorm = Mathf.Clamp(valeur / valeurMax, -1f, 1f);
 
-        // Bouge le handle
         if (slider != null)
             slider.value = valeurNorm;
 
-        // Sprite handle selon rôle
+        // Handle : aileron si maire, queue si fugitif
         if (handleImage != null)
             handleImage.sprite = estMaire ? spriteAileron : spriteQueue;
 
-        // Affiche le score
+        // Couleur fill gauche (zone négative = maire = mauvais = rouge)
+        if (fillGauche != null)
+            fillGauche.color = valeurNorm < 0
+                ? new Color(0.9f, 0.3f, 0.3f, 1f)
+                : new Color(0.5f, 0.5f, 0.5f, 0.3f);
+
+        // Couleur fill droit (zone positive = fugitif = bon = vert)
+        if (fillDroit != null)
+            fillDroit.color = valeurNorm > 0
+                ? new Color(0.3f, 0.8f, 0.4f, 1f)
+                : new Color(0.5f, 0.5f, 0.5f, 0.3f);
+
+        // Score affiché
         if (labelValeur != null)
             labelValeur.text = valeur.ToString("F1");
-
-        // Couleur fill selon positif/négatif
-        if (fillPositif != null)
-            fillPositif.color = valeurNorm > 0
-                ? new Color(0.9f, 0.3f, 0.3f, 1f)   // rouge = mauvais
-                : new Color(0.9f, 0.3f, 0.3f, 0.2f); // transparent
-
-        if (fillNegatif != null)
-            fillNegatif.color = valeurNorm < 0
-                ? new Color(0.3f, 0.8f, 0.4f, 1f)   // vert = bon
-                : new Color(0.3f, 0.8f, 0.4f, 0.2f); // transparent
     }
 
     public void SetCouleurJoueur(Color couleur)
     {
-        if (fillPositif != null) fillPositif.color = couleur;
+        if (fillDroit != null) fillDroit.color = couleur;
     }
 }
