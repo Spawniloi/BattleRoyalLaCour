@@ -78,6 +78,12 @@ public class MaireBalanceConfig : ScriptableObject
     public int itemNombreSimult = 3;    // nb items simultanés sur la map
     public float itemRayonCollecte = 0.6f; // rayon pour ramasser
 
+    [Header("Dash Bulles")]
+    public float dashBulleTaille = 0.15f; // taille des bulles
+    public float dashBulleduree = 0.4f;  // durée de vie bulle
+    public int dashBulleNombre = 5;     // nb bulles émises
+    public float dashBulleIntervalle = 0.03f; // intervalle entre bulles
+
     // ── Calcul vitesse selon slider ───────────────────────────────────────────
     public float GetSpeedFromSlider(float sliderValue)
     {

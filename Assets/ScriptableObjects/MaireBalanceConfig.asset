@@ -36,6 +36,12 @@ MonoBehaviour:
   propulsionForce: 8
   corailleSwapDelay: 0.5
   corailleRebondForceMin: 5
+  corailleAngleMin: -45
+  corailleAngleMax: 45
+  corailleDureeRotMin: 1.5
+  corailleDureeRotMax: 3.5
+  coraillePauseRotMin: 0.3
+  coraillePauseRotMax: 1
   terrainSize2J: {x: 15, y: 10.5}
   terrainSize3J: {x: 17, y: 10.5}
   terrainSize4J: {x: 19, y: 10.5}
@@ -44,3 +50,19 @@ MonoBehaviour:
   mayorTimeTickRate: 0.1
   corailleCooldownDuration: 3.5
   sliderValeurMax: 10
+  iconesDashTaille: 40
+  iconesDashEspacement: 35
+  dashForce: 5
+  dashDuree: 0.15
+  dashCooldown: 0.5
+  dashKeyJ1: 304
+  dashKeyJ2: 303
+  dashKeyJ3: 101
+  dashKeyJ4: 256
+  itemRespawnDelai: 4
+  itemNombreSimult: 1
+  itemRayonCollecte: 0.5
+  dashBulleTaille: 0.15
+  dashBulleduree: 0.4
+  dashBulleNombre: 5
+  dashBulleIntervalle: 0.03

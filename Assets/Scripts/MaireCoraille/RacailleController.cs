@@ -219,26 +219,88 @@ public class RacailleController : MonoBehaviour
         munitionsDash--;
         dashCooldownActuel = config.dashCooldown;
 
-        // Direction du dash = direction du mouvement actuel
+        // Direction du dash
         Vector2 dirDash = currentVelocity.normalized;
-
-        // Si immobile → dash vers la direction du dernier input
         if (dirDash == Vector2.zero && inputHandler.MoveInput != Vector2.zero)
             dirDash = inputHandler.MoveInput.normalized;
-
-        // Si toujours immobile → dash vers la droite par défaut
         if (dirDash == Vector2.zero)
             dirDash = Vector2.right;
 
-        // Impulsion dash
-        rb.linearVelocity = Vector2.zero;
+        // Impulsion dash — on AJOUTE à la vitesse actuelle
         rb.AddForce(dirDash * config.dashForce, ForceMode2D.Impulse);
-        currentVelocity = dirDash * config.dashForce;
+        currentVelocity += dirDash * config.dashForce;
 
-        Debug.Log($"[Dash] J{playerID} dash ! Munitions restantes : {munitionsDash}");
+        // Lance les bulles de dash
+        StartCoroutine(BullesDash(dirDash));
+
+        Debug.Log($"[Dash] J{playerID} ! Munitions : {munitionsDash}");
 
         yield return new WaitForSeconds(config.dashDuree);
         dashEnCours = false;
+    }
+
+    IEnumerator BullesDash(Vector2 dirDash)
+    {
+        // Direction opposée au dash = derrière le joueur
+        Vector2 dirBulle = -dirDash;
+
+        for (int i = 0; i < config.dashBulleNombre; i++)
+        {
+            // Crée une bulle derrière le joueur
+            GameObject bulle = new GameObject("BulleDash");
+            bulle.transform.position = (Vector2)transform.position
+                                     + dirBulle * 0.3f
+                                     + Random.insideUnitCircle * 0.15f;
+
+            SpriteRenderer sr = bulle.AddComponent<SpriteRenderer>();
+            sr.sprite = SpriteFactory.Creer("cercle",
+                                 new Color(1f, 1f, 1f, 0.8f));
+            sr.sortingOrder = 3;
+
+            float taille = config.dashBulleTaille
+                         * Random.Range(0.7f, 1.3f);
+            bulle.transform.localScale = new Vector3(taille, taille, 1f);
+
+            // Anime la bulle
+            StartCoroutine(AnimerBulleDash(bulle, dirBulle));
+
+            yield return new WaitForSeconds(config.dashBulleIntervalle);
+        }
+    }
+
+    IEnumerator AnimerBulleDash(GameObject bulle, Vector2 direction)
+    {
+        if (bulle == null) yield break;
+
+        SpriteRenderer sr = bulle.GetComponent<SpriteRenderer>();
+        Vector3 pos = bulle.transform.position;
+        float t = 0f;
+
+        while (t < config.dashBulleduree)
+        {
+            if (bulle == null) yield break;
+
+            float progress = t / config.dashBulleduree;
+
+            // Monte légèrement et s'estompe
+            bulle.transform.position = pos + new Vector3(
+                direction.x * 0.3f * progress,
+                direction.y * 0.3f * progress + 0.2f * progress,
+                0f
+            );
+
+            if (sr != null)
+            {
+                Color c = sr.color;
+                c.a = 1f - progress;
+                sr.color = c;
+            }
+
+            t += Time.deltaTime;
+            yield return null;
+        }
+
+        Destroy(bulle);
     }
 
     // Appelé quand on ramasse un item

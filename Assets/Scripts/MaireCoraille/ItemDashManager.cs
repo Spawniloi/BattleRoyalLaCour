@@ -15,8 +15,8 @@ public class ItemDashManager : MonoBehaviour
         for (int i = 0; i < config.itemNombreSimult; i++)
         {
             Vector3 pos = new Vector3(
-                GetPositionAleatoire().x,
-                GetPositionAleatoire().y,
+                TrouverPositionLibre().x,
+                TrouverPositionLibre().y,
                 0f
             );
             GameObject go = Instantiate(itemPrefab, pos, Quaternion.identity);
@@ -29,6 +29,40 @@ public class ItemDashManager : MonoBehaviour
 
     public Vector2 GetPositionAleatoire()
     {
+        return TrouverPositionLibre();
+    }
+
+    Vector2 TrouverPositionLibre()
+    {
+        int maxEssais = 50;
+
+        for (int essai = 0; essai < maxEssais; essai++)
+        {
+            Vector2 pos = new Vector2(
+                Random.Range(-tailleTerrain.x / 2f + 1f,
+                              tailleTerrain.x / 2f - 1f),
+                Random.Range(-tailleTerrain.y / 2f + 1f,
+                              tailleTerrain.y / 2f - 1f)
+            );
+
+            // Vérifie qu'il n'y a pas de coraille trop proche
+            Coraille[] corailles =
+                FindObjectsByType<Coraille>(FindObjectsSortMode.None);
+
+            bool tropProche = false;
+            foreach (var c in corailles)
+            {
+                if (Vector2.Distance(pos, c.transform.position) < 1.5f)
+                {
+                    tropProche = true;
+                    break;
+                }
+            }
+
+            if (!tropProche) return pos;
+        }
+
+        // Fallback si pas trouvé
         return new Vector2(
             Random.Range(-tailleTerrain.x / 2f + 1f,
                           tailleTerrain.x / 2f - 1f),
