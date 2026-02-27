@@ -18,6 +18,14 @@ public class SliderUI : MonoBehaviour
     public Image fillGauche;    // côté négatif (maire = rouge)
     public Image fillDroit;     // côté positif (fugitif = vert)
 
+    [Header("Munitions Dash UI")]
+    public Transform conteneurIcones;  // parent des icones
+    public Sprite spriteIconeDash;
+
+    private int munitionsAffichees = 0;
+    private System.Collections.Generic.List<GameObject> iconesActives
+        = new System.Collections.Generic.List<GameObject>();
+
     private RacailleController racaille;
 
     void Start()
@@ -57,6 +65,7 @@ public class SliderUI : MonoBehaviour
     {
         if (racaille == null || config == null) return;
         MettreAJour(racaille.sliderValue, racaille.isMayor);
+        MettreAJourMunitions();
     }
 
     void MettreAJour(float valeur, bool estMaire)
@@ -94,5 +103,47 @@ public class SliderUI : MonoBehaviour
     public void SetCouleurJoueur(Color couleur)
     {
         if (fillDroit != null) fillDroit.color = couleur;
+    }
+
+    void MettreAJourMunitions()
+    {
+        int munitions = racaille.isMayor ? racaille.munitionsDash : 0;
+        if (munitions == munitionsAffichees) return;
+
+        munitionsAffichees = munitions;
+
+        foreach (var ico in iconesActives)
+            Destroy(ico);
+        iconesActives.Clear();
+
+        if (conteneurIcones != null)
+            conteneurIcones.gameObject.SetActive(racaille.isMayor);
+
+        for (int i = 0; i < munitions; i++)
+        {
+            if (conteneurIcones == null) break;
+
+            GameObject ico = new GameObject($"IconeDash_{i}");
+            ico.transform.SetParent(conteneurIcones);
+            ico.transform.localScale = Vector3.one;
+            ico.transform.localPosition = new Vector3(
+     i * config.iconesDashEspacement, 0f, 0f);
+
+            var img = ico.AddComponent<UnityEngine.UI.Image>();
+
+            // Génère étoile jaune si pas de sprite assigné
+            img.sprite = spriteIconeDash != null
+                ? spriteIconeDash
+                : SpriteFactory.Creer("etoile", new Color(1f, 0.85f, 0.1f));
+
+            img.color = Color.white;
+
+            var rt = ico.GetComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(
+    config.iconesDashTaille,
+    config.iconesDashTaille);
+
+            iconesActives.Add(ico);
+        }
     }
 }

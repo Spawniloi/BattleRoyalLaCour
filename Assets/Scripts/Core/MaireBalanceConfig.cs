@@ -60,25 +60,29 @@ public class MaireBalanceConfig : ScriptableObject
     [Header("UI Slider")]
     public float sliderValeurMax = 10f; // valeur max affichée sur le slider
 
+    [Header("UI Icones Dash")]
+    public float iconesDashTaille = 30f;  // taille en pixels de chaque icone
+    public float iconesDashEspacement = 35f; // espacement entre icones
+
+    [Header("Dash")]
+    public float dashForce = 18f;  // force de l'impulsion
+    public float dashDuree = 0.15f; // durée du dash (secondes)
+    public float dashCooldown = 0.5f;  // cooldown entre 2 dashs
+    public KeyCode dashKeyJ1 = KeyCode.LeftShift;
+    public KeyCode dashKeyJ2 = KeyCode.RightShift;
+    public KeyCode dashKeyJ3 = KeyCode.E;
+    public KeyCode dashKeyJ4 = KeyCode.Keypad0;
+
+    [Header("Item Dash")]
+    public float itemRespawnDelai = 4f;   // délai avant respawn
+    public int itemNombreSimult = 3;    // nb items simultanés sur la map
+    public float itemRayonCollecte = 0.6f; // rayon pour ramasser
+
     // ── Calcul vitesse selon slider ───────────────────────────────────────────
     public float GetSpeedFromSlider(float sliderValue)
     {
-        // Positif = longtemps fugitif = plus lent (fatigué)
-        // Négatif = longtemps maire = plus rapide (motivé)
-        if (sliderValue <= 0)
-        {
-            // Maire depuis longtemps → plus rapide
-            float t = Mathf.Clamp01(-sliderValue / sliderValeurMax);
-            float bonus = Mathf.Pow(t, sliderExpCurve) * maxSpeedBonus;
-            return baseSpeed + bonus;
-        }
-        else
-        {
-            // Fugitif depuis longtemps → plus lent
-            float t = Mathf.Clamp01(sliderValue / sliderValeurMax);
-            float penalty = Mathf.Pow(t, sliderExpCurve) * maxSpeedPenalty;
-            return Mathf.Max(0.5f, baseSpeed - penalty);
-        }
+        // Vitesse fixe — plus de malus/bonus selon le slider
+        return baseSpeed;
     }
 
     // ── Taille terrain ────────────────────────────────────────────────────────

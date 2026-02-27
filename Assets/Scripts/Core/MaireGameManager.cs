@@ -18,6 +18,9 @@ public class MaireGameManager : MonoBehaviour
     [Header("Terrain")]
     public TerrainManager terrainManager;
 
+    [Header("Items")]
+    public ItemDashManager itemDashManager;
+
     [Header("UI")]
     public SliderUIManager sliderUIManager;
 
@@ -118,11 +121,15 @@ public class MaireGameManager : MonoBehaviour
     void DemarrerPartie()
     {
         SpawnerCorailles();
+
+        // Init items
+        Vector2 taille = config.GetTerrainSize(GameData.nombreJoueurs);
+        itemDashManager?.Init(taille);
+
         SetMayor(joueursActifs[0]);
         partieEnCours = true;
         StartCoroutine(SliderUpdateLoop());
         StartCoroutine(TimerLoop());
-        Debug.Log("[MaireGameManager] Partie démarrée !");
     }
 
     IEnumerator SliderUpdateLoop()

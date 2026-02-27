@@ -13,6 +13,11 @@ public class RacailleController : MonoBehaviour
     public bool isFrozen = false;  // bloque les inputs seulement
     public bool isStunned = false;  // bloque les inputs seulement
 
+    [Header("Dash")]
+    public int munitionsDash = 0;
+    private float dashCooldownActuel = 0f;
+    private bool dashEnCours = false;
+
     [Header("References")]
     public MaireGameManager gameManager;
 
@@ -47,6 +52,22 @@ public class RacailleController : MonoBehaviour
     {
         if (transfertCooldown > 0)
             transfertCooldown -= Time.deltaTime;
+
+        if (dashCooldownActuel > 0)
+            dashCooldownActuel -= Time.deltaTime;
+
+        // Dash — seulement si maire + munitions + pas en cooldown
+        if (isMayor
+            && !isFrozen
+            && !isStunned
+            && !dashEnCours
+            && dashCooldownActuel <= 0
+            && munitionsDash > 0
+            && inputHandler != null
+            && inputHandler.DashPressed)
+        {
+            StartCoroutine(EffectuerDash());
+        }
     }
 
     void FixedUpdate()
@@ -120,16 +141,18 @@ public class RacailleController : MonoBehaviour
         isMayor = mayor;
 
         if (mayor)
+        {
             transfertCooldown = config.transfertCooldownDuree;
+        }
         else
         {
             transfertCooldown = 0f;
+            munitionsDash = 0; // perd ses munitions en devenant poisson
+            dashCooldownActuel = 0f;
             StartCoroutine(FreezeInputs(config.freezeDuration));
         }
 
         visuel?.SetRoleVisuel(mayor);
-        Debug.Log($"[RacailleController] J{playerID} → " +
-                  $"{(mayor ? "MAIRE" : "FUGITIF")}");
     }
 
     // ── Freeze inputs seulement (le Rigidbody continue de bouger) ─────────────
@@ -189,6 +212,43 @@ public class RacailleController : MonoBehaviour
             SyncVelocity(rb.linearVelocity);
         }
     }
+
+    IEnumerator EffectuerDash()
+    {
+        dashEnCours = true;
+        munitionsDash--;
+        dashCooldownActuel = config.dashCooldown;
+
+        // Direction du dash = direction du mouvement actuel
+        Vector2 dirDash = currentVelocity.normalized;
+
+        // Si immobile → dash vers la direction du dernier input
+        if (dirDash == Vector2.zero && inputHandler.MoveInput != Vector2.zero)
+            dirDash = inputHandler.MoveInput.normalized;
+
+        // Si toujours immobile → dash vers la droite par défaut
+        if (dirDash == Vector2.zero)
+            dirDash = Vector2.right;
+
+        // Impulsion dash
+        rb.linearVelocity = Vector2.zero;
+        rb.AddForce(dirDash * config.dashForce, ForceMode2D.Impulse);
+        currentVelocity = dirDash * config.dashForce;
+
+        Debug.Log($"[Dash] J{playerID} dash ! Munitions restantes : {munitionsDash}");
+
+        yield return new WaitForSeconds(config.dashDuree);
+        dashEnCours = false;
+    }
+
+    // Appelé quand on ramasse un item
+    public void AjouterMunitionDash()
+    {
+        munitionsDash++;
+        Debug.Log($"[Dash] J{playerID} ramasse une munition ! Total : {munitionsDash}");
+    }
+
+    // Reset quand on devient poisson
 
 
     // Appelé depuis le Hub/JSON

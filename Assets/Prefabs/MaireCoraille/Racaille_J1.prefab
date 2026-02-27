@@ -121,6 +121,7 @@ MonoBehaviour:
   sliderValue: 0
   isFrozen: 0
   isStunned: 0
+  munitionsDash: 0
   gameManager: {fileID: 0}
 --- !u!114 &5828815982665504560
 MonoBehaviour:
@@ -197,6 +198,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerID: 1
+  config: {fileID: 11400000, guid: 911ed3adebc5d3e4e9f002edd406c5e2, type: 2}
 --- !u!114 &3980544839620377295
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -209,16 +211,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 37ccac23a577bdb4e9bfc599ffcf3dba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spriteCercle: {fileID: 0}
-  spriteCarre: {fileID: 0}
-  spriteTriangle: {fileID: 0}
-  spriteEtoile: {fileID: 0}
-  spriteLosange: {fileID: 0}
-  spriteAileron: {fileID: 0}
-  spriteQueue: {fileID: 0}
   srCorps: {fileID: 1600651472405963901}
   srRole: {fileID: 7572901099802825440}
-  srObjet: {fileID: 0}
 --- !u!1 &1826398357198875708
 GameObject:
   m_ObjectHideFlags: 0
