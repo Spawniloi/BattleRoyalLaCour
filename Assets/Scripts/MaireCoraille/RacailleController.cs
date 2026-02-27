@@ -310,7 +310,14 @@ public class RacailleController : MonoBehaviour
         Debug.Log($"[Dash] J{playerID} ramasse une munition ! Total : {munitionsDash}");
     }
 
-    // Reset quand on devient poisson
+    public void StopFreeze()
+    {
+        StopAllCoroutines();
+        isFrozen = false;
+        isStunned = false;
+        // Relance la rotation si nécessaire
+        StartCoroutine(FreezeInputs(0f));
+    }
 
 
     // Appelé depuis le Hub/JSON

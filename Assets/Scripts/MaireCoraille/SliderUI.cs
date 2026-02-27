@@ -11,15 +11,14 @@ public class SliderUI : MonoBehaviour
     [Header("UI")]
     public Slider slider;
     public Image handleImage;
-    public Sprite spriteAileron; // maire
-    public Sprite spriteQueue;   // fugitif
+    public Image fillImage;
+    public Sprite spriteAileron;
+    public Sprite spriteQueue;
     public TextMeshProUGUI labelJoueur;
     public TextMeshProUGUI labelValeur;
-    public Image fillGauche;    // côté négatif (maire = rouge)
-    public Image fillDroit;     // côté positif (fugitif = vert)
 
     [Header("Munitions Dash UI")]
-    public Transform conteneurIcones;  // parent des icones
+    public Transform conteneurIcones;
     public Sprite spriteIconeDash;
 
     private int munitionsAffichees = 0;
@@ -28,6 +27,7 @@ public class SliderUI : MonoBehaviour
 
     private RacailleController racaille;
 
+    // ── Start ─────────────────────────────────────────────────────────────────
     void Start()
     {
         if (config == null)
@@ -48,6 +48,7 @@ public class SliderUI : MonoBehaviour
         StartCoroutine(ChercherRacaille());
     }
 
+    // ── Cherche la racaille ───────────────────────────────────────────────────
     System.Collections.IEnumerator ChercherRacaille()
     {
         while (racaille == null)
@@ -61,6 +62,7 @@ public class SliderUI : MonoBehaviour
         }
     }
 
+    // ── Update ────────────────────────────────────────────────────────────────
     void Update()
     {
         if (racaille == null || config == null) return;
@@ -68,43 +70,41 @@ public class SliderUI : MonoBehaviour
         MettreAJourMunitions();
     }
 
+    // ── Mise à jour slider ────────────────────────────────────────────────────
     void MettreAJour(float valeur, bool estMaire)
     {
-        float valeurMax = config.sliderValeurMax;
-
-        // Maire = négatif, fugitif = positif
-        // On inverse : sliderValue monte quand fugitif, descend quand maire
-        float valeurNorm = Mathf.Clamp(valeur / valeurMax, -1f, 1f);
+        float valeurNorm = Mathf.Clamp(valeur / config.sliderValeurMax, -1f, 1f);
 
         if (slider != null)
             slider.value = valeurNorm;
 
-        // Handle : aileron si maire, queue si fugitif
+        // Rouge = requin, Vert = poisson
+        Color couleurRole = estMaire
+            ? new Color(0.9f, 0.3f, 0.3f, 1f)
+            : new Color(0.3f, 0.8f, 0.4f, 1f);
+
+        if (fillImage != null)
+            fillImage.color = couleurRole;
+
         if (handleImage != null)
-            handleImage.sprite = estMaire ? spriteAileron : spriteQueue;
+        {
+            if (spriteAileron != null && spriteQueue != null)
+                handleImage.sprite = estMaire ? spriteAileron : spriteQueue;
+            else
+                handleImage.color = couleurRole;
+        }
 
-        // Couleur fill gauche (zone négative = maire = mauvais = rouge)
-        if (fillGauche != null)
-            fillGauche.color = valeurNorm < 0
-                ? new Color(0.9f, 0.3f, 0.3f, 1f)
-                : new Color(0.5f, 0.5f, 0.5f, 0.3f);
-
-        // Couleur fill droit (zone positive = fugitif = bon = vert)
-        if (fillDroit != null)
-            fillDroit.color = valeurNorm > 0
-                ? new Color(0.3f, 0.8f, 0.4f, 1f)
-                : new Color(0.5f, 0.5f, 0.5f, 0.3f);
-
-        // Score affiché
         if (labelValeur != null)
             labelValeur.text = valeur.ToString("F1");
     }
 
+    // ── Couleur joueur ────────────────────────────────────────────────────────
     public void SetCouleurJoueur(Color couleur)
     {
-        if (fillDroit != null) fillDroit.color = couleur;
+        if (fillImage != null) fillImage.color = couleur;
     }
 
+    // ── Munitions dash ────────────────────────────────────────────────────────
     void MettreAJourMunitions()
     {
         int munitions = racaille.isMayor ? racaille.munitionsDash : 0;
@@ -127,21 +127,18 @@ public class SliderUI : MonoBehaviour
             ico.transform.SetParent(conteneurIcones);
             ico.transform.localScale = Vector3.one;
             ico.transform.localPosition = new Vector3(
-     i * config.iconesDashEspacement, 0f, 0f);
+                i * config.iconesDashEspacement, 0f, 0f);
 
             var img = ico.AddComponent<UnityEngine.UI.Image>();
-
-            // Génère étoile jaune si pas de sprite assigné
             img.sprite = spriteIconeDash != null
                 ? spriteIconeDash
                 : SpriteFactory.Creer("etoile", new Color(1f, 0.85f, 0.1f));
-
             img.color = Color.white;
 
             var rt = ico.GetComponent<RectTransform>();
             rt.sizeDelta = new Vector2(
-    config.iconesDashTaille,
-    config.iconesDashTaille);
+                config.iconesDashTaille,
+                config.iconesDashTaille);
 
             iconesActives.Add(ico);
         }

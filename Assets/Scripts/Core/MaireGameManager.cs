@@ -30,6 +30,9 @@ public class MaireGameManager : MonoBehaviour
     public int nombreCorailles3J = 6;
     public int nombreCorailles4J = 8;
 
+    [Header("Intro")]
+    public IntroManager introManager;
+
     [Header("Etat")]
     public RacailleController mayorActuel;
     public float tempsRestant;
@@ -122,14 +125,36 @@ public class MaireGameManager : MonoBehaviour
     {
         SpawnerCorailles();
 
-        // Init items
         Vector2 taille = config.GetTerrainSize(GameData.nombreJoueurs);
         itemDashManager?.Init(taille);
 
-        SetMayor(joueursActifs[0]);
+        // Maire aléatoire
+        int indexMaire = Random.Range(0, joueursActifs.Count);
+        SetMayor(joueursActifs[indexMaire]);
+
+        // Bloque tous les joueurs pendant l'intro
+        foreach (var j in joueursActifs)
+            j.ApplyFreeze(999f); // freeze long — levé après l'intro
+
+        // Lance l'intro
+        if (introManager != null)
+            StartCoroutine(introManager.LancerIntro(
+                mayorActuel, OnIntroTerminee));
+        else
+            OnIntroTerminee(); // skip si pas d'intro
+    }
+
+    void OnIntroTerminee()
+    {
+        // Débloque tous les joueurs
+        foreach (var j in joueursActifs)
+            j.StopFreeze();
+
         partieEnCours = true;
         StartCoroutine(SliderUpdateLoop());
         StartCoroutine(TimerLoop());
+
+        Debug.Log("[MaireGameManager] Partie démarrée !");
     }
 
     IEnumerator SliderUpdateLoop()
