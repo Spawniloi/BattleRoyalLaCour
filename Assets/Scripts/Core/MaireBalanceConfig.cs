@@ -38,6 +38,14 @@ public class MaireBalanceConfig : ScriptableObject
     public float corailleSwapDelay = 0.5f;
     public float corailleRebondForceMin = 5.0f; // force min rebond trigger
 
+    [Header("Coraille — Rotation aleatoire")]
+    public float corailleAngleMin = -45f;  // angle min rotation
+    public float corailleAngleMax = 45f;  // angle max rotation
+    public float corailleDureeRotMin = 1.5f; // durée rotation min
+    public float corailleDureeRotMax = 3.5f; // durée rotation max
+    public float coraillePauseRotMin = 0.3f; // pause entre rotations min
+    public float coraillePauseRotMax = 1.0f; // pause entre rotations max
+
     [Header("Terrain")]
     public Vector2 terrainSize2J = new Vector2(12f, 7f);
     public Vector2 terrainSize3J = new Vector2(15f, 8f);

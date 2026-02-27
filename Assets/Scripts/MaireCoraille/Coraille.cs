@@ -23,6 +23,13 @@ public class Coraille : MonoBehaviour
     public bool enCooldown = false;
     public float cooldownRestant = 0f;
 
+    private bool effetEnCours = false; // bloque la rotation pendant l'effet
+
+    void Start()
+    {
+        StartCoroutine(RotationAleatoire());
+    }
+
     // ── Init visuel ───────────────────────────────────────────────────────────
     public void InitVisuel()
     {
@@ -41,7 +48,46 @@ public class Coraille : MonoBehaviour
         }
     }
 
-    // ── Collision physique sur le corps (BoxCollider2D pas trigger) ───────────
+    // ── Rotation aleatoire ────────────────────────────────────────────────────
+    IEnumerator RotationAleatoire()
+    {
+        while (true)
+        {
+            // Attend si effet en cours
+            while (effetEnCours)
+                yield return null;
+
+            float angleCible = Random.Range(config.corailleAngleMin,
+                                             config.corailleAngleMax);
+            float angleDepart = transform.eulerAngles.z;
+            if (angleDepart > 180f) angleDepart -= 360f;
+
+            float duree = Random.Range(config.corailleDureeRotMin,
+                                       config.corailleDureeRotMax);
+
+            float t = 0f;
+            while (t < duree)
+            {
+                // Pause si effet déclenché en cours de rotation
+                if (effetEnCours)
+                {
+                    yield return null;
+                    continue;
+                }
+
+                float angle = Mathf.LerpAngle(angleDepart, angleCible, t / duree);
+                transform.rotation = Quaternion.Euler(0f, 0f, angle);
+                t += Time.deltaTime;
+                yield return null;
+            }
+
+            yield return new WaitForSeconds(
+                Random.Range(config.coraillePauseRotMin,
+                             config.coraillePauseRotMax));
+        }
+    }
+
+    // ── Collision physique corps ──────────────────────────────────────────────
     void OnCollisionEnter2D(Collision2D collision)
     {
         RacailleController racaille =
@@ -61,26 +107,21 @@ public class Coraille : MonoBehaviour
         racaille.SyncVelocity(rb.linearVelocity);
     }
 
-    // ── Tentative d'accrochage (appelé par CorailleCoteDetector) ─────────────
+    // ── Tentative d'accrochage ────────────────────────────────────────────────
     public void TenterAccrochage(RacailleController racaille, bool entreParCoteA)
     {
-        // Le maire (requin) → rebond simple, pas de freeze
         if (racaille.isMayor)
         {
-            Debug.Log($"[Coraille] Requin J{racaille.playerID} → Rebond !");
             Repulsion(racaille);
             return;
         }
 
-        // Cooldown actif → rebond
         if (enCooldown)
         {
-            Debug.Log($"[Coraille] Cooldown actif → Rebond J{racaille.playerID}");
             Repulsion(racaille);
             return;
         }
 
-        // Pas d'allié dans le binôme → rebond
         if (!ContientEquipe(racaille.playerID))
         {
             Debug.Log($"[Coraille] Pas d'allié J{racaille.playerID} → Rebond");
@@ -88,7 +129,6 @@ public class Coraille : MonoBehaviour
             return;
         }
 
-        // Mauvais côté → rebond
         RacailleController allie = GetAllie(racaille.playerID);
         bool allieEstCoteA = (allie == slotA);
         bool doitEntrerParCoteA = !allieEstCoteA;
@@ -100,12 +140,11 @@ public class Coraille : MonoBehaviour
             return;
         }
 
-        // ✅ Fusion réussie !
         Debug.Log($"[Coraille] Fusion réussie J{racaille.playerID} !");
         FusionReussie(racaille);
     }
 
-    // ── Rebond simple — comme une balle sur un mur ────────────────────────────
+    // ── Repulsion ─────────────────────────────────────────────────────────────
     void Repulsion(RacailleController racaille)
     {
         Vector2 dir = ((Vector2)racaille.transform.position
@@ -122,33 +161,28 @@ public class Coraille : MonoBehaviour
         racaille.SyncVelocity(vitesseReflechie * config.knockbackMultiplier);
     }
 
-    // ── Fusion réussie ────────────────────────────────────────────────────────
+    // ── Fusion reussie ────────────────────────────────────────────────────────
     void FusionReussie(RacailleController poisson)
     {
-        // Direction d'entrée = joueur → coraille
         Vector2 dirEntree = ((Vector2)transform.position
                            - (Vector2)poisson.transform.position).normalized;
 
-        // TP de l'autre côté du coraille
         Vector3 posTP = transform.position + (Vector3)(dirEntree * 1.5f);
         poisson.transform.position = posTP;
 
-        // Impulsion forte dans le même sens que le TP
         Rigidbody2D rb = poisson.GetComponent<Rigidbody2D>();
         rb.linearVelocity = Vector2.zero;
         rb.AddForce(dirEntree * config.propulsionForce, ForceMode2D.Impulse);
 
-        // Effet visuel du coraille
         StartCoroutine(EffetVisuelCoraille(dirEntree));
-
-        // Démarre le cooldown
         StartCoroutine(DemarrerCooldown());
     }
 
-    // ── Effet visuel coraille ─────────────────────────────────────────────────
+    // ── Effet visuel ──────────────────────────────────────────────────────────
     IEnumerator EffetVisuelCoraille(Vector2 dirEntree)
     {
-        // Position FIXE — ne bouge jamais
+        effetEnCours = true; // pause la rotation
+
         Vector3 posFixe = transform.position;
         Vector3 scaleActuel = transform.localScale;
         Vector3 scaleAbs = new Vector3(
@@ -157,16 +191,12 @@ public class Coraille : MonoBehaviour
             1f
         );
 
-        // ── Flip immédiat ─────────────────────────────────────────────────────────
-        Vector3 scaleFlip = new Vector3(
-            -scaleActuel.x,
-             scaleAbs.y,
-             1f
-        );
+        // Flip immédiat
+        Vector3 scaleFlip = new Vector3(-scaleActuel.x, scaleAbs.y, 1f);
         transform.localScale = scaleFlip;
-        transform.position = posFixe; // force position
+        transform.position = posFixe;
 
-        // ── Squeeze ───────────────────────────────────────────────────────────────
+        // Squeeze
         Vector3 scaleSquish = new Vector3(
             scaleFlip.x * 1.2f,
             scaleFlip.y * 0.8f,
@@ -177,23 +207,25 @@ public class Coraille : MonoBehaviour
         while (t < 0.08f)
         {
             transform.localScale = Vector3.Lerp(scaleFlip, scaleSquish, t / 0.08f);
-            transform.position = posFixe; // force position à chaque frame
+            transform.position = posFixe;
             t += Time.deltaTime;
             yield return null;
         }
 
-        // ── Retour scale flippé ───────────────────────────────────────────────────
+        // Retour scale flippé
         t = 0f;
         while (t < 0.12f)
         {
             transform.localScale = Vector3.Lerp(scaleSquish, scaleFlip, t / 0.12f);
-            transform.position = posFixe; // force position à chaque frame
+            transform.position = posFixe;
             t += Time.deltaTime;
             yield return null;
         }
 
         transform.localScale = scaleFlip;
         transform.position = posFixe;
+
+        effetEnCours = false; // reprend la rotation
     }
 
     // ── Cooldown ──────────────────────────────────────────────────────────────
