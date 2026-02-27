@@ -16,34 +16,29 @@ public class IntroManager : MonoBehaviour
     public float dureeCompte = 1.0f;  // durée de chaque chiffre
 
     // Appelé par MaireGameManager après avoir choisi le maire
-    public IEnumerator LancerIntro(RacailleController maire,
-                                   System.Action onFin)
+    public IEnumerator LancerIntro(RacailleController maire, System.Action onFin)
     {
-        // Bloque tous les inputs
         panneauIntro?.SetActive(true);
 
-        // ── Annonce le maire ──────────────────────────────────────────────────
+        // ── Annonce le maire ──────────────────────────────────────────────────────
         if (labelAnnonce != null)
         {
-            // Couleur du joueur
             PlayerData data = GameData.GetJoueur(maire.playerID);
             Color coul = data.GetCouleur();
 
             labelAnnonce.text = $"<color=#{ColorUtility.ToHtmlStringRGB(coul)}>" +
-                                 $"J{maire.playerID}</color>" +
-                                 $"\nest le 🦈 Requin !";
+                                $"J{maire.playerID}</color>" +
+                                $"\nest le 🦈 Requin !";
             labelAnnonce.gameObject.SetActive(true);
         }
 
         if (labelCompte != null)
             labelCompte.gameObject.SetActive(false);
 
+        // ── Attend 2s avant le compte ─────────────────────────────────────────────
         yield return new WaitForSeconds(dureeAnnonce);
 
-        // ── Compte à rebours ──────────────────────────────────────────────────
-        if (labelAnnonce != null)
-            labelAnnonce.gameObject.SetActive(false);
-
+        // ── Compte à rebours — labelAnnonce reste visible tout le long ───────────
         if (labelCompte != null)
             labelCompte.gameObject.SetActive(true);
 
@@ -57,7 +52,6 @@ public class IntroManager : MonoBehaviour
                 labelCompte.transform.localScale = Vector3.one * 1.5f;
             }
 
-            // Animation scale
             float t = 0f;
             while (t < dureeCompte)
             {
@@ -69,10 +63,9 @@ public class IntroManager : MonoBehaviour
             }
         }
 
-        // ── Cache le panneau ──────────────────────────────────────────────────
+        // ── Cache le panneau — labelAnnonce reste jusqu'à la fin ─────────────────
         panneauIntro?.SetActive(false);
 
-        // Lance la partie
         onFin?.Invoke();
     }
 }
