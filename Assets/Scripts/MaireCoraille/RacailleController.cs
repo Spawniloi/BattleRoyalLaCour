@@ -45,6 +45,10 @@ public class RacailleController : MonoBehaviour
     {
         PlayerData data = GameData.GetJoueur(playerID);
         visuel?.AppliquerData(data);
+
+        // Applique le rôle APRES les données visuelles
+        // isMayor est déjà assigné par le GameManager avant Start()
+        visuel?.SetRoleVisuel(isMayor);
     }
 
     // ── Update ────────────────────────────────────────────────────────────────

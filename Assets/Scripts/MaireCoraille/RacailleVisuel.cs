@@ -2,42 +2,97 @@
 
 public class RacailleVisuel : MonoBehaviour
 {
-    [Header("References")]
+    [Header("Sprites")]
+    public Sprite spriteCorps;
+    public Sprite spriteDossard;
+    public Sprite spriteJambes;
+    public Sprite[] spritesTetes; // 6 têtes
+
+    [Header("Sprites Role")]
+    public SpriteRenderer srAileronRequin;
+    public SpriteRenderer srTeteRequin;
+    public SpriteRenderer srQueuePoisson;
+    public SpriteRenderer srTetePoisson;   // enfant Queue
+
+    [Header("Renderers")]
     public SpriteRenderer srCorps;
-    public SpriteRenderer srRole;
+    public SpriteRenderer srDossard;
+    public SpriteRenderer srJambes;
+    public SpriteRenderer srTete;
+    
+
+    [Header("Couleur jambes fixe")]
+    public Color couleurJambes = new Color(0.1f, 0.15f, 0.3f); // bleu marine
 
     // ── Applique les données joueur ───────────────────────────────────────────
     public void AppliquerData(PlayerData data)
     {
-        if (srCorps == null) return;
+        if (srCorps != null)
+        {
+            srCorps.sprite = spriteCorps;
+            srCorps.color = data.GetCouleurPeau();
+        }
 
-        // Génère le sprite selon forme + couleur
-        srCorps.sprite = SpriteFactory.Creer(data.forme, data.GetCouleur());
-        srCorps.color = Color.white; // couleur déjà dans le sprite
+        if (srDossard != null)
+        {
+            srDossard.sprite = spriteDossard;
+            srDossard.color = data.GetCouleurDossard();
+        }
 
-        Debug.Log($"[RacailleVisuel] J{data.playerID} → {data.forme} {data.couleur}");
+        if (srJambes != null)
+        {
+            srJambes.sprite = spriteJambes;
+            srJambes.color = couleurJambes;
+        }
+
+        if (srTete != null)
+        {
+            if (spritesTetes != null &&
+                data.indexTete < spritesTetes.Length &&
+                spritesTetes[data.indexTete] != null)
+                srTete.sprite = spritesTetes[data.indexTete];
+            srTete.color = data.GetCouleurDossard();
+        }
+
+        // Couleur dossard sur les 4 parties rôle
+        Color coul = data.GetCouleurDossard();
+        if (srAileronRequin != null) srAileronRequin.color = coul;
+        if (srTeteRequin != null) srTeteRequin.color = coul;
+        if (srQueuePoisson != null) srQueuePoisson.color = coul;
+        if (srTetePoisson != null) srTetePoisson.color = coul;
+
+        // NE PAS appeler SetRoleVisuel ici — le GameManager s'en charge
     }
 
-    // ── Visuel rôle requin/poisson ────────────────────────────────────────────
+    // ── Visuel rôle ───────────────────────────────────────────────────────────
     public void SetRoleVisuel(bool isMayor)
     {
-        if (srRole == null) return;
+        PlayerData data = GameData.GetJoueur(
+            GetComponent<RacailleController>().playerID);
+        Color coul = data.GetCouleurDossard();
 
-        srRole.enabled = true;
-
-        if (isMayor)
+        // Requin — aileron + tête requin
+        if (srAileronRequin != null)
         {
-            // Aileron = triangle blanc au dessus
-            srRole.sprite = SpriteFactory.Creer("triangle", Color.white);
-            srRole.transform.localPosition = new Vector3(0, 0.6f, 0);
-            srRole.transform.localScale = new Vector3(0.4f, 0.5f, 1f);
+            srAileronRequin.color = coul;
+            srAileronRequin.enabled = isMayor;
         }
-        else
+        if (srTeteRequin != null)
         {
-            // Queue = losange derrière
-            srRole.sprite = SpriteFactory.Creer("losange", Color.white);
-            srRole.transform.localPosition = new Vector3(0, -0.6f, 0);
-            srRole.transform.localScale = new Vector3(0.5f, 0.4f, 1f);
+            srTeteRequin.color = coul;
+            srTeteRequin.enabled = isMayor;
+        }
+
+        // Poisson — queue + tête poisson
+        if (srQueuePoisson != null)
+        {
+            srQueuePoisson.color = coul;
+            srQueuePoisson.enabled = !isMayor;
+        }
+        if (srTetePoisson != null)
+        {
+            srTetePoisson.color = coul;
+            srTetePoisson.enabled = !isMayor;
         }
     }
 }

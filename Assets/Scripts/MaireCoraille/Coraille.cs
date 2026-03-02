@@ -10,9 +10,17 @@ public class Coraille : MonoBehaviour
     public RacailleController slotA;
     public RacailleController slotB;
 
-    [Header("Visuels des cotes")]
-    public SpriteRenderer spriteA;
-    public SpriteRenderer spriteB;
+    [Header("Visuels Cote A")]
+    public SpriteRenderer coteA_Jambes;
+    public SpriteRenderer coteA_Corps;
+    public SpriteRenderer coteA_Dossard;
+    public SpriteRenderer coteA_Tete;
+
+    [Header("Visuels Cote B")]
+    public SpriteRenderer coteB_Jambes;
+    public SpriteRenderer coteB_Corps;
+    public SpriteRenderer coteB_Dossard;
+    public SpriteRenderer coteB_Tete;
 
     [Header("Colliders")]
     public Collider2D colliderCoteA;
@@ -23,7 +31,7 @@ public class Coraille : MonoBehaviour
     public bool enCooldown = false;
     public float cooldownRestant = 0f;
 
-    private bool effetEnCours = false; // bloque la rotation pendant l'effet
+    private bool effetEnCours = false;
 
     void Start()
     {
@@ -33,18 +41,51 @@ public class Coraille : MonoBehaviour
     // ── Init visuel ───────────────────────────────────────────────────────────
     public void InitVisuel()
     {
-        if (slotA != null && spriteA != null)
+        AppliquerVisuelCote(slotA,
+            coteA_Jambes, coteA_Corps, coteA_Dossard, coteA_Tete);
+        AppliquerVisuelCote(slotB,
+            coteB_Jambes, coteB_Corps, coteB_Dossard, coteB_Tete);
+    }
+
+    void AppliquerVisuelCote(RacailleController racaille,
+        SpriteRenderer srJambes,
+        SpriteRenderer srCorps,
+        SpriteRenderer srDossard,
+        SpriteRenderer srTete)
+    {
+        if (racaille == null) return;
+
+        PlayerData data = GameData.GetJoueur(racaille.playerID);
+        RacailleVisuel visuel = racaille.GetComponent<RacailleVisuel>();
+
+        if (visuel == null) return;
+
+        if (srJambes != null)
         {
-            PlayerData dataA = GameData.GetJoueur(slotA.playerID);
-            spriteA.sprite = SpriteFactory.Creer(dataA.forme, dataA.GetCouleur());
-            spriteA.color = Color.white;
+            srJambes.sprite = visuel.spriteJambes;
+            srJambes.color = visuel.couleurJambes;
         }
 
-        if (slotB != null && spriteB != null)
+        if (srCorps != null)
         {
-            PlayerData dataB = GameData.GetJoueur(slotB.playerID);
-            spriteB.sprite = SpriteFactory.Creer(dataB.forme, dataB.GetCouleur());
-            spriteB.color = Color.white;
+            srCorps.sprite = visuel.spriteCorps;
+            srCorps.color = data.GetCouleurPeau();
+        }
+
+        if (srDossard != null)
+        {
+            srDossard.sprite = visuel.spriteDossard;
+            srDossard.color = data.GetCouleurDossard();
+        }
+
+        if (srTete != null)
+        {
+            if (visuel.spritesTetes != null &&
+                data.indexTete < visuel.spritesTetes.Length &&
+                visuel.spritesTetes[data.indexTete] != null)
+                srTete.sprite = visuel.spritesTetes[data.indexTete];
+
+            srTete.color = data.GetCouleurDossard();
         }
     }
 
@@ -53,7 +94,6 @@ public class Coraille : MonoBehaviour
     {
         while (true)
         {
-            // Attend si effet en cours
             while (effetEnCours)
                 yield return null;
 
@@ -68,13 +108,7 @@ public class Coraille : MonoBehaviour
             float t = 0f;
             while (t < duree)
             {
-                // Pause si effet déclenché en cours de rotation
-                if (effetEnCours)
-                {
-                    yield return null;
-                    continue;
-                }
-
+                if (effetEnCours) { yield return null; continue; }
                 float angle = Mathf.LerpAngle(angleDepart, angleCible, t / duree);
                 transform.rotation = Quaternion.Euler(0f, 0f, angle);
                 t += Time.deltaTime;
@@ -157,7 +191,8 @@ public class Coraille : MonoBehaviour
             vitesseReflechie = dir * config.corailleRebondForceMin;
 
         rb.linearVelocity = Vector2.zero;
-        rb.AddForce(vitesseReflechie * config.knockbackMultiplier, ForceMode2D.Impulse);
+        rb.AddForce(vitesseReflechie * config.knockbackMultiplier,
+                    ForceMode2D.Impulse);
         racaille.SyncVelocity(vitesseReflechie * config.knockbackMultiplier);
     }
 
@@ -181,7 +216,7 @@ public class Coraille : MonoBehaviour
     // ── Effet visuel ──────────────────────────────────────────────────────────
     IEnumerator EffetVisuelCoraille(Vector2 dirEntree)
     {
-        effetEnCours = true; // pause la rotation
+        effetEnCours = true;
 
         Vector3 posFixe = transform.position;
         Vector3 scaleActuel = transform.localScale;
@@ -191,12 +226,10 @@ public class Coraille : MonoBehaviour
             1f
         );
 
-        // Flip immédiat
         Vector3 scaleFlip = new Vector3(-scaleActuel.x, scaleAbs.y, 1f);
         transform.localScale = scaleFlip;
         transform.position = posFixe;
 
-        // Squeeze
         Vector3 scaleSquish = new Vector3(
             scaleFlip.x * 1.2f,
             scaleFlip.y * 0.8f,
@@ -212,7 +245,6 @@ public class Coraille : MonoBehaviour
             yield return null;
         }
 
-        // Retour scale flippé
         t = 0f;
         while (t < 0.12f)
         {
@@ -224,8 +256,7 @@ public class Coraille : MonoBehaviour
 
         transform.localScale = scaleFlip;
         transform.position = posFixe;
-
-        effetEnCours = false; // reprend la rotation
+        effetEnCours = false;
     }
 
     // ── Cooldown ──────────────────────────────────────────────────────────────
