@@ -9,6 +9,8 @@ public class ItemDash : MonoBehaviour
     [Header("Visuel")]
     public SpriteRenderer sr;
 
+    public ItemDashManager manager; // assigné par le manager
+
     private bool estActif = true;
 
     void Awake()
@@ -61,18 +63,13 @@ public class ItemDash : MonoBehaviour
     IEnumerator Respawn()
     {
         yield return new WaitForSeconds(config.itemRespawnDelai);
+        transform.position = manager != null
+            ? new Vector3(manager.GetPositionAleatoire().x,
+                          manager.GetPositionAleatoire().y, 0f)
+            : Vector3.zero;
 
-        // Nouvelle position aléatoire
-        ItemDashManager manager =
-            FindFirstObjectByType<ItemDashManager>();
-        if (manager != null)
-            transform.position = manager.GetPositionAleatoire();
-
-        // Réactive
         if (sr != null) sr.enabled = true;
         GetComponent<Collider2D>().enabled = true;
         estActif = true;
-
-        Debug.Log("[ItemDash] Respawn !");
     }
 }

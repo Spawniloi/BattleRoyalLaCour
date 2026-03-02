@@ -52,6 +52,12 @@ public class MaireBalanceConfig : ScriptableObject
     public Vector2 terrainSize4J = new Vector2(17f, 9f);
     public float distanceMinCorailles = 3.0f; // distance min entre corailles
 
+    [Header("Spawn Corailles")]
+    public float corailleMargesBords2J = 1.5f;
+    public float corailleMargesBords3J = 1.5f;
+    public float corailleMargesBords4J = 1.5f;
+
+
     [Header("Temps & Score")]
     public float roundDuration = 90f;
     public float mayorTimeTickRate = 0.1f;
@@ -101,4 +107,11 @@ public class MaireBalanceConfig : ScriptableObject
             _ => terrainSize4J,
         };
     }
+
+    public float GetMargesBords(int nbJoueurs) => nbJoueurs switch
+    {
+        2 => corailleMargesBords2J,
+        3 => corailleMargesBords3J,
+        _ => corailleMargesBords4J,
+    };
 }

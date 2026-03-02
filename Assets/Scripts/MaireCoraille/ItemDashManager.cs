@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class ItemDashManager : MonoBehaviour
 {
@@ -6,7 +7,12 @@ public class ItemDashManager : MonoBehaviour
     public MaireBalanceConfig config;
     public GameObject itemPrefab;
 
+    [Header("Marges")]
+    public float margesBords = 1.5f; // distance min du bord
+    public float distanceCoraille = 2.0f; // distance min des corailles
+
     private Vector2 tailleTerrain;
+    private List<ItemDash> items = new List<ItemDash>();
 
     public void Init(Vector2 taille)
     {
@@ -14,45 +20,45 @@ public class ItemDashManager : MonoBehaviour
 
         for (int i = 0; i < config.itemNombreSimult; i++)
         {
-            Vector3 pos = new Vector3(
-                TrouverPositionLibre().x,
-                TrouverPositionLibre().y,
-                0f
-            );
-            GameObject go = Instantiate(itemPrefab, pos, Quaternion.identity);
+            Vector2 pos = TrouverPositionLibre();
+            GameObject go = Instantiate(itemPrefab,
+                             new Vector3(pos.x, pos.y, 0f),
+                             Quaternion.identity);
             ItemDash item = go.GetComponent<ItemDash>();
-            if (item != null) item.config = config;
+            if (item != null)
+            {
+                item.config = config;
+                item.manager = this;
+                items.Add(item);
+            }
         }
-
-        Debug.Log($"[ItemDashManager] {config.itemNombreSimult} items spawnés");
     }
 
-    public Vector2 GetPositionAleatoire()
-    {
-        return TrouverPositionLibre();
-    }
+    public Vector2 GetPositionAleatoire() => TrouverPositionLibre();
 
     Vector2 TrouverPositionLibre()
     {
-        int maxEssais = 50;
+        float xMin = -tailleTerrain.x / 2f + margesBords;
+        float xMax = tailleTerrain.x / 2f - margesBords;
+        float yMin = -tailleTerrain.y / 2f + margesBords;
+        float yMax = tailleTerrain.y / 2f - margesBords;
 
-        for (int essai = 0; essai < maxEssais; essai++)
+        for (int essai = 0; essai < 50; essai++)
         {
             Vector2 pos = new Vector2(
-                Random.Range(-tailleTerrain.x / 2f + 1f,
-                              tailleTerrain.x / 2f - 1f),
-                Random.Range(-tailleTerrain.y / 2f + 1f,
-                              tailleTerrain.y / 2f - 1f)
+                Random.Range(xMin, xMax),
+                Random.Range(yMin, yMax)
             );
 
-            // Vérifie qu'il n'y a pas de coraille trop proche
+            // Vérifie distance des corailles
+            bool tropProche = false;
             Coraille[] corailles =
                 FindObjectsByType<Coraille>(FindObjectsSortMode.None);
 
-            bool tropProche = false;
             foreach (var c in corailles)
             {
-                if (Vector2.Distance(pos, c.transform.position) < 1.5f)
+                if (Vector2.Distance(pos, c.transform.position)
+                    < distanceCoraille)
                 {
                     tropProche = true;
                     break;
@@ -62,12 +68,7 @@ public class ItemDashManager : MonoBehaviour
             if (!tropProche) return pos;
         }
 
-        // Fallback si pas trouvé
-        return new Vector2(
-            Random.Range(-tailleTerrain.x / 2f + 1f,
-                          tailleTerrain.x / 2f - 1f),
-            Random.Range(-tailleTerrain.y / 2f + 1f,
-                          tailleTerrain.y / 2f - 1f)
-        );
+        // Fallback centre de la map
+        return Vector2.zero;
     }
 }

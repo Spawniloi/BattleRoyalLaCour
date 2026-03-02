@@ -239,11 +239,11 @@ public class MaireGameManager : MonoBehaviour
                           nb == 3 ? nombreCorailles3J : nombreCorailles4J;
 
         Vector2 terrainSize = config.GetTerrainSize(nb);
-        float distanceMin = config.distanceMinCorailles; // distance minimum entre 2 corailles
-        int maxEssais = 50;   // évite boucle infinie
+        float distanceMin = config.distanceMinCorailles;
+        float marge = config.GetMargesBords(nb); // ← remplace le 2f hardcodé
+        int maxEssais = 50;
 
         List<Vector2> positionsDejaUtilisees = new List<Vector2>();
-
         float[] angles = { 0f, 90f, 45f, -45f };
 
         for (int i = 0; i < nbCorailles; i++)
@@ -254,11 +254,12 @@ public class MaireGameManager : MonoBehaviour
             for (int essai = 0; essai < maxEssais; essai++)
             {
                 pos = new Vector2(
-                    Random.Range(-terrainSize.x / 2f + 2f, terrainSize.x / 2f - 2f),
-                    Random.Range(-terrainSize.y / 2f + 2f, terrainSize.y / 2f - 2f)
+                    Random.Range(-terrainSize.x / 2f + marge,  // ← marge variable
+                                  terrainSize.x / 2f - marge),
+                    Random.Range(-terrainSize.y / 2f + marge,  // ← marge variable
+                                  terrainSize.y / 2f - marge)
                 );
 
-                // Vérifie que la position est assez loin des autres
                 bool tropProche = false;
                 foreach (Vector2 posExistante in positionsDejaUtilisees)
                 {
@@ -269,22 +270,18 @@ public class MaireGameManager : MonoBehaviour
                     }
                 }
 
-                if (!tropProche)
-                {
-                    trovee = true;
-                    break;
-                }
+                if (!tropProche) { trovee = true; break; }
             }
 
             if (!trovee)
-                Debug.LogWarning($"[Coraille] Impossible de trouver position pour coraille {i + 1}");
+                Debug.LogWarning($"[Coraille] Impossible position coraille {i + 1}");
 
             positionsDejaUtilisees.Add(pos);
 
             float angle = angles[Random.Range(0, angles.Length)];
             GameObject go = Instantiate(coraillePrefab,
-                                        new Vector3(pos.x, pos.y, 0),
-                                        Quaternion.Euler(0, 0, angle));
+                               new Vector3(pos.x, pos.y, 0),
+                               Quaternion.Euler(0, 0, angle));
             go.name = $"Coraille_{i + 1}";
 
             Coraille c = go.GetComponent<Coraille>();

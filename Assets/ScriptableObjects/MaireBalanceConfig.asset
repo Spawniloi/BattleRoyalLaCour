@@ -46,6 +46,9 @@ MonoBehaviour:
   terrainSize3J: {x: 17, y: 10.5}
   terrainSize4J: {x: 19, y: 10.5}
   distanceMinCorailles: 3
+  corailleMargesBords2J: 2
+  corailleMargesBords3J: 2
+  corailleMargesBords4J: 2
   roundDuration: 90
   mayorTimeTickRate: 0.1
   corailleCooldownDuration: 3.5
