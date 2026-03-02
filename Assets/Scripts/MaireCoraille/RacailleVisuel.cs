@@ -14,6 +14,9 @@ public class RacailleVisuel : MonoBehaviour
     public SpriteRenderer srQueuePoisson;
     public SpriteRenderer srTetePoisson;   // enfant Queue
 
+    [Header("Details Requin (couleur fixe)")]
+    public SpriteRenderer srDetailsRequin; // bouche + yeux — enfant de TeteRequin
+
     [Header("Renderers")]
     public SpriteRenderer srCorps;
     public SpriteRenderer srDossard;
@@ -71,7 +74,6 @@ public class RacailleVisuel : MonoBehaviour
             GetComponent<RacailleController>().playerID);
         Color coul = data.GetCouleurDossard();
 
-        // Requin — aileron + tête requin
         if (srAileronRequin != null)
         {
             srAileronRequin.color = coul;
@@ -83,7 +85,11 @@ public class RacailleVisuel : MonoBehaviour
             srTeteRequin.enabled = isMayor;
         }
 
-        // Poisson — queue + tête poisson
+        // Details requin — couleur fixe jaune, pas affecté par dossard
+        if (srDetailsRequin != null)
+            srDetailsRequin.enabled = isMayor; // visible seulement si maire
+                                               // PAS de .color = coul ici — garde sa couleur d'origine
+
         if (srQueuePoisson != null)
         {
             srQueuePoisson.color = coul;
