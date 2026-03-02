@@ -119,6 +119,53 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &224140194
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 224140195}
+  - component: {fileID: 224140196}
+  m_Layer: 0
+  m_Name: BallSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &224140195
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 224140194}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -3.5082011, y: -1.8121599, z: -0.2617699}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &224140196
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 224140194}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dbd55d4ee1178434ba093b2d09b2dedf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ballPrefab: {fileID: 411268170382777448, guid: 7ff4d543690475d42917916fd86633b5, type: 3}
+  spawnDelay: 3
+  mapSize: 20
 --- !u!1 &376941892
 GameObject:
   m_ObjectHideFlags: 0
@@ -1070,9 +1117,10 @@ GameObject:
   m_Component:
   - component: {fileID: 1431149610}
   - component: {fileID: 1431149615}
-  - component: {fileID: 1431149614}
   - component: {fileID: 1431149613}
   - component: {fileID: 1431149612}
+  - component: {fileID: 1431149616}
+  - component: {fileID: 1431149614}
   - component: {fileID: 1431149611}
   m_Layer: 0
   m_Name: Unit (1)
@@ -1244,6 +1292,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &1431149616
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1431149609}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1257a8aa855a6846a4c0d4b602f6ab6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  patrolSpeed: 3
 --- !u!1 &1519717691
 GameObject:
   m_ObjectHideFlags: 0
@@ -1342,9 +1403,10 @@ GameObject:
   - component: {fileID: 1583389682}
   - component: {fileID: 1583389681}
   - component: {fileID: 1583389679}
-  - component: {fileID: 1583389680}
   - component: {fileID: 1583389683}
   - component: {fileID: 1583389684}
+  - component: {fileID: 1583389685}
+  - component: {fileID: 1583389680}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -1515,6 +1577,19 @@ MonoBehaviour:
   teamID: 0
   isControlled: 0
   isAlive: 1
+--- !u!114 &1583389685
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1583389678}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1257a8aa855a6846a4c0d4b602f6ab6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  patrolSpeed: 3
 --- !u!1 &1595692617
 GameObject:
   m_ObjectHideFlags: 0
@@ -1525,9 +1600,10 @@ GameObject:
   m_Component:
   - component: {fileID: 1595692621}
   - component: {fileID: 1595692620}
-  - component: {fileID: 1595692619}
   - component: {fileID: 1595692618}
   - component: {fileID: 1595692622}
+  - component: {fileID: 1595692624}
+  - component: {fileID: 1595692619}
   - component: {fileID: 1595692623}
   m_Layer: 0
   m_Name: Unit
@@ -1699,6 +1775,19 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 4
+--- !u!114 &1595692624
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1595692617}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1257a8aa855a6846a4c0d4b602f6ab6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  patrolSpeed: 3
 --- !u!1 &1624627339
 GameObject:
   m_ObjectHideFlags: 0
@@ -1709,9 +1798,10 @@ GameObject:
   m_Component:
   - component: {fileID: 1624627340}
   - component: {fileID: 1624627345}
-  - component: {fileID: 1624627344}
   - component: {fileID: 1624627343}
   - component: {fileID: 1624627342}
+  - component: {fileID: 1624627346}
+  - component: {fileID: 1624627344}
   - component: {fileID: 1624627341}
   m_Layer: 0
   m_Name: Unit (2)
@@ -1883,6 +1973,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &1624627346
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1624627339}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1257a8aa855a6846a4c0d4b602f6ab6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  patrolSpeed: 3
 --- !u!1 &1680468055
 GameObject:
   m_ObjectHideFlags: 0
@@ -2296,9 +2399,10 @@ GameObject:
   m_Component:
   - component: {fileID: 1765477831}
   - component: {fileID: 1765477836}
-  - component: {fileID: 1765477835}
   - component: {fileID: 1765477834}
   - component: {fileID: 1765477833}
+  - component: {fileID: 1765477837}
+  - component: {fileID: 1765477835}
   - component: {fileID: 1765477832}
   m_Layer: 0
   m_Name: Unit (3)
@@ -2470,6 +2574,19 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &1765477837
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1765477830}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1257a8aa855a6846a4c0d4b602f6ab6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  patrolSpeed: 3
 --- !u!1 &1830793827
 GameObject:
   m_ObjectHideFlags: 0
@@ -3019,3 +3136,4 @@ SceneRoots:
   - {fileID: 563021316}
   - {fileID: 1734246674}
   - {fileID: 376941893}
+  - {fileID: 224140195}

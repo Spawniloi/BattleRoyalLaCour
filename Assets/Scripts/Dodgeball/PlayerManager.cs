@@ -60,7 +60,6 @@ public class PlayerManager : MonoBehaviour
             return;
         
         CurrentUnit.SetControlled(false);
-        print("OMG IM HERE");
         currentUnitIndex = units.IndexOf(target);
         CurrentUnit.SetControlled(true);
     }
@@ -69,20 +68,21 @@ public class PlayerManager : MonoBehaviour
     {
         Unit current = CurrentUnit;
         Vector2 direction = current.GetComponent<PlayerController>().lastDirection;
-        Vector2 origin = (Vector2)current.transform.position + direction * 1f;
-        //Vector2 origin = current.transform.position;
+        Vector2 origin = (Vector2)current.transform.position + direction * 1f; // offSetForce = 1f ( + direction * 1f to prevent a self cast)
+        //Vector2 origin = current.transform.position; // Self Cast Issue 
         
-
-        //RaycastHit2D hit = Physics2D.Raycast(origin, direction, 3f);
+        // --- RAY CAST ---
+        //RaycastHit2D hit = Physics2D.Raycast(origin, direction, 3f); 
         RaycastHit2D hit = Physics2D.CircleCast(origin, 0.5f, direction, 3f);
+        Debug.DrawRay(origin, direction * 3f, Color.green);
         
         
         if(hit.collider == null)
             return null;
 
         Unit unit = hit.collider.GetComponent<Unit>();
-        print($"Omg j'ai grab qq : {unit.name}" );
-
+        if (unit != null) print($"j'ai grab qq : {unit.name}");
+       
         if (unit != null && unit.teamID == current.teamID && unit != CurrentUnit)
         {
             return unit;
