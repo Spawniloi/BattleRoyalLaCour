@@ -16,14 +16,16 @@ public class TerrainManager : MonoBehaviour
     public Color couleurBordure = Color.white;
     public float epaisseurLigne = 0.08f;
 
-    [Header("Sprites cadre terrain")]
-    public SpriteRenderer cadreTerrain;  // le SpriteRenderer dans la scène
-    public Sprite cadre2J;       // sprite pour 2 joueurs
-    public Sprite cadre3J;       // sprite pour 3 joueurs
-    public Sprite cadre4J;       // sprite pour 4 joueurs
+    [Header("Cadres piscine — positionnes manuellement")]
+    public GameObject cadre2J;
+    public GameObject cadre3J;
+    public GameObject cadre4J;
 
     [Header("Offset terrain (compense bande UI en haut)")]
     public float offsetY = -0.36f;
+
+    [Header("Preview dans editeur")]
+    public int previewNbJoueurs = 2;
 
     public Vector2 TailleTerrain { get; private set; }
 
@@ -45,25 +47,10 @@ public class TerrainManager : MonoBehaviour
         SetMur(murDroit, new Vector3(w, offsetY, 0),
                           new Vector3(0.5f, taille.y + 1f, 1f));
 
-        // ── Sprite cadre selon nb joueurs ─────────────────────────────────────
-        if (cadreTerrain != null)
-        {
-            // Choisit le bon sprite
-            cadreTerrain.sprite = nbJoueurs switch
-            {
-                2 => cadre2J,
-                3 => cadre3J,
-                _ => cadre4J,
-            };
-
-            // Centre le cadre sur la zone de jeu
-            cadreTerrain.transform.position = new Vector3(0, offsetY, 1f);
-
-            // Passe derrière les joueurs
-            cadreTerrain.sortingOrder = -1;
-
-            Debug.Log($"[Terrain] Cadre {nbJoueurs}J appliqué");
-        }
+        // ── Cadres piscine ────────────────────────────────────────────────────
+        if (cadre2J != null) cadre2J.SetActive(nbJoueurs == 2);
+        if (cadre3J != null) cadre3J.SetActive(nbJoueurs == 3);
+        if (cadre4J != null) cadre4J.SetActive(nbJoueurs == 4);
 
         // ── Bordure LineRenderer ──────────────────────────────────────────────
         if (ligneBordure != null)
@@ -91,5 +78,34 @@ public class TerrainManager : MonoBehaviour
         if (mur == null) return;
         mur.position = pos;
         mur.localScale = scale;
+    }
+
+    // ── Gizmos éditeur ────────────────────────────────────────────────────────
+    void OnDrawGizmos()
+    {
+        if (config == null) return;
+
+        int nb = Application.isPlaying
+                       ? GameData.nombreJoueurs
+                       : previewNbJoueurs;
+        Vector2 taille = config.GetTerrainSize(nb);
+        float w = taille.x / 2f;
+        float h = taille.y / 2f;
+
+        // Murs — rouge
+        Gizmos.color = new Color(1f, 0.3f, 0.3f, 0.8f);
+        Gizmos.DrawWireCube(new Vector3(0, h + offsetY, 0),
+                            new Vector3(taille.x + 1f, 0.5f, 0f));
+        Gizmos.DrawWireCube(new Vector3(0, -h + offsetY, 0),
+                            new Vector3(taille.x + 1f, 0.5f, 0f));
+        Gizmos.DrawWireCube(new Vector3(-w, offsetY, 0),
+                            new Vector3(0.5f, taille.y + 1f, 0f));
+        Gizmos.DrawWireCube(new Vector3(w, offsetY, 0),
+                            new Vector3(0.5f, taille.y + 1f, 0f));
+
+        // Zone de jeu — vert
+        Gizmos.color = new Color(0.3f, 1f, 0.3f, 0.5f);
+        Gizmos.DrawWireCube(new Vector3(0, offsetY, 0),
+                            new Vector3(taille.x, taille.y, 0f));
     }
 }

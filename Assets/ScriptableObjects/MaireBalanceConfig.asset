@@ -42,9 +42,9 @@ MonoBehaviour:
   corailleDureeRotMax: 3.5
   coraillePauseRotMin: 0.3
   coraillePauseRotMax: 1
-  terrainSize2J: {x: 15, y: 10.5}
-  terrainSize3J: {x: 17, y: 10.5}
-  terrainSize4J: {x: 19, y: 10.5}
+  terrainSize2J: {x: 11, y: 10}
+  terrainSize3J: {x: 15, y: 10}
+  terrainSize4J: {x: 19, y: 10}
   distanceMinCorailles: 3
   corailleMargesBords2J: 2
   corailleMargesBords3J: 2
