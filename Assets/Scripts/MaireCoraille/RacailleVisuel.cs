@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+
 public class RacailleVisuel : MonoBehaviour
 {
     [Header("Sprites")]
@@ -22,18 +23,40 @@ public class RacailleVisuel : MonoBehaviour
     public SpriteRenderer srDossard;
     public SpriteRenderer srJambes;
     public SpriteRenderer srTete;
-    public SpriteRenderer srBouee; // ← même niveau que le dossard
+    public SpriteRenderer srBouee;
 
     [Header("Couleur jambes fixe")]
     public Color couleurJambes = new Color(0.1f, 0.15f, 0.3f);
 
     [Header("Animation rebond")]
-    public float scaleRebond = 1.3f;  // scale max
-    public float dureeRebond = 0.15f; // durée total
+    public float scaleRebond = 1.3f;
+    public float dureeRebond = 0.15f;
+
+    // ── Awake — cache tout par défaut ─────────────────────────────────────────
+    void Awake()
+    {
+        if (srCorps != null) srCorps.enabled = false;
+        if (srDossard != null) srDossard.enabled = false;
+        if (srJambes != null) srJambes.enabled = false;
+        if (srTete != null) srTete.enabled = false;
+        if (srBouee != null) srBouee.enabled = false;
+        if (srAileronRequin != null) srAileronRequin.enabled = false;
+        if (srTeteRequin != null) srTeteRequin.enabled = false;
+        if (srQueuePoisson != null) srQueuePoisson.enabled = false;
+        if (srTetePoisson != null) srTetePoisson.enabled = false;
+        if (srDetailsRequin != null) srDetailsRequin.enabled = false;
+    }
 
     // ── Applique les données joueur ───────────────────────────────────────────
     public void AppliquerData(PlayerData data)
     {
+        // Réactive les renderers principaux
+        if (srCorps != null) srCorps.enabled = true;
+        if (srDossard != null) srDossard.enabled = true;
+        if (srJambes != null) srJambes.enabled = true;
+        if (srTete != null) srTete.enabled = true;
+        if (srBouee != null) srBouee.enabled = true;
+
         if (srCorps != null)
         {
             srCorps.sprite = spriteCorps;
@@ -66,8 +89,6 @@ public class RacailleVisuel : MonoBehaviour
         if (srTeteRequin != null) srTeteRequin.color = coul;
         if (srQueuePoisson != null) srQueuePoisson.color = coul;
         if (srTetePoisson != null) srTetePoisson.color = coul;
-
-        // Bouée — même couleur que le dossard
         if (srBouee != null) srBouee.color = coul;
     }
 
@@ -106,6 +127,7 @@ public class RacailleVisuel : MonoBehaviour
         }
     }
 
+    // ── Animation rebond ──────────────────────────────────────────────────────
     public void JouerRebond()
     {
         StopCoroutine("EffetRebond");
@@ -114,8 +136,6 @@ public class RacailleVisuel : MonoBehaviour
 
     IEnumerator EffetRebond()
     {
-        Vector3 scaleBase = Vector3.one;
-
         // Scale up
         float t = 0f;
         while (t < dureeRebond / 2f)
@@ -136,6 +156,6 @@ public class RacailleVisuel : MonoBehaviour
             yield return null;
         }
 
-        transform.localScale = scaleBase;
+        transform.localScale = Vector3.one;
     }
 }

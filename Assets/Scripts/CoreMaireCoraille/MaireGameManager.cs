@@ -59,17 +59,26 @@ public class MaireGameManager : MonoBehaviour
         for (int i = 0; i < nb; i++)
         {
             Vector3 pos = spawnPoints[i].position;
-            GameObject go = Instantiate(racaillePrefab, pos, Quaternion.identity);
-            go.name = $"Racaille_J{i + 1}";
+
+            // Spawn désactivé
+            GameObject go = Instantiate(racaillePrefab, pos,
+                             Quaternion.identity);
+            go.SetActive(false); // ← désactive avant tout
 
             RacailleController rc = go.GetComponent<RacailleController>();
             rc.playerID = i + 1;
             rc.config = config;
             rc.gameManager = this;
 
-            // Assigne le playerID à l'InputHandler aussi
             InputHandler ih = go.GetComponent<InputHandler>();
-            if (ih != null) ih.playerID = i + 1;
+            if (ih != null)
+            {
+                ih.playerID = i + 1;
+                ih.config = config;
+            }
+
+            go.name = $"Racaille_J{i + 1}";
+            go.SetActive(true); // ← réactive après assignation
 
             joueursActifs.Add(rc);
             Debug.Log($"[Spawn] Racaille_J{i + 1} spawné");

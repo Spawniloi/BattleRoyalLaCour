@@ -58,9 +58,9 @@ MonoBehaviour:
   dashForce: 5
   dashDuree: 0.15
   dashCooldown: 0.5
-  dashKeyJ1: 304
-  dashKeyJ2: 109
-  dashKeyJ3: 101
+  dashKeyJ1: 101
+  dashKeyJ2: 32
+  dashKeyJ3: 111
   dashKeyJ4: 256
   itemRespawnDelai: 4
   itemNombreSimult: 1
