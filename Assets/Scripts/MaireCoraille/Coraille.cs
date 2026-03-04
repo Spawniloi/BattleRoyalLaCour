@@ -15,12 +15,14 @@ public class Coraille : MonoBehaviour
     public SpriteRenderer coteA_Corps;
     public SpriteRenderer coteA_Dossard;
     public SpriteRenderer coteA_Tete;
+    public SpriteRenderer coteA_Bouee;
 
     [Header("Visuels Cote B")]
     public SpriteRenderer coteB_Jambes;
     public SpriteRenderer coteB_Corps;
     public SpriteRenderer coteB_Dossard;
     public SpriteRenderer coteB_Tete;
+    public SpriteRenderer coteB_Bouee;
 
     [Header("Colliders")]
     public Collider2D colliderCoteA;
@@ -42,16 +44,17 @@ public class Coraille : MonoBehaviour
     public void InitVisuel()
     {
         AppliquerVisuelCote(slotA,
-            coteA_Jambes, coteA_Corps, coteA_Dossard, coteA_Tete);
+            coteA_Jambes, coteA_Corps, coteA_Dossard, coteA_Tete, coteA_Bouee);
         AppliquerVisuelCote(slotB,
-            coteB_Jambes, coteB_Corps, coteB_Dossard, coteB_Tete);
+            coteB_Jambes, coteB_Corps, coteB_Dossard, coteB_Tete, coteB_Bouee);
     }
 
     void AppliquerVisuelCote(RacailleController racaille,
         SpriteRenderer srJambes,
         SpriteRenderer srCorps,
         SpriteRenderer srDossard,
-        SpriteRenderer srTete)
+        SpriteRenderer srTete,
+        SpriteRenderer srBouee)
     {
         if (racaille == null) return;
 
@@ -84,9 +87,12 @@ public class Coraille : MonoBehaviour
                 data.indexTete < visuel.spritesTetes.Length &&
                 visuel.spritesTetes[data.indexTete] != null)
                 srTete.sprite = visuel.spritesTetes[data.indexTete];
-
             srTete.color = data.GetCouleurDossard();
         }
+
+        // Bouée — couleur dossard
+        if (srBouee != null)
+            srBouee.color = data.GetCouleurDossard();
     }
 
     // ── Rotation aleatoire ────────────────────────────────────────────────────
@@ -144,17 +150,8 @@ public class Coraille : MonoBehaviour
     // ── Tentative d'accrochage ────────────────────────────────────────────────
     public void TenterAccrochage(RacailleController racaille, bool entreParCoteA)
     {
-        if (racaille.isMayor)
-        {
-            Repulsion(racaille);
-            return;
-        }
-
-        if (enCooldown)
-        {
-            Repulsion(racaille);
-            return;
-        }
+        if (racaille.isMayor) { Repulsion(racaille); return; }
+        if (enCooldown) { Repulsion(racaille); return; }
 
         if (!ContientEquipe(racaille.playerID))
         {
@@ -181,6 +178,8 @@ public class Coraille : MonoBehaviour
     // ── Repulsion ─────────────────────────────────────────────────────────────
     void Repulsion(RacailleController racaille)
     {
+        racaille.GetComponent<RacailleVisuel>()?.JouerRebond();
+
         Vector2 dir = ((Vector2)racaille.transform.position
                      - (Vector2)transform.position).normalized;
 

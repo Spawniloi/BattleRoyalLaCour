@@ -190,30 +190,42 @@ public class RacailleController : MonoBehaviour
     // ── Collision avec autre racaille ─────────────────────────────────────────
     void OnCollisionEnter2D(Collision2D collision)
     {
+        // Rebond contre un coraille
+        if (collision.gameObject.GetComponent<Coraille>() != null)
+        {
+            visuel?.JouerRebond();
+            return;
+        }
+
+        // Rebond contre un autre joueur
         RacailleController autre =
             collision.gameObject.GetComponent<RacailleController>();
         if (autre == null) return;
-        if (autre == this) return;
 
-        // Maire touche poisson → transfert
-        if (isMayor && !autre.isMayor)
+        visuel?.JouerRebond();
+        autre.visuel?.JouerRebond();
+
+        // Transfert — seulement côté MAIRE pour éviter le double appel
+        if (isMayor && !autre.isMayor && transfertCooldown <= 0)
         {
-            if (isFrozen || isStunned || transfertCooldown > 0) return;
-            transfertCooldown = config.transfertCooldownDuree;
             gameManager?.TenterTransfert(this, autre);
             return;
         }
 
-        // Poisson touche poisson → knockback léger
+        // Knockback poisson-poisson — seulement si aucun des 2 n'est maire
         if (!isMayor && !autre.isMayor)
         {
-            Vector2 dir = (autre.transform.position
-                         - transform.position).normalized;
-            if (dir == Vector2.zero)
-                dir = Random.insideUnitCircle.normalized;
+            Vector2 dir = ((Vector2)transform.position
+                                 - (Vector2)autre.transform.position).normalized;
+            Rigidbody2D rbAutre = autre.GetComponent<Rigidbody2D>();
 
-            rb.AddForce(-dir * config.knockbackPoissonPoisson, ForceMode2D.Impulse);
+            rb.AddForce(dir * config.knockbackPoissonPoisson,
+                        ForceMode2D.Impulse);
+            rbAutre.AddForce(-dir * config.knockbackPoissonPoisson,
+                             ForceMode2D.Impulse);
+
             SyncVelocity(rb.linearVelocity);
+            autre.SyncVelocity(rbAutre.linearVelocity);
         }
     }
 

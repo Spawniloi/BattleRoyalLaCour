@@ -18,10 +18,11 @@ public class InputHandler : MonoBehaviour
         InteractPressed = false;
         DashPressed = false;
 
-        // ── Manette prioritaire ───────────────────────────────────────────────
+        // ── Manette prioritaire — si dispo, BLOQUE le clavier ────────────────────
         var manettes = Gamepad.all;
         if (playerID - 1 < manettes.Count)
         {
+            // Ce joueur a une manette — utilise SEULEMENT la manette
             var manette = manettes[playerID - 1];
             MoveInput = manette.leftStick.ReadValue();
 
@@ -30,15 +31,14 @@ public class InputHandler : MonoBehaviour
             if (manette.buttonSouth.wasPressedThisFrame)
                 InteractPressed = true;
 
-            // Dash manette = bouton ouest (carré/X)
             if (manette.buttonWest.wasPressedThisFrame)
                 DashPressed = true;
 
-            if (MoveInput != Vector2.zero || InteractPressed || DashPressed)
-                return;
+            // Manette trouvée — on sort, clavier ignoré
+            return;
         }
 
-        // ── Clavier fallback ──────────────────────────────────────────────────
+        // ── Clavier — seulement si PAS de manette pour ce joueur ─────────────────
         var kb = Keyboard.current;
         if (kb == null) return;
 
@@ -86,7 +86,7 @@ public class InputHandler : MonoBehaviour
             if (kb.numpad4Key.isPressed) x = -1f;
             if (kb.numpad6Key.isPressed) x = 1f;
             if (kb.numpad8Key.isPressed) y = 1f;
-            if (kb.numpad2Key.isPressed) y = -1f;
+            if (kb.numpad5Key.isPressed) y = -1f;
             MoveInput = new Vector2(x, y).normalized;
 
             if (config != null && Input.GetKeyDown(config.dashKeyJ4))
