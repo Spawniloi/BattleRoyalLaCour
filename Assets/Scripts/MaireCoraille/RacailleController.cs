@@ -331,6 +331,7 @@ public class RacailleController : MonoBehaviour
     public void AjouterMunitionDash()
     {
         munitionsDash++;
+        MaireAudioManager.Instance?.JouerCollecteDash();
         Debug.Log($"[Dash] J{playerID} ramasse une munition ! Total : {munitionsDash}");
     }
 
