@@ -17,6 +17,10 @@ public class SliderUI : MonoBehaviour
     public TextMeshProUGUI labelJoueur;
     public TextMeshProUGUI labelValeur;
 
+    [Header("Serviette de plage")]
+    public Image serviette;
+    public Sprite spriteServiette;
+
     [Header("Munitions Dash UI")]
     public Transform conteneurIcones;
     public Sprite spriteIconeDash;
@@ -60,6 +64,22 @@ public class SliderUI : MonoBehaviour
             }
             yield return new WaitForSeconds(0.2f);
         }
+
+        InitServiette();
+    }
+
+    // ── Init serviette ────────────────────────────────────────────────────────
+    void InitServiette()
+    {
+        if (serviette == null) return;
+
+        if (spriteServiette != null)
+            serviette.sprite = spriteServiette;
+
+        // Couleur du dossard du joueur
+        PlayerData data = GameData.GetJoueur(playerID);
+        if (data != null)
+            serviette.color = data.GetCouleurDossard();
     }
 
     // ── Update ────────────────────────────────────────────────────────────────
@@ -129,11 +149,13 @@ public class SliderUI : MonoBehaviour
             ico.transform.localPosition = new Vector3(
                 i * config.iconesDashEspacement, 0f, 0f);
 
-            var img = ico.AddComponent<UnityEngine.UI.Image>();
+            var img = ico.AddComponent<Image>();
             img.sprite = spriteIconeDash != null
-                ? spriteIconeDash
-                : SpriteFactory.Creer("etoile", new Color(1f, 0.85f, 0.1f));
+                               ? spriteIconeDash
+                               : SpriteFactory.Creer("etoile",
+                                 new Color(1f, 0.85f, 0.1f));
             img.color = Color.white;
+            img.preserveAspect = true;
 
             var rt = ico.GetComponent<RectTransform>();
             rt.sizeDelta = new Vector2(

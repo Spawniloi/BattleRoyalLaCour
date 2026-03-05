@@ -30,6 +30,7 @@ public class RacailleController : MonoBehaviour
 
     // Mouvement avec effet glace
     private Vector2 currentVelocity;
+    private bool etaitEnMouvement = false;
 
     // ── Awake ─────────────────────────────────────────────────────────────────
     void Awake()
@@ -76,6 +77,12 @@ public class RacailleController : MonoBehaviour
 
     void FixedUpdate()
     {
+        bool bouge = currentVelocity.magnitude > 0.3f;
+        if (bouge != etaitEnMouvement)
+        {
+            MaireAudioManager.Instance?.SetJoueurEnMouvement(bouge);
+            etaitEnMouvement = bouge;
+        }
         // Freeze/Stun bloquent les INPUTS mais pas le Rigidbody
         // → le knockback physique fonctionne toujours
         if (isFrozen || isStunned)
@@ -234,6 +241,7 @@ public class RacailleController : MonoBehaviour
         dashEnCours = true;
         munitionsDash--;
         dashCooldownActuel = config.dashCooldown;
+        MaireAudioManager.Instance?.JouerDash();
 
         // Direction du dash
         Vector2 dirDash = currentVelocity.normalized;

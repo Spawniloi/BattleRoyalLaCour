@@ -207,6 +207,8 @@ public class MaireGameManager : MonoBehaviour
         attaquant.SyncVelocity(-dir * config.knockbackTransfert);
         cible.SyncVelocity(dir * config.knockbackTransfert);
 
+        MaireAudioManager.Instance?.JouerTransfert();
+
         SetMayor(cible);
         Debug.Log($"[Transfert] J{attaquant.playerID} → J{cible.playerID}");
     }

@@ -33,6 +33,19 @@ public class Coraille : MonoBehaviour
     public bool enCooldown = false;
     public float cooldownRestant = 0f;
 
+    [Header("Ondulation rotation")]
+    public float intervalleOndeRot = 0.4f;
+    public float dureeOndeRot = 0.5f;
+    public float tailleOndeMaxRot = 1.5f;
+    public Color couleurOndeRot = new Color(0.5f, 0.85f, 1f, 0.35f);
+
+    [Header("Spawn ondes")]
+    public Transform spawnOndeA;
+    public Transform spawnOndeB;
+
+    private float tempsOndeRot = 0f;
+    private float anglePrec = 0f;
+
     private bool effetEnCours = false;
 
     void Start()
@@ -115,8 +128,18 @@ public class Coraille : MonoBehaviour
             while (t < duree)
             {
                 if (effetEnCours) { yield return null; continue; }
+
                 float angle = Mathf.LerpAngle(angleDepart, angleCible, t / duree);
                 transform.rotation = Quaternion.Euler(0f, 0f, angle);
+
+                // Ondulation pendant la rotation
+                tempsOndeRot += Time.deltaTime;
+                if (tempsOndeRot >= intervalleOndeRot)
+                {
+                    tempsOndeRot = 0f;
+                    StartCoroutine(SpawnOndulationCoraille());
+                }
+
                 t += Time.deltaTime;
                 yield return null;
             }
@@ -125,6 +148,103 @@ public class Coraille : MonoBehaviour
                 Random.Range(config.coraillePauseRotMin,
                              config.coraillePauseRotMax));
         }
+    }
+
+    IEnumerator SpawnOndulationCoraille()
+    {
+        // Lance 2 ondes — une par point de spawn
+        if (spawnOndeA != null)
+            StartCoroutine(AnimerOnde(spawnOndeA.position));
+        else
+            StartCoroutine(AnimerOnde(transform.position));
+
+        if (spawnOndeB != null)
+            StartCoroutine(AnimerOnde(spawnOndeB.position));
+        else
+            StartCoroutine(AnimerOnde(transform.position));
+
+        yield break;
+    }
+
+    IEnumerator AnimerOnde(Vector3 position)
+    {
+        GameObject onde = new GameObject("OndulationCoraille");
+        onde.transform.position = position;
+
+        MeshFilter mf = onde.AddComponent<MeshFilter>();
+        MeshRenderer mr = onde.AddComponent<MeshRenderer>();
+
+        mr.material = new Material(Shader.Find("Sprites/Default"));
+        mr.material.color = couleurOndeRot;
+        mr.sortingOrder = -5;
+        mf.mesh = CreerMeshAnneau(0.4f, 0.5f, 32);
+
+        float t = 0f;
+        while (t < dureeOndeRot)
+        {
+            if (onde == null) yield break;
+
+            float progress = t / dureeOndeRot;
+            float taille = Mathf.Lerp(0f, tailleOndeMaxRot, progress);
+            onde.transform.localScale = new Vector3(taille, taille, 1f);
+
+            Color c = couleurOndeRot;
+            c.a = Mathf.Lerp(couleurOndeRot.a, 0f, progress);
+            mr.material.color = c;
+
+            t += Time.deltaTime;
+            yield return null;
+        }
+
+        Destroy(onde);
+    }
+
+    Mesh CreerMeshAnneau(float rayonInterne, float rayonExterne, int segments)
+    {
+        Mesh mesh = new Mesh();
+        int nbVerts = segments * 2;
+
+        Vector3[] vertices = new Vector3[nbVerts];
+        int[] triangles = new int[segments * 6];
+        Color[] colors = new Color[nbVerts];
+
+        for (int i = 0; i < segments; i++)
+        {
+            float angle = (float)i / segments * Mathf.PI * 2f;
+            float cos = Mathf.Cos(angle);
+            float sin = Mathf.Sin(angle);
+
+            vertices[i * 2] = new Vector3(cos * rayonInterne,
+                                              sin * rayonInterne, 0);
+            vertices[i * 2 + 1] = new Vector3(cos * rayonExterne,
+                                              sin * rayonExterne, 0);
+            colors[i * 2] = Color.white;
+            colors[i * 2 + 1] = Color.white;
+        }
+
+        for (int i = 0; i < segments; i++)
+        {
+            int next = (i + 1) % segments;
+            int idx = i * 6;
+            int v0 = i * 2;
+            int v1 = i * 2 + 1;
+            int v2 = next * 2;
+            int v3 = next * 2 + 1;
+
+            triangles[idx] = v0;
+            triangles[idx + 1] = v1;
+            triangles[idx + 2] = v2;
+            triangles[idx + 3] = v2;
+            triangles[idx + 4] = v1;
+            triangles[idx + 5] = v3;
+        }
+
+        mesh.vertices = vertices;
+        mesh.triangles = triangles;
+        mesh.colors = colors;
+        mesh.RecalculateNormals();
+
+        return mesh;
     }
 
     // ── Collision physique corps ──────────────────────────────────────────────
@@ -207,6 +327,8 @@ public class Coraille : MonoBehaviour
         Rigidbody2D rb = poisson.GetComponent<Rigidbody2D>();
         rb.linearVelocity = Vector2.zero;
         rb.AddForce(dirEntree * config.propulsionForce, ForceMode2D.Impulse);
+
+        MaireAudioManager.Instance?.JouerFusion();
 
         StartCoroutine(EffetVisuelCoraille(dirEntree));
         StartCoroutine(DemarrerCooldown());
