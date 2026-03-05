@@ -1,7 +1,8 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 public static class GameData
 {
+    // ── Joueurs ───────────────────────────────────────────────────────────────
     public static int nombreJoueurs = 4;
 
     public static List<PlayerData> joueurs = new List<PlayerData>()
@@ -22,5 +23,21 @@ public static class GameData
         if (idx >= 0 && idx < joueurs.Count)
             return joueurs[idx];
         return new PlayerData { playerID = playerID };
+    }
+
+    // ── Partie en cours ───────────────────────────────────────────────────────
+    public static string jeuActuel = "MaireCoraille";
+    public static PartieData dernierePartie = null;
+
+    // ── Progression globale ───────────────────────────────────────────────────
+    public static int sucettesOr = 0;
+
+    // ── Historique toutes parties ─────────────────────────────────────────────
+    public static List<PartieData> historique = new List<PartieData>();
+
+    public static void AjouterPartie(PartieData partie)
+    {
+        dernierePartie = partie;
+        historique.Add(partie);
     }
 }

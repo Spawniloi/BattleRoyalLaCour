@@ -229,10 +229,32 @@ public class MaireGameManager : MonoBehaviour
     void TerminerPartie()
     {
         partieEnCours = false;
-        var gagnant = joueursActifs.OrderBy(j => j.sliderValue).First();
-        Debug.Log($"[FIN] Gagnant : {gagnant.name} (slider = {gagnant.sliderValue:F2})");
+
+        // Crée une partie basique sans StatsTracker pour l'instant
+        PartieData resultat = new PartieData();
+        resultat.jeuActuel = "MaireCoraille";
+        resultat.partieId = System.Guid.NewGuid().ToString();
+        resultat.nbJoueurs = GameData.nombreJoueurs;
+        resultat.dureePartie = config.roundDuration - tempsRestant;
+        resultat.gagnant = joueursActifs
+            .OrderBy(j => j.sliderValue).First().playerID;
+
         foreach (var j in joueursActifs)
-            Debug.Log($"  J{j.playerID} : slider = {j.sliderValue:F2}");
+        {
+            resultat.joueurs.Add(new JoueurResultat
+            {
+                playerID = j.playerID,
+                score = j.sliderValue,
+                stats = new StatsJoueur(),
+                titres = new System.Collections.Generic.List<string>()
+            });
+        }
+
+        GameData.AjouterPartie(resultat);
+        ResultatExporter.Instance?.Exporter(resultat);
+
+        UnityEngine.SceneManagement
+            .SceneManager.LoadScene("Scene_Resultats");
     }
 
     // Test rapide sans Hub
