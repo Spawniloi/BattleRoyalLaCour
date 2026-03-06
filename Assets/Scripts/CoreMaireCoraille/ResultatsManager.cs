@@ -8,6 +8,12 @@ using UnityEngine.UI;
 
 public class ResultatsManager : MonoBehaviour
 {
+    [Header("Ardoise fond")]
+    public Image ardoise;
+    public Sprite ardoiseMaireCoraille;
+    public Sprite ardoiseJeu2;
+    public Sprite ardoiseJeu3;
+
     [Header("Tailles texte")]
     public float tailleEntete = 28f;
     public float tailleJoueurs = 26f;
@@ -27,9 +33,6 @@ public class ResultatsManager : MonoBehaviour
     [Header("Espacement lignes")]
     public float hauteurLigne = 40f;
     public float delaiEntreLignes = 0.05f;
-
-    [Header("Ardoise fond")]
-    public Image ardoise;
 
     [Header("Tableau")]
     public RectTransform conteneurTableau;
@@ -73,6 +76,24 @@ public class ResultatsManager : MonoBehaviour
 
     void Start()
     {
+        if (ardoise != null)
+        {
+            switch (GameData.jeuActuel)
+            {
+                case "MaireCoraille":
+                    if (ardoiseMaireCoraille != null)
+                        ardoise.sprite = ardoiseMaireCoraille;
+                    break;
+                case "Jeu2":
+                    if (ardoiseJeu2 != null)
+                        ardoise.sprite = ardoiseJeu2;
+                    break;
+                case "Jeu3":
+                    if (ardoiseJeu3 != null)
+                        ardoise.sprite = ardoiseJeu3;
+                    break;
+            }
+        }
         partie = GameData.dernierePartie;
         if (partie == null) partie = GenererMock();
 

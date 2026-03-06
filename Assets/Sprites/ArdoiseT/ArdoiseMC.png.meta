@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 1ea2a9a71ceca9a42bd748ff31422721
+guid: bd5dc7d796dafe64a8cdb4a527b9cdd6
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 151720026424618394
-    second: Ardoise3_0
+      213: -8233761623369944401
+    second: ArdoiseMC_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,7 +113,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Ardoise3_0
+      name: ArdoiseMC_0
       rect:
         serializedVersion: 2
         x: 0
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a9d2a586f840b1200800000000000000
-      internalID: 151720026424618394
+      spriteID: fa27ac98d6dcbbd80800000000000000
+      internalID: -8233761623369944401
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Ardoise3_0: 151720026424618394
+      ArdoiseMC_0: -8233761623369944401
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
