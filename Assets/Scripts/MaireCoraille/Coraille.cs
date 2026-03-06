@@ -329,6 +329,7 @@ public class Coraille : MonoBehaviour
         rb.AddForce(dirEntree * config.propulsionForce, ForceMode2D.Impulse);
 
         MaireAudioManager.Instance?.JouerFusion();
+        StatsTracker.Instance?.OnPassageCoraille(poisson.playerID);
 
         StartCoroutine(EffetVisuelCoraille(dirEntree));
         StartCoroutine(DemarrerCooldown());
