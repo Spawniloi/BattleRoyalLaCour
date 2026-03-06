@@ -5,6 +5,8 @@ using UnityEngine.InputSystem;
 
 public class PlayerManager : MonoBehaviour
 {
+    [SerializeField] LayerMask unitLayer;
+
     // Unit List
     public List<Unit> units = new List<Unit>();
     int currentUnitIndex = 0;
@@ -19,14 +21,21 @@ public class PlayerManager : MonoBehaviour
     }
 
     private void Start()
+
     {
         Initialize();
+    }
+
+    private void Update()
+    {
+        DebugDeath();
     }
 
     void OnEnable()
     {
         controls.Enable();
         controls.Player.Switch.performed += ctx => SwitchUnit();
+        controls.Player.Throw.performed += ctx => ThrowBall();
     }
 
     void OnDisable()
@@ -45,24 +54,17 @@ public class PlayerManager : MonoBehaviour
     }
     
     public void SwitchUnit()
-    {
-        /*
-        units[currentUnitIndex].SetControlled(false);
-        currentUnitIndex++;
-        if(currentUnitIndex >= units.Count)
-            currentUnitIndex = 0;
-        units[currentUnitIndex].SetControlled(true);
-        */
-        
+    {   
         Unit target = GetUnitInFront();
 
-        if(target == null)
-            return;
+        if(target == null) return;
         
         CurrentUnit.SetControlled(false);
         currentUnitIndex = units.IndexOf(target);
         CurrentUnit.SetControlled(true);
     }
+
+
     
     Unit GetUnitInFront()
     {
@@ -73,20 +75,87 @@ public class PlayerManager : MonoBehaviour
         
         // --- RAY CAST ---
         //RaycastHit2D hit = Physics2D.Raycast(origin, direction, 3f); 
-        RaycastHit2D hit = Physics2D.CircleCast(origin, 0.5f, direction, 3f);
+        RaycastHit2D hit = Physics2D.CircleCast(origin, 0.5f, direction, 3f, unitLayer);
         Debug.DrawRay(origin, direction * 3f, Color.green);
         
         
-        if(hit.collider == null)
-            return null;
+        if(hit.collider == null) return null;
 
         Unit unit = hit.collider.GetComponent<Unit>();
         if (unit != null) print($"j'ai grab qq : {unit.name}");
-       
+
         if (unit != null && unit.teamID == current.teamID && unit != CurrentUnit)
-        {
-            return unit;
-        }    
+        { return unit; }
+        
         return null;
+    }
+
+    void ThrowBall()
+    {
+
+        Unit unit = CurrentUnit;
+        if (!unit.HasBall) return;
+
+        Ball ball = unit.heldBall;
+        ball.OwnerTeam = unit.teamID; 
+
+        Vector2 direction = unit.GetComponent<PlayerController>().lastDirection;
+
+        ball.Throw(direction);
+        unit.heldBall = null;
+    }
+
+    public void SwitchToClosestUnit(Unit deadUnit)
+    {
+        Unit[] units = FindObjectsOfType<Unit>();
+
+        Unit closest = null;
+        float dist = Mathf.Infinity;
+
+        foreach (Unit u in units)
+        {
+            if (u == deadUnit) continue;
+            if (u.teamID != deadUnit.teamID) continue;
+
+            float d = Vector2.Distance(deadUnit.transform.position, u.transform.position);
+
+            if (d < dist)
+            {
+                dist = d;
+                closest = u;
+            }
+        }
+
+        if (closest != null) SetControlledUnit(closest);
+    }
+
+
+    public void SetControlledUnit(Unit closest)
+    {
+        if (CurrentUnit != null) CurrentUnit.SetControlled(false); else return;
+        currentUnitIndex = units.IndexOf(closest);
+        CurrentUnit.SetControlled(true);
+    }
+
+
+
+    // EDITOR CHEATS
+    void Kill(Unit unit)
+    {
+        unit.isAlive = false;
+
+        print($"{unit.name} is Killed !");
+        SwitchToClosestUnit(unit);
+
+        Destroy(unit.gameObject);
+    }
+
+    private void DebugDeath()
+    {
+        if (Input.GetKeyDown(KeyCode.X))
+        {
+            Unit deadUnit = CurrentUnit;
+            Kill(deadUnit);
+        }
     }
 }

@@ -1,4 +1,5 @@
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 public class UnitAI : MonoBehaviour
 {
     Unit _unit;
@@ -13,11 +14,17 @@ public class UnitAI : MonoBehaviour
 
     private void Start()
     {
-        PickNewTarget();
+        //PickNewTarget();
+        ChooseNewTarget();
+
+
     }
+
+
     void Update()
     {
         if ( _unit.isControlled || !_unit.isAlive ) return;
+        if (_unit.HasBall) return;
         Patrol();
     }
 
@@ -25,7 +32,8 @@ public class UnitAI : MonoBehaviour
     {
         if (Vector2.Distance(transform.position, targetPosition) < 0.3f)
         {
-            PickNewTarget();
+            //PickNewTarget();
+            ChooseNewTarget();
         }
 
         transform.position = Vector2.MoveTowards(transform.position, targetPosition, patrolSpeed * Time.deltaTime);
@@ -44,6 +52,10 @@ public class UnitAI : MonoBehaviour
     {
         Vector2 random = Random.insideUnitCircle * 4f; // Random.insideUnitCircle will be replace by the Team Area in the future
         targetPosition = (Vector2)transform.position + random;
+    }
+    private void ChooseNewTarget()
+    {
+        targetPosition = _unit.zone.GetRandomPoint();
     }
 
     void OnDrawGizmos()
