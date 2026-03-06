@@ -6,7 +6,6 @@ using UnityEngine.InputSystem;
 public class PlayerManager : MonoBehaviour
 {
     [SerializeField] LayerMask unitLayer;
-
     // Unit List
     public List<Unit> units = new List<Unit>();
     int currentUnitIndex = 0;
@@ -14,6 +13,9 @@ public class PlayerManager : MonoBehaviour
     
     // Player Input
     PlayerControls controls;
+
+    // Teams
+    public int teamID;
 
     void Awake()
     {
@@ -23,7 +25,13 @@ public class PlayerManager : MonoBehaviour
     private void Start()
 
     {
+        var playerInput = GetComponentInChildren<PlayerInput>();
+
+        Debug.Log("Player " + playerInput.playerIndex + " device: " + playerInput.devices[0]);
+
         Initialize();
+        TeamInitialize();
+        //OldInitialize();
     }
 
     private void Update()
@@ -43,16 +51,35 @@ public class PlayerManager : MonoBehaviour
         controls.Disable();
     }
     
-    public void Initialize()
+    void OldInitialize()
     {
-        for(int i = 0; i < units.Count; i++)
+        for (int i = 0; i < units.Count; i++)
         {
             units[i].SetControlled(false);
         }
-        
+
         units[currentUnitIndex].SetControlled(true);
     }
-    
+    public void Initialize()
+    {
+        PlayerInput input = GetComponentInChildren<PlayerInput>(); 
+        if (input.playerIndex == 0) teamID = 0;
+        if (input.playerIndex == 1) teamID = 1;
+    }
+
+    private void TeamInitialize()
+    {
+        Unit[] allUnits = GetComponentsInChildren<Unit>();
+
+        foreach (Unit u in allUnits)
+        {
+            u.teamID = teamID;
+            units.Add(u);
+        }
+        SetControlledUnit(units[0]);
+        //if (units[0] != null) units[0].SetControlled(true); else Debug.LogError("Team Initialize Failed, units[0] is null");
+    }
+
     public void SwitchUnit()
     {   
         Unit target = GetUnitInFront();
