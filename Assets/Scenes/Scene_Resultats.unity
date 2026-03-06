@@ -382,7 +382,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -4543022220842945641, guid: 47964faa1596e754f81d3f6978bcd53e, type: 3}
+  m_Sprite: {fileID: 151720026424618394, guid: 1ea2a9a71ceca9a42bd748ff31422721, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -646,7 +646,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -299, y: -317}
+  m_AnchoredPosition: {x: -241, y: -317}
   m_SizeDelta: {x: 200, y: 200}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &824662834
@@ -779,10 +779,10 @@ MonoBehaviour:
   tailleJoueurs: 50
   tailleSucette: 50
   colLabel: 0
-  colJ1: 300
-  colJ2: 450
-  colJ3: 600
-  colJ4: 750
+  colJ1: 310
+  colJ2: 510
+  colJ3: 710
+  colJ4: 910
   largeurLabel: 180
   largeurValeur: 100
   hauteurLigne: 150
@@ -795,6 +795,7 @@ MonoBehaviour:
   spawn3e: {fileID: 1974054949}
   spawn4e: {fileID: 1502363200}
   podiumVisuelPrefab: {fileID: 8991821531559601163, guid: 6a7583c6b5ae23049ba92d5427806dfb, type: 3}
+  echellePodium: 3
   prefabSucetteOr: {fileID: 0}
   conteneurSucette: {fileID: 824662833}
   btnContinuer: {fileID: 215132784}
