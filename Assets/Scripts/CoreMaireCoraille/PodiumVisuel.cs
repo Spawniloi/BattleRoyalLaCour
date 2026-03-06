@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class PodiumVisuel : MonoBehaviour
@@ -43,7 +43,8 @@ public class PodiumVisuel : MonoBehaviour
                 data.indexTete < spritesTetes.Length &&
                 spritesTetes[data.indexTete] != null)
                 imgTete.sprite = spritesTetes[data.indexTete];
-            imgTete.color = data.GetCouleurPeau();
+
+            imgTete.color = data.GetCouleurDossard(); // ← remplace GetCouleurPeau()
         }
 
         if (imgBouee != null)

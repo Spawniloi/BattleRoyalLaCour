@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -21,6 +20,10 @@ public class ResultatsManager : MonoBehaviour
     public float colJ3 = 420f;
     public float colJ4 = 530f;
 
+    [Header("Largeur colonnes")]
+    public float largeurLabel = 180f;
+    public float largeurValeur = 100f;
+
     [Header("Espacement lignes")]
     public float hauteurLigne = 40f;
     public float delaiEntreLignes = 0.05f;
@@ -37,7 +40,10 @@ public class ResultatsManager : MonoBehaviour
     public Transform spawn2e;
     public Transform spawn3e;
     public Transform spawn4e;
-    public GameObject racaillePrefab;
+    public GameObject podiumVisuelPrefab;
+
+    [Header("Podium — taille prefabs")]
+    public float echellePodium = 2f; // ← ajuste dans Inspector
 
     [Header("Sucette or")]
     public GameObject prefabSucetteOr;
@@ -70,8 +76,9 @@ public class ResultatsManager : MonoBehaviour
         partie = GameData.dernierePartie;
         if (partie == null) partie = GenererMock();
 
+        // Tableau — trié par playerID
         classes = partie.joueurs
-            .OrderByDescending(j => j.score)
+            .OrderBy(j => j.playerID)
             .ToList();
 
         btnContinuer?.onClick.AddListener(Continuer);
@@ -162,13 +169,12 @@ public class ResultatsManager : MonoBehaviour
             }
 
             yield return StartCoroutine(EcrireParallele(tmps, textes));
-
             ligneActuelle++;
             yield return new WaitForSeconds(delaiEntreLignes);
         }
     }
 
-    // ── Crée une cellule à position absolue ───────────────────────────────────
+    // ── Cellule à position absolue ────────────────────────────────────────────
     TextMeshProUGUI CreerCell(Color couleur, float taille, float posX)
     {
         GameObject go = new GameObject("Cell");
@@ -179,9 +185,10 @@ public class ResultatsManager : MonoBehaviour
         rt.anchorMax = new Vector2(0, 1);
         rt.pivot = new Vector2(0, 1);
         rt.anchoredPosition = new Vector2(
-            posX,
-            -ligneActuelle * hauteurLigne);
-        rt.sizeDelta = new Vector2(200f, hauteurLigne);
+            posX, -ligneActuelle * hauteurLigne);
+        rt.sizeDelta = new Vector2(
+            posX == colLabel ? largeurLabel : largeurValeur,
+            hauteurLigne);
 
         TextMeshProUGUI tmp = go.AddComponent<TextMeshProUGUI>();
         if (fonteCraie != null) tmp.font = fonteCraie;
@@ -222,39 +229,39 @@ public class ResultatsManager : MonoBehaviour
     // ── Podium ────────────────────────────────────────────────────────────────
     IEnumerator AnimerPodium()
     {
+        // Tri par score — plus faible en premier
+        List<JoueurResultat> parScore = partie.joueurs
+            .OrderBy(j => j.score)
+            .ThenBy(j => j.stats.tempsMaire)
+            .ToList();
+
         Transform[] spawns = { spawn1er, spawn2e, spawn3e, spawn4e };
 
-        for (int i = 0; i < classes.Count; i++)
+        for (int i = 0; i < parScore.Count; i++)
         {
             if (i >= spawns.Length || spawns[i] == null) continue;
 
-            JoueurResultat jr = classes[i];
+            JoueurResultat jr = parScore[i];
             Transform pos = spawns[i];
 
             GameObject go = Instantiate(
-                racaillePrefab,
+                podiumVisuelPrefab,
                 pos.position,
                 Quaternion.identity);
 
-            go.transform.SetParent(pos);
-            go.transform.localPosition = new Vector3(0, 0.5f, 0);
+            go.transform.SetParent(pos, false);
+            go.transform.localPosition = Vector3.zero;
             go.transform.localScale = Vector3.zero;
 
-            RacailleController rc = go.GetComponent<RacailleController>();
-            RacailleVisuel rv = go.GetComponent<RacailleVisuel>();
-
-            if (rc != null) rc.playerID = jr.playerID;
-
             PlayerData data = GameData.GetJoueur(jr.playerID);
-            rv?.AppliquerData(data);
-            rv?.SetRoleVisuel(false);
+            PodiumVisuel pv = go.GetComponent<PodiumVisuel>();
 
-            if (rc != null) rc.enabled = false;
-            InputHandler ih = go.GetComponent<InputHandler>();
-            if (ih != null) ih.enabled = false;
+            if (pv != null && data != null)
+                pv.AppliquerData(data);
 
             yield return StartCoroutine(
-                ScaleUpBounce(go.transform, Vector3.one * 1.8f, 0.4f));
+    ScaleUpBounce(go.transform,
+    Vector3.one * echellePodium, 0.4f));
 
             yield return new WaitForSeconds(0.2f);
         }
@@ -282,7 +289,12 @@ public class ResultatsManager : MonoBehaviour
     {
         if (conteneurSucette == null) yield break;
 
-        JoueurResultat gagnant = classes[0];
+        // Gagnant = score le plus haut
+        JoueurResultat gagnant = partie.joueurs
+            .OrderByDescending(j => j.score)
+            .ThenByDescending(j => j.stats.tempsMaire)
+            .First();
+
         PlayerData dataGagnant = GameData.GetJoueur(gagnant.playerID);
         Color coulGagnant = dataGagnant != null
             ? dataGagnant.GetCouleurDossard() : couleurOr;
@@ -300,7 +312,6 @@ public class ResultatsManager : MonoBehaviour
         tmp.alignment = TextAlignmentOptions.Center;
         tmp.text = "";
 
-        // Écrit lettre par lettre
         string texteBrut =
             $"J{gagnant.playerID} gagne une sucette en OR !";
 
@@ -311,7 +322,6 @@ public class ResultatsManager : MonoBehaviour
             yield return new WaitForSeconds(vitesseEcriture * 0.5f);
         }
 
-        // Applique couleur du gagnant sur son nom
         tmp.text =
             $"<color=#{hex}>J{gagnant.playerID}</color>" +
             " gagne une sucette en OR !";
