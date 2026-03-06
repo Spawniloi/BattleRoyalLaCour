@@ -3,30 +3,12 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
-    PlayerControls controls;
 
     Vector2 moveInput;
     public Vector2 lastDirection = Vector2.right;
 
     public float speed = 5f;
 
-    void Awake()
-    {
-        controls = new PlayerControls();
-
-        controls.Player.Move.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
-        controls.Player.Move.canceled += ctx => moveInput = Vector2.zero;
-    }
-
-    void OnEnable()
-    {
-        controls.Enable();
-    }
-
-    void OnDisable()
-    {
-        controls.Disable();
-    }
 
     void Update()
     {
@@ -43,7 +25,11 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void Move()
+    public void OnMove(InputAction.CallbackContext context)
+    {
+        moveInput = context.ReadValue<Vector2>();
+    }
+    public void Move()
     {
         Vector3 movement = new Vector3(moveInput.x, moveInput.y, 0);
         transform.position += movement * speed * Time.deltaTime;

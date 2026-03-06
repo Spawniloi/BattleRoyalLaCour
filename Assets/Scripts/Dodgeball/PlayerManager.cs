@@ -14,6 +14,7 @@ public class PlayerManager : MonoBehaviour
     // Player Input
     PlayerControls controls;
 
+
     // Teams
     public int teamID;
 
@@ -27,7 +28,8 @@ public class PlayerManager : MonoBehaviour
     {
         var playerInput = GetComponentInChildren<PlayerInput>();
 
-        Debug.Log("Player " + playerInput.playerIndex + " device: " + playerInput.devices[0]);
+        Debug.Log("Player " + playerInput.playerIndex +
+                  " device: " + playerInput.devices[0]);
 
         Initialize();
         TeamInitialize();
