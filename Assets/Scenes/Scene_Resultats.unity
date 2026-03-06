@@ -382,7 +382,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 151720026424618394, guid: 1ea2a9a71ceca9a42bd748ff31422721, type: 3}
+  m_Sprite: {fileID: -8233761623369944401, guid: bd5dc7d796dafe64a8cdb4a527b9cdd6, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -775,6 +775,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f9d9290592fb484487c9651b928a904, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ardoise: {fileID: 254220947}
+  ardoiseMaireCoraille: {fileID: -8233761623369944401, guid: bd5dc7d796dafe64a8cdb4a527b9cdd6, type: 3}
+  ardoiseJeu2: {fileID: 0}
+  ardoiseJeu3: {fileID: 0}
   tailleEntete: 50
   tailleJoueurs: 50
   tailleSucette: 50
@@ -787,7 +791,6 @@ MonoBehaviour:
   largeurValeur: 100
   hauteurLigne: 150
   delaiEntreLignes: 0.2
-  ardoise: {fileID: 254220947}
   conteneurTableau: {fileID: 637564565}
   fonteCraie: {fileID: 0}
   spawn1er: {fileID: 1732562249}
