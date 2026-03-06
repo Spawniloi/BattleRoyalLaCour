@@ -201,6 +201,7 @@ public class RacailleController : MonoBehaviour
         if (collision.gameObject.GetComponent<Coraille>() != null)
         {
             visuel?.JouerRebond();
+            StatsTracker.Instance?.OnRebondCoraille(playerID);
             return;
         }
 
@@ -208,7 +209,7 @@ public class RacailleController : MonoBehaviour
         RacailleController autre =
             collision.gameObject.GetComponent<RacailleController>();
         if (autre == null) return;
-
+        StatsTracker.Instance?.OnRebondJoueur(playerID);
         visuel?.JouerRebond();
         autre.visuel?.JouerRebond();
 
@@ -242,6 +243,7 @@ public class RacailleController : MonoBehaviour
         munitionsDash--;
         dashCooldownActuel = config.dashCooldown;
         MaireAudioManager.Instance?.JouerDash();
+        StatsTracker.Instance?.OnDashUtilise();
 
         // Direction du dash
         Vector2 dirDash = currentVelocity.normalized;
@@ -332,6 +334,7 @@ public class RacailleController : MonoBehaviour
     {
         munitionsDash++;
         MaireAudioManager.Instance?.JouerCollecteDash();
+        StatsTracker.Instance?.OnDashCollecte();
         Debug.Log($"[Dash] J{playerID} ramasse une munition ! Total : {munitionsDash}");
     }
 

@@ -48,8 +48,18 @@ public class MaireGameManager : MonoBehaviour
         tempsRestant = config.roundDuration;
         terrainManager?.InitTerrain(GameData.nombreJoueurs);
         sliderUIManager?.InitSliders(GameData.nombreJoueurs);
+        
         SpawnerJoueurs();
+
+        StatsTracker.Instance?.Init(joueursActifs);
     }
+
+    void Update()
+    {
+        if (partieEnCours)
+            StatsTracker.Instance?.Tick(joueursActifs);
+    }
+
 
     void SpawnerJoueurs()
     {
@@ -230,28 +240,43 @@ public class MaireGameManager : MonoBehaviour
     {
         partieEnCours = false;
 
-        // Crée une partie basique sans StatsTracker pour l'instant
-        PartieData resultat = new PartieData();
-        resultat.jeuActuel = "MaireCoraille";
-        resultat.partieId = System.Guid.NewGuid().ToString();
-        resultat.nbJoueurs = GameData.nombreJoueurs;
-        resultat.dureePartie = config.roundDuration - tempsRestant;
-        resultat.gagnant = joueursActifs
-            .OrderBy(j => j.sliderValue).First().playerID;
+        PartieData resultat = StatsTracker.Instance != null
+            ? StatsTracker.Instance.CalculerResultats(
+                joueursActifs,
+                GameData.nombreJoueurs,
+                config.roundDuration - tempsRestant)
+            : null;
 
-        foreach (var j in joueursActifs)
+        // Fallback si pas de StatsTracker
+        if (resultat == null)
         {
-            resultat.joueurs.Add(new JoueurResultat
+            resultat = new PartieData();
+            resultat.jeuActuel = "MaireCoraille";
+            resultat.partieId = System.Guid.NewGuid().ToString();
+            resultat.nbJoueurs = GameData.nombreJoueurs;
+            resultat.dureePartie = config.roundDuration - tempsRestant;
+
+            foreach (var j in joueursActifs)
             {
-                playerID = j.playerID,
-                score = j.sliderValue,
-                stats = new StatsJoueur(),
-                titres = new System.Collections.Generic.List<string>()
-            });
+                resultat.joueurs.Add(new JoueurResultat
+                {
+                    playerID = j.playerID,
+                    score = j.sliderValue,
+                    stats = new StatsJoueur
+                    {
+                        tempsMaire = j.sliderValue
+                    },
+                    titres = new System.Collections.Generic.List<string>()
+                });
+            }
+
+            resultat.gagnant = joueursActifs
+                .OrderByDescending(j => j.sliderValue)
+                .First().playerID;
         }
 
         GameData.AjouterPartie(resultat);
-        ResultatExporter.Instance?.Exporter(resultat);
+        FindFirstObjectByType<ResultatExporter>()?.Exporter(resultat);
 
         UnityEngine.SceneManagement
             .SceneManager.LoadScene("Scene_Resultats");
