@@ -73,6 +73,7 @@ public class ResultatsManager : MonoBehaviour
     private PartieData partie;
     private List<JoueurResultat> classes;
     private int ligneActuelle = 0;
+    private bool dejàEnvoye = false;
 
     void Start()
     {
@@ -380,17 +381,34 @@ public class ResultatsManager : MonoBehaviour
 
     // ── Boutons ───────────────────────────────────────────────────────────────
     void Continuer()
-        => SceneManager.LoadScene("Scene_MaireCoraille");
+    {
+        EnvoyerDonnees();
+        SceneManager.LoadScene("Scene_MaireCoraille");
+    }
 
     void RetourMenu()
-        => SceneManager.LoadScene("Scene_Menu");
+    {
+        EnvoyerDonnees();
+        SceneManager.LoadScene("Scene_Menu");
+    }
 
     void Quitter()
     {
+        EnvoyerDonnees();
         Application.Quit();
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #endif
+    }
+
+    void EnvoyerDonnees()
+    {
+        if (dejàEnvoye) return; // ← évite le double envoi
+        dejàEnvoye = true;
+
+        GoogleSheetsExporter exporter =
+            FindFirstObjectByType<GoogleSheetsExporter>();
+        exporter?.Exporter(partie);
     }
 
     // ── Mock pour tester ──────────────────────────────────────────────────────

@@ -277,6 +277,7 @@ public class MaireGameManager : MonoBehaviour
 
         GameData.AjouterPartie(resultat);
         FindFirstObjectByType<ResultatExporter>()?.Exporter(resultat);
+        FindFirstObjectByType<GoogleSheetsExporter>()?.Exporter(resultat);
 
         UnityEngine.SceneManagement
             .SceneManager.LoadScene("Scene_Resultats");
