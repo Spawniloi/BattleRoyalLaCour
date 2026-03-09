@@ -1,16 +1,19 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.SceneManagement;
-using UnityEngine.InputSystem;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.ComponentModel;
 using TMPro;
-using System.Collections;
+using Unity.VisualScripting;
+using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class PanelConfigManager : MonoBehaviour
 {
     [Header("Panel")]
     public GameObject panelConfig;
 
-    [Header("Joueurs")]
+    [Header("Joueurs — boutons")]
     public Button btn2J;
     public Button btn3J;
     public Button btn4J;
@@ -25,16 +28,26 @@ public class PanelConfigManager : MonoBehaviour
     [Header("Mode test")]
     public Button btnModeTest;
 
-    [Header("Boutons")]
+    [Header("Boutons action")]
     public Button btnRetour;
     public Button btnContinuer;
 
     [Header("Avertissement")]
     public TextMeshProUGUI txtAvertissement;
 
-    [Header("Couleurs")]
-    public Color couleurNormal = Color.white;
-    public Color couleurSelectionne = new Color(1f, 0.84f, 0f, 1f);
+    [Header("Style boutons joueurs")]
+    public BoutonStylee styleBtn2J;
+    public BoutonStylee styleBtn3J;
+    public BoutonStylee styleBtn4J;
+
+    [Header("Style boutons action")]
+    public BoutonStylee styleBtnModeTest;
+    public BoutonStylee styleBtnRetour;
+    public BoutonStylee styleBtnContinuer;
+
+    [Header("Navigation")]
+    public float echelleNormal = 1f;
+    public float echelleSelect = 1.1f;
 
     [Header("Audio")]
     public AudioSource sourceAudio;
@@ -46,9 +59,14 @@ public class PanelConfigManager : MonoBehaviour
     private int nbManches = 3;
     private bool modeTest = false;
 
+    // Navigation dans le panel
+    private List<Button> boutonsNav = new List<Button>();
+    private List<BoutonStylee> stylesNav = new List<BoutonStylee>();
+    private int indexNav = 0;
+    private bool navActif = false;
+
     void Awake()
     {
-        // Panel fermé au départ
         panelConfig?.SetActive(false);
     }
 
@@ -70,52 +88,119 @@ public class PanelConfigManager : MonoBehaviour
         // Mode test
         btnModeTest?.onClick.AddListener(ToggleModeTest);
 
-        // Retour / Continuer
+        // Action
         btnRetour?.onClick.AddListener(Fermer);
         btnContinuer?.onClick.AddListener(Continuer);
 
-        // Visuel initial
-        nbJoueurs = 2;
+        // Navigation manette — ordre des boutons
+        boutonsNav.Add(btnRetour);
+        boutonsNav.Add(btnContinuer);
+        stylesNav.Add(styleBtnRetour);
+        stylesNav.Add(styleBtnContinuer);
+
         MettreAJourBoutonsJoueurs();
         MasquerAvertissement();
     }
 
-    // ── Ouvre le panel ────────────────────────────────────────────────────────
+    // ── Ouvre ────────────────────────────────────────────────────────────────
     public void Ouvrir()
     {
         panelConfig?.SetActive(true);
+        nbJoueurs = 2;
         MettreAJourBoutonsJoueurs();
         MasquerAvertissement();
+        navActif = true;
+        indexNav = 1; // Continuer sélectionné par défaut
+        SurlígnerNav(indexNav);
     }
 
-    // ── Ferme le panel ────────────────────────────────────────────────────────
+    // ── Ferme ────────────────────────────────────────────────────────────────
     public void Fermer()
     {
-        if (sourceAudio != null && sfxRetour != null)
-            sourceAudio.PlayOneShot(sfxRetour);
-
+        JouerSFX(sfxRetour);
+        navActif = false;
         panelConfig?.SetActive(false);
     }
 
-    // ── Sélection joueurs ─────────────────────────────────────────────────────
+    // ── Update — navigation manette ───────────────────────────────────────────
+    void Update()
+    {
+        if (!navActif) return;
+
+        var kb = Keyboard.current;
+        var gp = Gamepad.all.Count > 0 ? Gamepad.all[0] : null;
+
+        bool gauche = false, droite = false, valider = false;
+        float sliderDelta = 0f;
+
+        if (kb != null)
+        {
+            gauche = kb.leftArrowKey.wasPressedThisFrame;
+            droite = kb.rightArrowKey.wasPressedThisFrame;
+            valider = kb.enterKey.wasPressedThisFrame
+                   || kb.spaceKey.wasPressedThisFrame;
+
+            // Slider avec Z/S
+            if (kb.zKey.isPressed || kb.upArrowKey.isPressed)
+                sliderDelta = 0.1f;
+            if (kb.sKey.isPressed || kb.downArrowKey.isPressed)
+                sliderDelta = -0.1f;
+        }
+
+        if (gp != null)
+        {
+            gauche = gauche || gp.dpad.left.wasPressedThisFrame;
+            droite = droite || gp.dpad.right.wasPressedThisFrame;
+            valider = valider || gp.buttonSouth.wasPressedThisFrame;
+
+            // Slider avec stick gauche
+            sliderDelta += gp.leftStick.y.ReadValue() * Time.deltaTime * 3f;
+        }
+
+        if (gauche) Naviguer(-1);
+        if (droite) Naviguer(1);
+        if (valider) ValiderNav();
+
+        // Slider
+        if (!modeTest && Mathf.Abs(sliderDelta) > 0.01f)
+            sliderManches.value += sliderDelta;
+    }
+
+    void Naviguer(int dir)
+    {
+        indexNav = (indexNav + dir + boutonsNav.Count) % boutonsNav.Count;
+        SurlígnerNav(indexNav);
+        JouerSFX(sfxFocus);
+    }
+
+    void ValiderNav()
+    {
+        boutonsNav[indexNav]?.onClick.Invoke();
+    }
+
+    void SurlígnerNav(int index)
+    {
+        for (int i = 0; i < stylesNav.Count; i++)
+            stylesNav[i]?.SetSelectionne(i == index);
+    }
+
+    // ── Joueurs ───────────────────────────────────────────────────────────────
     void SelectionnerJoueurs(int nb)
     {
         nbJoueurs = nb;
         MettreAJourBoutonsJoueurs();
         MasquerAvertissement();
-
-        if (sourceAudio != null && sfxFocus != null)
-            sourceAudio.PlayOneShot(sfxFocus);
+        JouerSFX(sfxFocus);
     }
 
     void MettreAJourBoutonsJoueurs()
     {
-        SurlígnerBouton(btn2J, nbJoueurs == 2);
-        SurlígnerBouton(btn3J, nbJoueurs == 3);
-        SurlígnerBouton(btn4J, nbJoueurs == 4);
+        styleBtn2J?.SetSelectionne(nbJoueurs == 2);
+        styleBtn3J?.SetSelectionne(nbJoueurs == 3);
+        styleBtn4J?.SetSelectionne(nbJoueurs == 4);
     }
 
-    // ── Slider manches ────────────────────────────────────────────────────────
+    // ── Slider ────────────────────────────────────────────────────────────────
     void OnSliderChange(float valeur)
     {
         nbManches = (int)valeur;
@@ -125,28 +210,19 @@ public class PanelConfigManager : MonoBehaviour
     void MettreAJourTexteManches()
     {
         if (txtManches == null) return;
-
-        if (modeTest)
-            txtManches.text = "Mode test — pas de classement";
-        else
-            txtManches.text = $"Manches : {nbManches}";
+        txtManches.text = modeTest
+            ? "Mode test — pas de classement"
+            : $"Manches : {nbManches}";
     }
 
     // ── Mode test ─────────────────────────────────────────────────────────────
     void ToggleModeTest()
     {
         modeTest = !modeTest;
-
-        // Désactive le slider en mode test
         sliderManches.interactable = !modeTest;
-
-        // Visuel bouton mode test
-        SurlígnerBouton(btnModeTest, modeTest);
-
+        styleBtnModeTest?.SetSelectionne(modeTest);
         MettreAJourTexteManches();
-
-        if (sourceAudio != null && sfxFocus != null)
-            sourceAudio.PlayOneShot(sfxFocus);
+        JouerSFX(sfxFocus);
     }
 
     // ── Continuer ─────────────────────────────────────────────────────────────
@@ -154,23 +230,19 @@ public class PanelConfigManager : MonoBehaviour
     {
         if (nbJoueurs < 2)
         {
-            AfficherAvertissement("Sélectionne au moins 2 joueurs !");
+            AfficherAvertissement("Selectionne au moins 2 joueurs !");
             return;
         }
 
-        if (sourceAudio != null && sfxValider != null)
-            sourceAudio.PlayOneShot(sfxValider);
+        JouerSFX(sfxValider);
 
-        // Enregistre dans GameData
         GameData.nombreJoueurs = nbJoueurs;
 
-        // Démarre la session
         if (GameSessionManager.Instance != null)
         {
             string mode = modeTest ? "entrainement" : "manche";
             int manches = modeTest ? 1 : nbManches;
 
-            // Jeux par défaut — sera modifié dans Scene_ChoixJeu
             GameSessionManager.Instance.DemarrerSession(
                 mode,
                 manches,
@@ -179,6 +251,7 @@ public class PanelConfigManager : MonoBehaviour
                 true);
         }
 
+        navActif = false;
         panelConfig?.SetActive(false);
         SceneManager.LoadScene("Scene_ChoixJeu");
     }
@@ -197,19 +270,9 @@ public class PanelConfigManager : MonoBehaviour
         txtAvertissement.enabled = false;
     }
 
-    // ── Visuel bouton surligné ────────────────────────────────────────────────
-    void SurlígnerBouton(Button btn, bool actif)
+    void JouerSFX(AudioClip clip)
     {
-        if (btn == null) return;
-
-        TextMeshProUGUI txt =
-            btn.GetComponentInChildren<TextMeshProUGUI>();
-
-        if (txt != null)
-            txt.color = actif ? couleurSelectionne : couleurNormal;
-
-        btn.transform.localScale = actif
-            ? Vector3.one * 1.08f
-            : Vector3.one;
+        if (sourceAudio != null && clip != null)
+            sourceAudio.PlayOneShot(clip);
     }
 }

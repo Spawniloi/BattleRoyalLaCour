@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [System.Serializable]
 public class SessionData
@@ -187,6 +188,6 @@ public class GameSessionManager : MonoBehaviour
         GameData.jeuActuel = jeu;
 
         Debug.Log($"[Session] Lancement {jeu} → {scene}");
-        UnityEngine.SceneManagement.SceneManager.LoadScene(scene);
+        SceneManager.LoadScene("Scene_ChoixJeu");
     }
 }
