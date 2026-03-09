@@ -4,7 +4,6 @@ public static class GameData
 {
     // ── Joueurs ───────────────────────────────────────────────────────────────
     public static int nombreJoueurs = 3;
-
     public static List<PlayerData> joueurs = new List<PlayerData>()
     {
         new PlayerData { playerID=1, couleurPeau="#F4C89A",
@@ -23,6 +22,15 @@ public static class GameData
         if (idx >= 0 && idx < joueurs.Count)
             return joueurs[idx];
         return new PlayerData { playerID = playerID };
+    }
+
+    // ← ICI à l'intérieur
+    public static List<PlayerData> GetJoueursActifs()
+    {
+        List<PlayerData> actifs = new List<PlayerData>();
+        for (int i = 0; i < nombreJoueurs; i++)
+            actifs.Add(joueurs[i]);
+        return actifs;
     }
 
     // ── Partie en cours ───────────────────────────────────────────────────────

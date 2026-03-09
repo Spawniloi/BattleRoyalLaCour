@@ -383,7 +383,32 @@ public class ResultatsManager : MonoBehaviour
     void Continuer()
     {
         EnvoyerDonnees();
-        SceneManager.LoadScene("Scene_MaireCoraille");
+
+        if (GameSessionManager.Instance == null)
+        {
+            SceneManager.LoadScene("Scene_MaireCoraille");
+            return;
+        }
+
+        var gsm = GameSessionManager.Instance;
+
+        // Manche terminée ?
+        if (gsm.MancheTerminee())
+        {
+            // Dernière manche ?
+            if (gsm.SessionTerminee())
+                SceneManager.LoadScene("Scene_ClassementFinal");
+            else
+            {
+                gsm.MancheSuivante();
+                gsm.LancerProchainJeu();
+            }
+        }
+        else
+        {
+            // Encore des jeux dans cette manche
+            gsm.LancerProchainJeu();
+        }
     }
 
     void RetourMenu()
