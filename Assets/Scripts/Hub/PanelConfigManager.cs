@@ -1,6 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.Collections.Generic;
+using System.Reflection;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -25,13 +24,6 @@ public class PanelConfigManager : MonoBehaviour
     public int manchesMax = 10;
     public int manchesDefaut = 3;
 
-    [Header("Mode test")]
-    public Button btnModeTest;
-
-    [Header("Boutons action")]
-    public Button btnRetour;
-    public Button btnContinuer;
-
     [Header("Avertissement")]
     public TextMeshProUGUI txtAvertissement;
 
@@ -40,14 +32,13 @@ public class PanelConfigManager : MonoBehaviour
     public BoutonStylee styleBtn3J;
     public BoutonStylee styleBtn4J;
 
-    [Header("Style boutons action")]
+    [Header("Boutons bas — dans l'ordre : ModeTest, Retour, Continuer")]
+    public Button btnModeTest;
+    public Button btnRetour;
+    public Button btnContinuer;
     public BoutonStylee styleBtnModeTest;
     public BoutonStylee styleBtnRetour;
     public BoutonStylee styleBtnContinuer;
-
-    [Header("Navigation")]
-    public float echelleNormal = 1f;
-    public float echelleSelect = 1.1f;
 
     [Header("Audio")]
     public AudioSource sourceAudio;
@@ -57,12 +48,10 @@ public class PanelConfigManager : MonoBehaviour
 
     private int nbJoueurs = 2;
     private int nbManches = 3;
-    private bool modeTest = false;
 
-    // Navigation dans le panel
     private List<Button> boutonsNav = new List<Button>();
     private List<BoutonStylee> stylesNav = new List<BoutonStylee>();
-    private int indexNav = 0;
+    private int indexNav = 2; // Continuer par défaut
     private bool navActif = false;
 
     void Awake()
@@ -79,22 +68,25 @@ public class PanelConfigManager : MonoBehaviour
         sliderManches.value = manchesDefaut;
         sliderManches.onValueChanged.AddListener(OnSliderChange);
         MettreAJourTexteManches();
+        sliderManches.interactable = false;
 
         // Boutons joueurs
         btn2J?.onClick.AddListener(() => SelectionnerJoueurs(2));
         btn3J?.onClick.AddListener(() => SelectionnerJoueurs(3));
         btn4J?.onClick.AddListener(() => SelectionnerJoueurs(4));
 
-        // Mode test
-        btnModeTest?.onClick.AddListener(ToggleModeTest);
-
-        // Action
+        // Boutons bas
+        btnModeTest?.onClick.AddListener(LancerModeTest);
         btnRetour?.onClick.AddListener(Fermer);
         btnContinuer?.onClick.AddListener(Continuer);
 
-        // Navigation manette — ordre des boutons
+        // Navigation bas — ModeTest / Retour / Continuer
+        boutonsNav.Clear();
+        stylesNav.Clear();
+        boutonsNav.Add(btnModeTest);
         boutonsNav.Add(btnRetour);
         boutonsNav.Add(btnContinuer);
+        stylesNav.Add(styleBtnModeTest);
         stylesNav.Add(styleBtnRetour);
         stylesNav.Add(styleBtnContinuer);
 
@@ -102,19 +94,22 @@ public class PanelConfigManager : MonoBehaviour
         MasquerAvertissement();
     }
 
-    // ── Ouvre ────────────────────────────────────────────────────────────────
+    // ── Ouvre ─────────────────────────────────────────────────────────────────
     public void Ouvrir()
     {
         panelConfig?.SetActive(true);
         nbJoueurs = 2;
+        nbManches = manchesDefaut;
+        sliderManches.value = manchesDefaut;
         MettreAJourBoutonsJoueurs();
+        MettreAJourTexteManches();
         MasquerAvertissement();
         navActif = true;
-        indexNav = 1; // Continuer sélectionné par défaut
+        indexNav = 2; // Continuer sélectionné par défaut
         SurlígnerNav(indexNav);
     }
 
-    // ── Ferme ────────────────────────────────────────────────────────────────
+    // ── Ferme ─────────────────────────────────────────────────────────────────
     public void Fermer()
     {
         JouerSFX(sfxRetour);
@@ -122,7 +117,7 @@ public class PanelConfigManager : MonoBehaviour
         panelConfig?.SetActive(false);
     }
 
-    // ── Update — navigation manette ───────────────────────────────────────────
+    // ── Update ────────────────────────────────────────────────────────────────
     void Update()
     {
         if (!navActif) return;
@@ -137,46 +132,74 @@ public class PanelConfigManager : MonoBehaviour
 
         if (kb != null)
         {
-            // Joueurs — gauche/droite
             gauche = kb.qKey.wasPressedThisFrame
                    || kb.leftArrowKey.wasPressedThisFrame;
             droite = kb.dKey.wasPressedThisFrame
                    || kb.rightArrowKey.wasPressedThisFrame;
-
-            // Actions — haut/bas
             haut = kb.zKey.wasPressedThisFrame
                    || kb.upArrowKey.wasPressedThisFrame;
             bas = kb.sKey.wasPressedThisFrame
                    || kb.downArrowKey.wasPressedThisFrame;
-
             valider = kb.spaceKey.wasPressedThisFrame
                    || kb.enterKey.wasPressedThisFrame;
             retour = kb.escapeKey.wasPressedThisFrame;
 
-            // Slider — A/E ou PageUp/Down
             if (kb.eKey.isPressed) sliderDelta = 1f;
             if (kb.aKey.isPressed) sliderDelta = -1f;
         }
 
         if (gp != null)
         {
-            // Joueurs — dpad gauche/droite
-            gauche = gauche || gp.dpad.left.wasPressedThisFrame;
-            droite = droite || gp.dpad.right.wasPressedThisFrame;
+            // Joueurs nb — stick gauche gauche/droite
+            gauche = gauche || gp.leftStick.left.wasPressedThisFrame
+                             || gp.dpad.left.wasPressedThisFrame;
+            droite = droite || gp.leftStick.right.wasPressedThisFrame
+                             || gp.dpad.right.wasPressedThisFrame;
 
-            // Actions — dpad haut/bas
-            haut = haut || gp.dpad.up.wasPressedThisFrame;
-            bas = bas || gp.dpad.down.wasPressedThisFrame;
+            // Boutons bas — stick gauche haut/bas
+            haut = haut || gp.leftStick.up.wasPressedThisFrame
+                           || gp.dpad.up.wasPressedThisFrame;
+            bas = bas || gp.leftStick.down.wasPressedThisFrame
+                           || gp.dpad.down.wasPressedThisFrame;
 
             valider = valider || gp.buttonSouth.wasPressedThisFrame;
             retour = retour || gp.buttonEast.wasPressedThisFrame;
 
-            // Slider — gâchettes L2/R2
-            sliderDelta += gp.rightTrigger.ReadValue()
-                         - gp.leftTrigger.ReadValue();
+            // Slider — bumpers R1/L1 (plus simple et fiable)
+            if (gp.rightShoulder.wasPressedThisFrame)
+            {
+                sliderManches.value = Mathf.Min(
+                    sliderManches.value + 1,
+                    manchesMax);
+                JouerSFX(sfxFocus);
+            }
+            if (gp.leftShoulder.wasPressedThisFrame)
+            {
+                sliderManches.value = Mathf.Max(
+                    sliderManches.value - 1,
+                    manchesMin);
+                JouerSFX(sfxFocus);
+            }
         }
-
-        // ── Joueurs gauche/droite ─────────────────────────────────────────────
+        // Clavier — même chose
+        if (kb != null)
+        {
+            if (kb.eKey.wasPressedThisFrame)
+            {
+                sliderManches.value = Mathf.Min(
+                    sliderManches.value + 1,
+                    manchesMax);
+                JouerSFX(sfxFocus);
+            }
+            if (kb.aKey.wasPressedThisFrame)
+            {
+                sliderManches.value = Mathf.Max(
+                    sliderManches.value - 1,
+                    manchesMin);
+                JouerSFX(sfxFocus);
+            }
+        }
+        // Nb joueurs ←/→
         if (gauche)
         {
             int nouveau = nbJoueurs - 1;
@@ -190,14 +213,14 @@ public class PanelConfigManager : MonoBehaviour
             SelectionnerJoueurs(nouveau);
         }
 
-        // ── Actions haut/bas ──────────────────────────────────────────────────
+        // Boutons bas ↑/↓
         if (haut) Naviguer(-1);
         if (bas) Naviguer(1);
         if (valider) ValiderNav();
         if (retour) Fermer();
 
-        // ── Slider manches ────────────────────────────────────────────────────
-        if (!modeTest && Mathf.Abs(sliderDelta) > 0.05f)
+        // Slider manches — gâchettes
+        if (Mathf.Abs(sliderDelta) > 0.05f)
             sliderManches.value += sliderDelta * Time.deltaTime * 5f;
     }
 
@@ -245,19 +268,31 @@ public class PanelConfigManager : MonoBehaviour
     void MettreAJourTexteManches()
     {
         if (txtManches == null) return;
-        txtManches.text = modeTest
-            ? "Mode test — pas de classement"
-            : $"Manches : {nbManches}";
+        txtManches.text = $"Manches : {nbManches}";
     }
 
     // ── Mode test ─────────────────────────────────────────────────────────────
-    void ToggleModeTest()
+    void LancerModeTest()
     {
-        modeTest = !modeTest;
-        sliderManches.interactable = !modeTest;
-        styleBtnModeTest?.SetSelectionne(modeTest);
-        MettreAJourTexteManches();
-        JouerSFX(sfxFocus);
+        if (nbJoueurs < 2)
+        {
+            AfficherAvertissement("Selectionne au moins 2 joueurs !");
+            return;
+        }
+
+        JouerSFX(sfxValider);
+
+        GameData.nombreJoueurs = nbJoueurs;
+
+        GameSessionManager.Instance?.DemarrerSession(
+            "entrainement",
+            1,
+            new List<string> { "maire", "ballon", "snake" },
+            true);
+
+        navActif = false;
+        panelConfig?.SetActive(false);
+        SceneManager.LoadScene("Scene_ChoixJeu");
     }
 
     // ── Continuer ─────────────────────────────────────────────────────────────
@@ -273,18 +308,11 @@ public class PanelConfigManager : MonoBehaviour
 
         GameData.nombreJoueurs = nbJoueurs;
 
-        if (GameSessionManager.Instance != null)
-        {
-            string mode = modeTest ? "entrainement" : "manche";
-            int manches = modeTest ? 1 : nbManches;
-
-            GameSessionManager.Instance.DemarrerSession(
-                mode,
-                manches,
-                new System.Collections.Generic.List<string> {
-                    "maire", "ballon", "snake" },
-                true);
-        }
+        GameSessionManager.Instance?.DemarrerSession(
+            "manche",
+            nbManches,
+            new List<string> { "maire", "ballon", "snake" },
+            true);
 
         navActif = false;
         panelConfig?.SetActive(false);
