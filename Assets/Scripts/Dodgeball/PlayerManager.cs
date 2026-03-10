@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -11,29 +10,21 @@ public class PlayerManager : MonoBehaviour
     int currentUnitIndex = 0;
     public Unit CurrentUnit => units[currentUnitIndex];
     
-    // Player Input
-    PlayerControls controls;
-
-
     // Teams
     public int teamID;
 
-    void Awake()
-    {
-        controls = new PlayerControls();
-    }
+    //Input
+    Vector2 currentMoveInput;
 
     private void Start()
 
     {
         var playerInput = GetComponentInChildren<PlayerInput>();
 
-        Debug.Log("Player " + playerInput.playerIndex +
-                  " device: " + playerInput.devices[0]);
+        Debug.Log("Player " + playerInput.playerIndex + " device: " + playerInput.devices[0]);
 
         Initialize();
         TeamInitialize();
-        //OldInitialize();
     }
 
     private void Update()
@@ -41,27 +32,31 @@ public class PlayerManager : MonoBehaviour
         DebugDeath();
     }
 
-    void OnEnable()
+
+    #region PLAYER_INPUTS_REGION
+    public void OnThrow(InputAction.CallbackContext context)
     {
-        controls.Enable();
-        controls.Player.Switch.performed += ctx => SwitchUnit();
-        controls.Player.Throw.performed += ctx => ThrowBall();
+        if (!context.performed) return;
+        ThrowBall();
     }
 
-    void OnDisable()
+    public void OnSwitch(InputAction.CallbackContext context)
     {
-        controls.Disable();
+        if (!context.performed) return;
+        SwitchUnit();
     }
-    
-    void OldInitialize()
-    {
-        for (int i = 0; i < units.Count; i++)
-        {
-            units[i].SetControlled(false);
-        }
 
-        units[currentUnitIndex].SetControlled(true);
+    public void OnMove(InputAction.CallbackContext context)
+    {
+        currentMoveInput = context.ReadValue<Vector2>();
+
+        if (CurrentUnit == null) return;
+
+        PlayerController controller = CurrentUnit.GetComponent<PlayerController>();
+        controller.SetMoveInput(currentMoveInput);
     }
+    #endregion
+
     public void Initialize()
     {
         PlayerInput input = GetComponentInChildren<PlayerInput>(); 
@@ -78,8 +73,7 @@ public class PlayerManager : MonoBehaviour
             u.teamID = teamID;
             units.Add(u);
         }
-        SetControlledUnit(units[0]);
-        //if (units[0] != null) units[0].SetControlled(true); else Debug.LogError("Team Initialize Failed, units[0] is null");
+        if (units.Count > 0) SetControlledUnit(units[0]);
     }
 
     public void SwitchUnit()
@@ -91,19 +85,19 @@ public class PlayerManager : MonoBehaviour
         CurrentUnit.SetControlled(false);
         currentUnitIndex = units.IndexOf(target);
         CurrentUnit.SetControlled(true);
-    }
 
+        // Transfer Current MoveInput to the new Unit
+        CurrentUnit.GetComponent<PlayerController>().SetMoveInput(currentMoveInput);
+    }
 
     
     Unit GetUnitInFront()
     {
         Unit current = CurrentUnit;
         Vector2 direction = current.GetComponent<PlayerController>().lastDirection;
-        Vector2 origin = (Vector2)current.transform.position + direction * 1f; // offSetForce = 1f ( + direction * 1f to prevent a self cast)
-        //Vector2 origin = current.transform.position; // Self Cast Issue 
-        
+        Vector2 origin = (Vector2)current.transform.position + direction * 1f; 
+
         // --- RAY CAST ---
-        //RaycastHit2D hit = Physics2D.Raycast(origin, direction, 3f); 
         RaycastHit2D hit = Physics2D.CircleCast(origin, 0.5f, direction, 3f, unitLayer);
         Debug.DrawRay(origin, direction * 3f, Color.green);
         

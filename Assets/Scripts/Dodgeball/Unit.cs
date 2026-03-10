@@ -37,11 +37,10 @@ public class Unit : MonoBehaviour
         if(!isAlive) return;
         playerController.enabled = isControlled;
     }
-    
+
     public void SetControlled(bool value)
     {
         isControlled = value;
+        playerController.enabled = value;
     }
-
-
 }

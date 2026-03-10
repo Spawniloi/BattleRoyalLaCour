@@ -14,10 +14,7 @@ public class UnitAI : MonoBehaviour
 
     private void Start()
     {
-        //PickNewTarget();
         ChooseNewTarget();
-
-
     }
 
 
@@ -32,7 +29,6 @@ public class UnitAI : MonoBehaviour
     {
         if (Vector2.Distance(transform.position, targetPosition) < 0.3f)
         {
-            //PickNewTarget();
             ChooseNewTarget();
         }
 

@@ -12,11 +12,8 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        Move();
-        
-        // FORWARD BY DIRECTION OR MOUSE
         RotateToMovement(moveInput);
-        //LookAtMouse();
+        Move();
         
         // LOOK DIRECTION
         if(moveInput != Vector2.zero)
@@ -25,10 +22,13 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    public void OnMove(InputAction.CallbackContext context)
+
+
+    public void SetMoveInput(Vector2 input)
     {
-        moveInput = context.ReadValue<Vector2>();
+        moveInput = input;
     }
+
     public void Move()
     {
         Vector3 movement = new Vector3(moveInput.x, moveInput.y, 0);
