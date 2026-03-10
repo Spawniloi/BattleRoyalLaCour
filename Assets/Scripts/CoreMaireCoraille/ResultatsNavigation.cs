@@ -9,9 +9,8 @@ public class ResultatsNavigation : MonoBehaviour
     [Header("Boutons navigables")]
     public List<Button> boutons = new List<Button>();
 
-    [Header("Style selection")]
-    public Color couleurSelectione = new Color(1f, 0.84f, 0f);
-    public Color couleurNormale = new Color(0.95f, 0.95f, 0.9f);
+    [Header("Styles boutons")]
+    public List<BoutonStylee> styles = new List<BoutonStylee>();
 
     private int indexActuel = 0;
     private float cooldownInput = 0f;
@@ -69,20 +68,7 @@ public class ResultatsNavigation : MonoBehaviour
 
     void SurlигнerBouton(int index)
     {
-        for (int i = 0; i < boutons.Count; i++)
-        {
-            if (boutons[i] == null) continue;
-
-            TextMeshProUGUI tmpUGUI = boutons[i]
-                .GetComponentInChildren<TextMeshProUGUI>();
-
-            Color coul = (i == index) ? couleurSelectione : couleurNormale;
-
-            if (tmpUGUI != null) tmpUGUI.color = coul;
-
-            boutons[i].transform.localScale = (i == index)
-                ? new Vector3(1.1f, 1.1f, 1f)
-                : Vector3.one;
-        }
+        for (int i = 0; i < styles.Count; i++)
+            styles[i]?.SetSelectionne(i == index);
     }
 }

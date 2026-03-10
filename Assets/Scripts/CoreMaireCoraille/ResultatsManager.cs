@@ -257,14 +257,20 @@ public class ResultatsManager : MonoBehaviour
             .ThenBy(j => j.stats.tempsMaire)
             .ToList();
 
-        Transform[] spawns = { spawn1er, spawn2e, spawn3e, spawn4e };
+        // Spawns actifs selon nb joueurs — plus faible en premier
+        List<Transform> spawnsActifs = new List<Transform>();
+        int nb = partie.nbJoueurs;
+        if (nb >= 4 && spawn4e != null) spawnsActifs.Add(spawn1er);
+        if (nb >= 3 && spawn3e != null) spawnsActifs.Add(spawn2e);
+        if (nb >= 2 && spawn2e != null) spawnsActifs.Add(spawn3e);
+        if (spawn1er != null) spawnsActifs.Add(spawn4e);
 
         for (int i = 0; i < parScore.Count; i++)
         {
-            if (i >= spawns.Length || spawns[i] == null) continue;
+            if (i >= spawnsActifs.Count) continue;
 
             JoueurResultat jr = parScore[i];
-            Transform pos = spawns[i];
+            Transform pos = spawnsActifs[i];
 
             GameObject go = Instantiate(
                 podiumVisuelPrefab,
@@ -282,8 +288,8 @@ public class ResultatsManager : MonoBehaviour
                 pv.AppliquerData(data);
 
             yield return StartCoroutine(
-    ScaleUpBounce(go.transform,
-    Vector3.one * echellePodium, 0.4f));
+                ScaleUpBounce(go.transform,
+                Vector3.one * echellePodium, 0.4f));
 
             yield return new WaitForSeconds(0.2f);
         }

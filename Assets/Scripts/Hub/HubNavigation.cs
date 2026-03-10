@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
 using System.Collections.Generic;
@@ -18,8 +18,8 @@ public class HubNavigation : MonoBehaviour
 
     void Start()
     {
-        // Sélectionne le premier par défaut
-        SurlígnerBouton(indexActuel);
+        // SÃ©lectionne le premier par dÃ©faut
+        SurlÃ­gnerBouton(indexActuel);
     }
 
     void Update()
@@ -58,7 +58,7 @@ public class HubNavigation : MonoBehaviour
         indexActuel = (indexActuel + direction + boutons.Count)
                     % boutons.Count;
 
-        SurlígnerBouton(indexActuel);
+        SurlÃ­gnerBouton(indexActuel);
         hubManager?.JouerSFX(hubManager.sfxFocus);
     }
 
@@ -68,7 +68,7 @@ public class HubNavigation : MonoBehaviour
             boutons[indexActuel].onClick.Invoke();
     }
 
-    void SurlígnerBouton(int index)
+    void SurlÃ­gnerBouton(int index)
     {
         for (int i = 0; i < styles.Count; i++)
             styles[i]?.SetSelectionne(i == index);

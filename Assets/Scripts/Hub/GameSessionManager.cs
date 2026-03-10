@@ -46,6 +46,9 @@ public class GameSessionManager : MonoBehaviour
             session.scores[i] = 0f;
             session.sucettesOr[i] = 0;
         }
+
+        Debug.Log($"[Session] Scores init pour " +
+                  $"{GameData.nombreJoueurs} joueurs");
     }
 
     // ── Démarre session ───────────────────────────────────────────────────────
@@ -126,7 +129,8 @@ public class GameSessionManager : MonoBehaviour
             session.sucettesOr[partie.gagnant]++;
         }
 
-        Debug.Log($"[Session] Partie enregistrée — gagnant J{partie.gagnant}");
+        Debug.Log($"[Session] Partie enregistrée — " +
+                  $"gagnant J{partie.gagnant}");
     }
 
     // ── Manche suivante ───────────────────────────────────────────────────────
@@ -145,10 +149,18 @@ public class GameSessionManager : MonoBehaviour
     public bool EstEntrainement()
         => session.mode == "entrainement";
 
-    // ── Classement final ──────────────────────────────────────────────────────
+    // ── Classement ────────────────────────────────────────────────────────────
     public List<(int playerID, float score, int sucettes)> GetClassementFinal()
     {
         var classement = new List<(int, float, int)>();
+
+        // Scores vides — fallback tous les joueurs actifs à 0
+        if (session.scores.Count == 0)
+        {
+            for (int i = 1; i <= GameData.nombreJoueurs; i++)
+                classement.Add((i, 0f, 0));
+            return classement;
+        }
 
         foreach (var kvp in session.scores)
         {
@@ -160,15 +172,19 @@ public class GameSessionManager : MonoBehaviour
             classement.Add((id, score, sucettes));
         }
 
+        // Tri score desc, sucettes desc, playerID asc
         classement.Sort((a, b) => {
             int cmp = b.Item2.CompareTo(a.Item2);
-            return cmp != 0 ? cmp : b.Item3.CompareTo(a.Item3);
+            if (cmp != 0) return cmp;
+            cmp = b.Item3.CompareTo(a.Item3);
+            if (cmp != 0) return cmp;
+            return a.Item1.CompareTo(b.Item1);
         });
 
         return classement;
     }
 
-    // ── Prochain jeu à charger ────────────────────────────────────────────────
+    // ── Scène selon jeu ───────────────────────────────────────────────────────
     public string GetNomScene(string jeu)
     {
         return jeu switch
@@ -180,14 +196,20 @@ public class GameSessionManager : MonoBehaviour
         };
     }
 
+    // ── Lance prochain jeu ────────────────────────────────────────────────────
     public void LancerProchainJeu()
     {
-        string jeu = ProchainJeu();
-        string scene = GetNomScene(jeu);
+        // Retourne toujours à ChoixJeu pour que le joueur choisisse
+        SceneManager.LoadScene("Scene_ChoixJeu");
+    }
 
+    // ── Lance un jeu spécifique ───────────────────────────────────────────────
+    public void LancerJeu(string jeu)
+    {
+        string scene = GetNomScene(jeu);
         GameData.jeuActuel = jeu;
 
         Debug.Log($"[Session] Lancement {jeu} → {scene}");
-        SceneManager.LoadScene("Scene_ChoixJeu");
+        SceneManager.LoadScene(scene);
     }
 }

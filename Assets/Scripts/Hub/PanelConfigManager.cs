@@ -130,40 +130,75 @@ public class PanelConfigManager : MonoBehaviour
         var kb = Keyboard.current;
         var gp = Gamepad.all.Count > 0 ? Gamepad.all[0] : null;
 
-        bool gauche = false, droite = false, valider = false;
+        bool gauche = false, droite = false;
+        bool haut = false, bas = false;
+        bool valider = false, retour = false;
         float sliderDelta = 0f;
 
         if (kb != null)
         {
-            gauche = kb.leftArrowKey.wasPressedThisFrame;
-            droite = kb.rightArrowKey.wasPressedThisFrame;
-            valider = kb.enterKey.wasPressedThisFrame
-                   || kb.spaceKey.wasPressedThisFrame;
+            // Joueurs — gauche/droite
+            gauche = kb.qKey.wasPressedThisFrame
+                   || kb.leftArrowKey.wasPressedThisFrame;
+            droite = kb.dKey.wasPressedThisFrame
+                   || kb.rightArrowKey.wasPressedThisFrame;
 
-            // Slider avec Z/S
-            if (kb.zKey.isPressed || kb.upArrowKey.isPressed)
-                sliderDelta = 0.1f;
-            if (kb.sKey.isPressed || kb.downArrowKey.isPressed)
-                sliderDelta = -0.1f;
+            // Actions — haut/bas
+            haut = kb.zKey.wasPressedThisFrame
+                   || kb.upArrowKey.wasPressedThisFrame;
+            bas = kb.sKey.wasPressedThisFrame
+                   || kb.downArrowKey.wasPressedThisFrame;
+
+            valider = kb.spaceKey.wasPressedThisFrame
+                   || kb.enterKey.wasPressedThisFrame;
+            retour = kb.escapeKey.wasPressedThisFrame;
+
+            // Slider — A/E ou PageUp/Down
+            if (kb.eKey.isPressed) sliderDelta = 1f;
+            if (kb.aKey.isPressed) sliderDelta = -1f;
         }
 
         if (gp != null)
         {
+            // Joueurs — dpad gauche/droite
             gauche = gauche || gp.dpad.left.wasPressedThisFrame;
             droite = droite || gp.dpad.right.wasPressedThisFrame;
-            valider = valider || gp.buttonSouth.wasPressedThisFrame;
 
-            // Slider avec stick gauche
-            sliderDelta += gp.leftStick.y.ReadValue() * Time.deltaTime * 3f;
+            // Actions — dpad haut/bas
+            haut = haut || gp.dpad.up.wasPressedThisFrame;
+            bas = bas || gp.dpad.down.wasPressedThisFrame;
+
+            valider = valider || gp.buttonSouth.wasPressedThisFrame;
+            retour = retour || gp.buttonEast.wasPressedThisFrame;
+
+            // Slider — gâchettes L2/R2
+            sliderDelta += gp.rightTrigger.ReadValue()
+                         - gp.leftTrigger.ReadValue();
         }
 
-        if (gauche) Naviguer(-1);
-        if (droite) Naviguer(1);
-        if (valider) ValiderNav();
+        // ── Joueurs gauche/droite ─────────────────────────────────────────────
+        if (gauche)
+        {
+            int nouveau = nbJoueurs - 1;
+            if (nouveau < 2) nouveau = 4;
+            SelectionnerJoueurs(nouveau);
+        }
+        if (droite)
+        {
+            int nouveau = nbJoueurs + 1;
+            if (nouveau > 4) nouveau = 2;
+            SelectionnerJoueurs(nouveau);
+        }
 
-        // Slider
-        if (!modeTest && Mathf.Abs(sliderDelta) > 0.01f)
-            sliderManches.value += sliderDelta;
+        // ── Actions haut/bas ──────────────────────────────────────────────────
+        if (haut) Naviguer(-1);
+        if (bas) Naviguer(1);
+        if (valider) ValiderNav();
+        if (retour) Fermer();
+
+        // ── Slider manches ────────────────────────────────────────────────────
+        if (!modeTest && Mathf.Abs(sliderDelta) > 0.05f)
+            sliderManches.value += sliderDelta * Time.deltaTime * 5f;
     }
 
     void Naviguer(int dir)
