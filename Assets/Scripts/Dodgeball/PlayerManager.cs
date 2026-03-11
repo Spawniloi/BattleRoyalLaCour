@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using static GameManager;
 
 public class PlayerManager : MonoBehaviour
 {
@@ -17,39 +18,35 @@ public class PlayerManager : MonoBehaviour
     Vector2 currentMoveInput;
 
     private void Start()
-
     {
         var playerInput = GetComponentInChildren<PlayerInput>();
-
-        Debug.Log("Player " + playerInput.playerIndex + " device: " + playerInput.devices[0]);
 
         Initialize();
         TeamInitialize();
     }
 
-    private void Update()
-    {
-        DebugDeath();
-    }
-
-
     #region PLAYER_INPUTS_REGION
     public void OnThrow(InputAction.CallbackContext context)
     {
+        if (GameManager.Instance.currentState != GameState.Playing) return;
+
         if (!context.performed) return;
         ThrowBall();
     }
 
     public void OnSwitch(InputAction.CallbackContext context)
     {
+        if (GameManager.Instance.currentState != GameState.Playing) return;
+
         if (!context.performed) return;
         SwitchUnit();
     }
 
     public void OnMove(InputAction.CallbackContext context)
     {
-        currentMoveInput = context.ReadValue<Vector2>();
+        if (GameManager.Instance.currentState != GameState.Playing) return;
 
+        currentMoveInput = context.ReadValue<Vector2>();
         if (CurrentUnit == null) return;
 
         PlayerController controller = CurrentUnit.GetComponent<PlayerController>();
@@ -71,6 +68,7 @@ public class PlayerManager : MonoBehaviour
         foreach (Unit u in allUnits)
         {
             u.teamID = teamID;
+            u.ApplyTeamColor(); // Apply Unit Color
             units.Add(u);
         }
         if (units.Count > 0) SetControlledUnit(units[0]);
@@ -126,6 +124,11 @@ public class PlayerManager : MonoBehaviour
 
         ball.Throw(direction);
         unit.heldBall = null;
+
+        if (GameManager.Instance.teamScores.ContainsKey(unit.teamID))
+        {
+            GameManager.Instance.teamScores[unit.teamID].ballsThrown++;
+        }
     }
 
     public void SwitchToClosestUnit(Unit deadUnit)

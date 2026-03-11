@@ -3,13 +3,23 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
+    TeamZones zone;
+    Unit Unit;
 
     Vector2 moveInput;
     public Vector2 lastDirection = Vector2.right;
 
     public float speed = 5f;
 
+    void Awake()
+    {
+        Unit = GetComponent<Unit>();
+    }
 
+    private void Start()
+    {
+        zone = Unit.zone;
+    }
     void Update()
     {
         RotateToMovement(moveInput);
@@ -22,8 +32,6 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-
-
     public void SetMoveInput(Vector2 input)
     {
         moveInput = input;
@@ -32,9 +40,17 @@ public class PlayerController : MonoBehaviour
     public void Move()
     {
         Vector3 movement = new Vector3(moveInput.x, moveInput.y, 0);
-        transform.position += movement * speed * Time.deltaTime;
+        Vector3 newPos = transform.position + movement * speed * Time.deltaTime;
+
+        // Clamp dans la zone si elle est définie
+        if (zone != null)
+        {
+            newPos = (Vector3)zone.ClampPosition(newPos);
+        }
+
+        transform.position = newPos;
     }
-    
+
     void RotateToMovement(Vector2 moveInput)
     {
         if(moveInput != Vector2.zero)

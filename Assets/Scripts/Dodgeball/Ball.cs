@@ -66,6 +66,11 @@ public class Ball : MonoBehaviour
 
         transform.SetParent(unit.transform);
         transform.localPosition = new Vector3(0.5f, 0, 0);
+
+        if (GameManager.Instance.teamScores.ContainsKey(unit.teamID)) //SCORE
+        {
+            GameManager.Instance.teamScores[unit.teamID].ballsPicked++;
+        }
     }
 
     internal void Throw(Vector2 dir)
@@ -79,14 +84,18 @@ public class Ball : MonoBehaviour
         rb.simulated = true;
 
         rb.linearVelocity = dir.normalized * throwSpeed;
+
     }
 
     void HitUnit(Unit unit)
     {
-        unit.isAlive = false;
+        unit.Die();
+        if (GameManager.Instance.teamScores.ContainsKey(OwnerTeam)) //SCORE
+        {
+            GameManager.Instance.teamScores[OwnerTeam].eliminations++;
+        }
 
-        print($"{unit.name} is Eliminated !");
-        Destroy(unit.gameObject);
+
         Destroy(gameObject);
     }
 }

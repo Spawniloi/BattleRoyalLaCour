@@ -13,9 +13,6 @@ public class BallSpawner : MonoBehaviour
     public float spawnDelay = 3f;
     public float mapSize = 20f;
 
-    int maxBalls = 10;
-    int currentBalls = 0;
-
     void Start()
     {
         cam = Camera.main;
@@ -33,18 +30,19 @@ public class BallSpawner : MonoBehaviour
         InvokeRepeating(nameof(SpawnBall), 2f, spawnDelay);
     }
 
-void SpawnBall()
-{
-    //if(currentBalls >= maxBalls) return;
+    private void OnDisable()
+    {
+        
+    }
 
+    void SpawnBall()
+{
     Vector2 spawnPos = RandomEdgePosition();
     GameObject ball = Instantiate(ballPrefab, spawnPos, Quaternion.identity);
     Vector2 center = Vector2.zero;
     Vector2 dir = (center - spawnPos).normalized;
 
     ball.GetComponent<Ball>().Initialize(dir);
-
-    //currentBalls++;
 }
 
     Vector2 RandomEdgePosition()

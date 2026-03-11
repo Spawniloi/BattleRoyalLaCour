@@ -1,5 +1,6 @@
 using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
+using static GameManager;
+
 public class UnitAI : MonoBehaviour
 {
     Unit _unit;
@@ -17,11 +18,13 @@ public class UnitAI : MonoBehaviour
         ChooseNewTarget();
     }
 
-
     void Update()
     {
-        if ( _unit.isControlled || !_unit.isAlive ) return;
+        if (GameManager.Instance.currentState != GameState.Playing) return;
+
+        if (_unit.isControlled || !_unit.isAlive) return;
         if (_unit.HasBall) return;
+
         Patrol();
     }
 
@@ -32,10 +35,17 @@ public class UnitAI : MonoBehaviour
             ChooseNewTarget();
         }
 
-        transform.position = Vector2.MoveTowards(transform.position, targetPosition, patrolSpeed * Time.deltaTime);
+        Vector2 newPos = Vector2.MoveTowards(transform.position, targetPosition, patrolSpeed * Time.deltaTime);
 
-        // Rotate to Movement
-        
+        // Clamp
+        if (_unit.zone != null)
+        {
+            newPos = _unit.zone.ClampPosition(newPos);
+        }
+
+        transform.position = newPos;
+
+        // Rotation vers la cible
         Vector2 dir = (targetPosition - (Vector2)transform.position).normalized;
         if (dir != Vector2.zero)
         {
@@ -44,14 +54,17 @@ public class UnitAI : MonoBehaviour
         }
     }
 
-    private void PickNewTarget()
-    {
-        Vector2 random = Random.insideUnitCircle * 4f; // Random.insideUnitCircle will be replace by the Team Area in the future
-        targetPosition = (Vector2)transform.position + random;
-    }
     private void ChooseNewTarget()
     {
-        targetPosition = _unit.zone.GetRandomPoint();
+        if (_unit.zone != null)
+        {
+            targetPosition = _unit.zone.GetRandomPoint();
+        }
+        else
+        {
+            // fallback si pas de zone
+            targetPosition = (Vector2)transform.position;
+        }
     }
 
     void OnDrawGizmos()
