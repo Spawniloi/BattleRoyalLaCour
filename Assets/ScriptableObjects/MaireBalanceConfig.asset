@@ -1,0 +1,71 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfca998c66b614f4c9862ced37dae7b2, type: 3}
+  m_Name: MaireBalanceConfig
+  m_EditorClassIdentifier: 
+  baseSpeed: 4
+  sliderExpCurve: 1.5
+  maxSpeedBonus: 3
+  maxSpeedPenalty: 3
+  sliderRiseRate: 0.15
+  sliderFallRate: 0.1
+  iceAcceleration: 8
+  iceDeceleration: 4
+  iceTurnSpeed: 6
+  freezeDuration: 1
+  mayorTransferRadius: 0.5
+  transfertCooldownDuree: 1.5
+  speedResetOnTransfer: 0
+  knockbackTransfert: 5
+  knockbackPoissonPoisson: 5
+  knockbackCorailleBody: 5
+  knockbackMultiplier: 1.3
+  corailleEntryAngle: 60
+  corailleRepulsionForce: 6
+  stunDuration: 0.3
+  corailleCooldown: 3.5
+  propulsionForce: 8
+  corailleSwapDelay: 0.5
+  corailleRebondForceMin: 5
+  corailleAngleMin: -45
+  corailleAngleMax: 45
+  corailleDureeRotMin: 1.5
+  corailleDureeRotMax: 3.5
+  coraillePauseRotMin: 0.3
+  coraillePauseRotMax: 1
+  terrainSize2J: {x: 11, y: 10}
+  terrainSize3J: {x: 15, y: 10}
+  terrainSize4J: {x: 19, y: 10}
+  distanceMinCorailles: 3
+  corailleMargesBords2J: 2
+  corailleMargesBords3J: 2
+  corailleMargesBords4J: 2
+  roundDuration: 90
+  mayorTimeTickRate: 0.1
+  corailleCooldownDuration: 3.5
+  sliderValeurMax: 10
+  iconesDashTaille: 40
+  iconesDashEspacement: 35
+  dashForce: 5
+  dashDuree: 0.15
+  dashCooldown: 0.5
+  dashKeyJ1: 101
+  dashKeyJ2: 32
+  dashKeyJ3: 111
+  dashKeyJ4: 256
+  itemRespawnDelai: 4
+  itemNombreSimult: 1
+  itemRayonCollecte: 0.5
+  dashBulleTaille: 0.15
+  dashBulleduree: 0.4
+  dashBulleNombre: 5
+  dashBulleIntervalle: 0.03
