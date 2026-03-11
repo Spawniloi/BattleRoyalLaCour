@@ -3,7 +3,7 @@
 public static class GameData
 {
     // ── Joueurs ───────────────────────────────────────────────────────────────
-    public static int nombreJoueurs = 3;
+    public static int nombreJoueurs = 4;
     public static List<PlayerData> joueurs = new List<PlayerData>()
     {
         new PlayerData { playerID=1, couleurPeau="#F4C89A",

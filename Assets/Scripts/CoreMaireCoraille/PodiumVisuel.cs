@@ -11,10 +11,12 @@ public class PodiumVisuel : MonoBehaviour
     public Image imgBouee;
 
     [Header("Sprites")]
-    public Sprite spriteCorps;
-    public Sprite spriteDossard;
-    public Sprite spriteJambes;
+    public Sprite   spriteCorps;
+    public Sprite   spriteDossard;
+    public Sprite   spriteJambes;
     public Sprite[] spritesTetes;
+
+    [Header("Couleurs")]
     public Color couleurJambes = new Color(0.1f, 0.15f, 0.3f);
 
     public void AppliquerData(PlayerData data)
@@ -22,29 +24,40 @@ public class PodiumVisuel : MonoBehaviour
         if (imgCorps != null)
         {
             imgCorps.sprite = spriteCorps;
-            imgCorps.color = data.GetCouleurPeau();
+            imgCorps.color  = data.GetCouleurPeau();
         }
 
         if (imgDossard != null)
         {
             imgDossard.sprite = spriteDossard;
-            imgDossard.color = data.GetCouleurDossard();
+            imgDossard.color  = data.GetCouleurDossard();
         }
 
         if (imgJambes != null)
         {
             imgJambes.sprite = spriteJambes;
-            imgJambes.color = couleurJambes;
+            imgJambes.color  = couleurJambes;
         }
 
+        // ── Tête — index 0 = pas de coiffure ─────────────────────────────────
         if (imgTete != null)
         {
-            if (spritesTetes != null &&
-                data.indexTete < spritesTetes.Length &&
-                spritesTetes[data.indexTete] != null)
-                imgTete.sprite = spritesTetes[data.indexTete];
+            if (data.indexTete <= 0)
+            {
+                // Pas de coiffure — cache complètement
+                imgTete.enabled = false;
+            }
+            else
+            {
+                imgTete.enabled = true;
 
-            imgTete.color = data.GetCouleurDossard(); // ← remplace GetCouleurPeau()
+                if (spritesTetes != null &&
+                    data.indexTete < spritesTetes.Length &&
+                    spritesTetes[data.indexTete] != null)
+                    imgTete.sprite = spritesTetes[data.indexTete];
+
+                imgTete.color = data.GetCouleurDossard();
+            }
         }
 
         if (imgBouee != null)

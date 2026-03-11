@@ -198,12 +198,10 @@ public class RacailleVisuel : MonoBehaviour
         if (srCorps != null) srCorps.enabled = true;
         if (srDossard != null) srDossard.enabled = true;
         if (srJambes != null) srJambes.enabled = true;
-        if (srTete != null) srTete.enabled = true;
         if (srBouee != null) srBouee.enabled = true;
 
         if (srCorps != null)
         {
-            // Frame idle par défaut si frames disponibles
             srCorps.sprite = (framesMarche != null && framesMarche.Length > 0)
                            ? framesMarche[0]
                            : spriteCorps;
@@ -222,13 +220,24 @@ public class RacailleVisuel : MonoBehaviour
             srJambes.color = couleurJambes;
         }
 
+        // ── Tête — index 0 = pas de coiffure ─────────────────────────────────
         if (srTete != null)
         {
-            if (spritesTetes != null &&
-                data.indexTete < spritesTetes.Length &&
-                spritesTetes[data.indexTete] != null)
-                srTete.sprite = spritesTetes[data.indexTete];
-            srTete.color = data.GetCouleurDossard();
+            if (data.indexTete == 0)
+            {
+                srTete.enabled = false;
+            }
+            else
+            {
+                srTete.enabled = true;
+
+                if (spritesTetes != null &&
+                    data.indexTete < spritesTetes.Length &&
+                    spritesTetes[data.indexTete] != null)
+                    srTete.sprite = spritesTetes[data.indexTete];
+
+                srTete.color = data.GetCouleurDossard();
+            }
         }
 
         Color coul = data.GetCouleurDossard();
