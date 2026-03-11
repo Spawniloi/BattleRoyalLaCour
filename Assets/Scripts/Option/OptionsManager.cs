@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
-using UnityEngine.Timeline;
 using UnityEngine.UI;
 
 public class OptionsManager : MonoBehaviour
@@ -38,13 +38,12 @@ public class OptionsManager : MonoBehaviour
     public AudioClip sfxValider;
     public AudioClip sfxRetour;
 
-    // Navigation interne
     // 0=sliderMusique 1=sliderVFX 2=langue 3=retour 4=quitterJeu
     private int navIndex = 3;
     private bool estOuvert = false;
     private bool etaitEnJeu = false;
+    private bool inputBloque = false;
 
-    // Scènes considérées "en jeu" — pause activée
     private static readonly HashSet<string> scenesJeu = new HashSet<string>
     {
         "Scene_MaireCoraille",
@@ -63,7 +62,6 @@ public class OptionsManager : MonoBehaviour
     {
         panelOptions?.SetActive(false);
 
-        // Sliders
         if (sliderMusique != null)
         {
             sliderMusique.minValue = 0f;
@@ -88,7 +86,6 @@ public class OptionsManager : MonoBehaviour
                 v => AudioManager.Instance?.AppliquerVFX(v));
         }
 
-        // Boutons langue
         for (int i = 0; i < btnsLangue.Count; i++)
         {
             int idx = i;
@@ -98,24 +95,24 @@ public class OptionsManager : MonoBehaviour
 
         btnRetour?.onClick.AddListener(Fermer);
         btnQuitterJeu?.onClick.AddListener(QuitterJeu);
-
-        // Surligne langue actuelle
         MettreAJourLangueVisuel();
     }
 
     void Update()
     {
-        // ── Détection ouverture — tous joueurs ────────────────────────────────
+        if (inputBloque) return;
+
+        var kb = Keyboard.current;
+        var gp0 = Gamepad.all.Count > 0 ? Gamepad.all[0] : null;
+
+        // ── Panel fermé — détecte ouverture ──────────────────────────────────
         if (!estOuvert)
         {
             bool ouvrir = false;
 
-            // Clavier
-            if (Keyboard.current != null &&
-                Keyboard.current.escapeKey.wasPressedThisFrame)
+            if (kb != null && kb.escapeKey.wasPressedThisFrame)
                 ouvrir = true;
 
-            // N'importe quelle manette — bouton Start
             foreach (var gp in Gamepad.all)
                 if (gp.startButton.wasPressedThisFrame)
                     ouvrir = true;
@@ -124,49 +121,95 @@ public class OptionsManager : MonoBehaviour
             return;
         }
 
-        // ── Navigation dans le panel ──────────────────────────────────────────
-        var kb = Keyboard.current;
-        var gp0 = Gamepad.all.Count > 0 ? Gamepad.all[0] : null;
-
+        // ── Panel ouvert — navigation ─────────────────────────────────────────
         bool haut = false, bas = false;
-        bool gauche = false, droite = false;
         bool valider = false, fermer = false;
+        bool dpadGauche = false, dpadDroite = false;
 
         if (kb != null)
         {
             haut = kb.upArrowKey.wasPressedThisFrame
-                   || kb.zKey.wasPressedThisFrame;
+                      || kb.zKey.wasPressedThisFrame;
             bas = kb.downArrowKey.wasPressedThisFrame
-                   || kb.sKey.wasPressedThisFrame;
-            gauche = kb.leftArrowKey.wasPressedThisFrame
-                   || kb.qKey.wasPressedThisFrame;
-            droite = kb.rightArrowKey.wasPressedThisFrame
-                   || kb.dKey.wasPressedThisFrame;
+                      || kb.sKey.wasPressedThisFrame;
+            dpadGauche = kb.leftArrowKey.wasPressedThisFrame
+                      || kb.qKey.wasPressedThisFrame;
+            dpadDroite = kb.rightArrowKey.wasPressedThisFrame
+                      || kb.dKey.wasPressedThisFrame;
             valider = kb.spaceKey.wasPressedThisFrame
-                   || kb.enterKey.wasPressedThisFrame;
+                      || kb.enterKey.wasPressedThisFrame;
             fermer = kb.escapeKey.wasPressedThisFrame;
         }
 
-        // Une seule manette contrôle le panel (J1 ou celle qui a ouvert)
         if (gp0 != null)
         {
             haut = haut || gp0.dpad.up.wasPressedThisFrame
-                              || gp0.leftStick.up.wasPressedThisFrame;
+                               || gp0.leftStick.up.wasPressedThisFrame;
             bas = bas || gp0.dpad.down.wasPressedThisFrame
-                              || gp0.leftStick.down.wasPressedThisFrame;
-            gauche = gauche || gp0.dpad.left.wasPressedThisFrame
-                              || gp0.leftStick.left.wasPressedThisFrame;
-            droite = droite || gp0.dpad.right.wasPressedThisFrame
-                              || gp0.leftStick.right.wasPressedThisFrame;
+                               || gp0.leftStick.down.wasPressedThisFrame;
+            dpadGauche = dpadGauche || gp0.dpad.left.wasPressedThisFrame;
+            dpadDroite = dpadDroite || gp0.dpad.right.wasPressedThisFrame;
             valider = valider || gp0.buttonSouth.wasPressedThisFrame;
             fermer = fermer || gp0.buttonEast.wasPressedThisFrame
-                              || gp0.startButton.wasPressedThisFrame;
+                               || gp0.startButton.wasPressedThisFrame;
         }
 
+        // ── LB/RB pour sliders — par clic ────────────────────────────────────
+        if (gp0 != null)
+        {
+            if (navIndex == 0 && sliderMusique != null)
+            {
+                if (gp0.rightShoulder.wasPressedThisFrame)
+                    sliderMusique.value =
+                        Mathf.Clamp01(sliderMusique.value + 0.05f);
+                if (gp0.leftShoulder.wasPressedThisFrame)
+                    sliderMusique.value =
+                        Mathf.Clamp01(sliderMusique.value - 0.05f);
+            }
+            if (navIndex == 1 && sliderVFX != null)
+            {
+                if (gp0.rightShoulder.wasPressedThisFrame)
+                    sliderVFX.value =
+                        Mathf.Clamp01(sliderVFX.value + 0.05f);
+                if (gp0.leftShoulder.wasPressedThisFrame)
+                    sliderVFX.value =
+                        Mathf.Clamp01(sliderVFX.value - 0.05f);
+            }
+        }
+
+        // Clavier A/E pour sliders
+        if (kb != null)
+        {
+            if (navIndex == 0 && sliderMusique != null)
+            {
+                if (kb.eKey.wasPressedThisFrame)
+                    sliderMusique.value =
+                        Mathf.Clamp01(sliderMusique.value + 0.05f);
+                if (kb.aKey.wasPressedThisFrame)
+                    sliderMusique.value =
+                        Mathf.Clamp01(sliderMusique.value - 0.05f);
+            }
+            if (navIndex == 1 && sliderVFX != null)
+            {
+                if (kb.eKey.wasPressedThisFrame)
+                    sliderVFX.value =
+                        Mathf.Clamp01(sliderVFX.value + 0.05f);
+                if (kb.aKey.wasPressedThisFrame)
+                    sliderVFX.value =
+                        Mathf.Clamp01(sliderVFX.value - 0.05f);
+            }
+        }
+
+        // ── Langue — dpad ←/→ seulement ──────────────────────────────────────
+        if (navIndex == 2)
+        {
+            if (dpadGauche) NaviguerLangue(-1);
+            if (dpadDroite) NaviguerLangue(1);
+        }
+
+        // ── Navigation ↑↓ ────────────────────────────────────────────────────
         if (haut) Naviguer(-1);
         if (bas) Naviguer(1);
-        if (gauche) NaviguerSliderOuLangue(-1);
-        if (droite) NaviguerSliderOuLangue(1);
         if (valider) ValiderNav();
         if (fermer) Fermer();
     }
@@ -178,24 +221,18 @@ public class OptionsManager : MonoBehaviour
         string scene = SceneManager.GetActiveScene().name;
         etaitEnJeu = scenesJeu.Contains(scene);
 
-        // Pause si en jeu
-        if (etaitEnJeu)
-            Time.timeScale = 0f;
+        if (etaitEnJeu) Time.timeScale = 0f;
 
-        // Montre bouton quitter seulement en jeu
         zoneQuitterJeu?.SetActive(etaitEnJeu);
-
         panelOptions?.SetActive(true);
 
-        // Refresh sliders
         if (sliderMusique != null && AudioManager.Instance != null)
             sliderMusique.value = AudioManager.Instance.GetVolMusique();
         if (sliderVFX != null && AudioManager.Instance != null)
             sliderVFX.value = AudioManager.Instance.GetVolVFX();
 
         MettreAJourLangueVisuel();
-
-        navIndex = 3; // Retour par défaut
+        navIndex = 3;
         SurlígnerNav();
         JouerSFX(sfxValider);
     }
@@ -204,14 +241,43 @@ public class OptionsManager : MonoBehaviour
     public void Fermer()
     {
         estOuvert = false;
-
-        // Reprend le jeu
-        if (etaitEnJeu)
-            Time.timeScale = 1f;
-
+        if (etaitEnJeu) Time.timeScale = 1f;
         AudioManager.Instance?.Sauvegarder();
-        panelOptions?.SetActive(false);
         JouerSFX(sfxRetour);
+        StartCoroutine(BloquerJusquAuRelachement()); // ← AVANT SetActive(false)
+        panelOptions?.SetActive(false);              // ← APRÈS
+    }
+
+    IEnumerator BloquerJusquAuRelachement()
+    {
+        inputBloque = true;
+        yield return null;
+
+        // Attend que tous les boutons soient relâchés
+        bool encoreAppuye = true;
+        while (encoreAppuye)
+        {
+            encoreAppuye = false;
+
+            if (Keyboard.current != null)
+            {
+                if (Keyboard.current.escapeKey.isPressed) encoreAppuye = true;
+                if (Keyboard.current.spaceKey.isPressed) encoreAppuye = true;
+                if (Keyboard.current.enterKey.isPressed) encoreAppuye = true;
+            }
+
+            foreach (var gp in Gamepad.all)
+            {
+                if (gp.startButton.isPressed) encoreAppuye = true;
+                if (gp.buttonEast.isPressed) encoreAppuye = true;
+                if (gp.buttonSouth.isPressed) encoreAppuye = true;
+            }
+
+            if (encoreAppuye) yield return null;
+        }
+
+        yield return null; // sécurité
+        inputBloque = false;
     }
 
     // ── Quitter le jeu ────────────────────────────────────────────────────────
@@ -225,10 +291,9 @@ public class OptionsManager : MonoBehaviour
         JouerSFX(sfxValider);
     }
 
-    // ── Navigation ↑↓ ────────────────────────────────────────────────────────
     void Naviguer(int dir)
     {
-        int max = etaitEnJeu ? 4 : 3; // quitterJeu seulement en jeu
+        int max = etaitEnJeu ? 4 : 3;
         navIndex = (navIndex + dir + max + 1) % (max + 1);
         SurlígnerNav();
         JouerSFX(sfxFocus);
@@ -243,43 +308,16 @@ public class OptionsManager : MonoBehaviour
         }
     }
 
-    // ── Navigation ←/→ sur slider ou langue ──────────────────────────────────
-    void NaviguerSliderOuLangue(int dir)
+    void NaviguerLangue(int dir)
     {
-        switch (navIndex)
-        {
-            case 0: // Slider musique
-                if (sliderMusique != null)
-                {
-                    sliderMusique.value = Mathf.Clamp01(
-                        sliderMusique.value + dir * 0.05f);
-                    JouerSFX(sfxFocus);
-                }
-                break;
-
-            case 1: // Slider VFX
-                if (sliderVFX != null)
-                {
-                    sliderVFX.value = Mathf.Clamp01(
-                        sliderVFX.value + dir * 0.05f);
-                    JouerSFX(sfxFocus);
-                }
-                break;
-
-            case 2: // Langue
-                int idxLang = codesLangue.IndexOf(
-                    LocalisationManager.Instance?.GetLangueActuelle()
-                    ?? "fr");
-                int newIdx = (idxLang + dir + codesLangue.Count)
-                           % codesLangue.Count;
-                SelectionnerLangue(newIdx);
-                break;
-        }
+        int idx = codesLangue.IndexOf(
+            LocalisationManager.Instance?.GetLangueActuelle() ?? "fr");
+        int newIdx = (idx + dir + codesLangue.Count) % codesLangue.Count;
+        SelectionnerLangue(newIdx);
     }
 
     void SurlígnerNav()
     {
-        // Sliders — scale si actif
         if (sliderMusique != null)
             sliderMusique.transform.localScale =
                 navIndex == 0 ? Vector3.one * 1.05f : Vector3.one;
@@ -288,12 +326,10 @@ public class OptionsManager : MonoBehaviour
             sliderVFX.transform.localScale =
                 navIndex == 1 ? Vector3.one * 1.05f : Vector3.one;
 
-        // Boutons
         styleBtnRetour?.SetSelectionne(navIndex == 3);
         styleBtnQuitterJeu?.SetSelectionne(navIndex == 4);
     }
 
-    // ── Langue ────────────────────────────────────────────────────────────────
     void SelectionnerLangue(int index)
     {
         if (index < 0 || index >= codesLangue.Count) return;
