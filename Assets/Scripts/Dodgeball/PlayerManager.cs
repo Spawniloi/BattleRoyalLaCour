@@ -24,6 +24,10 @@ public class PlayerManager : MonoBehaviour
         Initialize();
         TeamInitialize();
     }
+    private void Update()
+    {
+        //Kill();
+    }
 
     #region PLAYER_INPUTS_REGION
     public void OnThrow(InputAction.CallbackContext context)
@@ -166,22 +170,23 @@ public class PlayerManager : MonoBehaviour
 
 
     // EDITOR CHEATS
-    void Kill(Unit unit)
+    void DebugDeath(Unit unit)
     {
         unit.isAlive = false;
 
         print($"{unit.name} is Killed !");
         SwitchToClosestUnit(unit);
 
+        GameManager.Instance.CheckVictory();
         Destroy(unit.gameObject);
     }
 
-    private void DebugDeath()
+    private void Kill()
     {
         if (Input.GetKeyDown(KeyCode.X))
         {
             Unit deadUnit = CurrentUnit;
-            Kill(deadUnit);
+            DebugDeath(deadUnit);
         }
     }
 }

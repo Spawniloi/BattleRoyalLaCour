@@ -32,7 +32,7 @@ public class BallSpawner : MonoBehaviour
 
     private void OnDisable()
     {
-        
+        CancelInvoke(nameof(SpawnBall));
     }
 
     void SpawnBall()

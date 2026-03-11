@@ -75,7 +75,7 @@ public class GameManager : MonoBehaviour
         ballSpawner.enabled = false;
         Debug.Log("Game over");
 
-        UpdateRemainingUnits();
+        PrintGameSummary();
     }
 
     #endregion
@@ -200,8 +200,7 @@ public class GameManager : MonoBehaviour
     {
         teamScores.Clear();
 
-        // Pour chaque équipe présente
-        for (int i = 0; i < 4; i++) // ou le nombre d’équipes réelles
+        for (int i = 0; i < inputManager.playerCount; i++)
         {
             TeamScore ts = new TeamScore();
             ts.teamID = i;
@@ -219,6 +218,34 @@ public class GameManager : MonoBehaviour
                 if (teamScores.ContainsKey(u.teamID))
                     teamScores[u.teamID].unitsRemaining++;
             }
+        }
+    }
+
+    private void PrintGameSummary()
+    {
+        UpdateRemainingUnits();
+
+        // Determine winner by Score
+        TeamScore winner = null;
+        foreach (TeamScore ts in teamScores.Values)
+        {
+            if (winner == null || ts.TotalScore > winner.TotalScore)
+                winner = ts;
+        }
+
+        Debug.Log($"Équipe Vainqueur : {winner.teamID}");
+
+        // Afficher le détail pour chaque équipe
+        foreach (var ts in teamScores.Values)
+        {
+            Debug.Log(
+                $"Équipe : {ts.teamID}\n" +
+                $"Score d’équipe : {ts.TotalScore}\n" +
+                $"+20 par élimination : {ts.eliminations}\n" +
+                $"+5 par balle ramassée : {ts.ballsPicked}\n" +
+                $"+7 par balles envoyées : {ts.ballsThrown}\n" +
+                $"+10 par unité restante : {ts.unitsRemaining}"
+            );
         }
     }
 
@@ -248,4 +275,9 @@ public class TeamScore
             return score;
         }
     }
+
+
+    // This is how to access one specific stat, in this case Second Team Elimination.
+    // int eliminations = GameManager.Instance.teamScores[1].eliminations;
+    // Debug.Log(eliminations);
 }
