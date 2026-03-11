@@ -46,7 +46,7 @@ public class ResultatsManager : MonoBehaviour
     public GameObject podiumVisuelPrefab;
 
     [Header("Podium — taille prefabs")]
-    public float echellePodium = 2f; // ← ajuste dans Inspector
+    public float echellePodium = 2f;
 
     [Header("Sucette or")]
     public GameObject prefabSucetteOr;
@@ -56,6 +56,11 @@ public class ResultatsManager : MonoBehaviour
     public Button btnContinuer;
     public Button btnMenu;
     public Button btnQuitter;
+
+    [Header("Textes boutons")]
+    public TextMeshProUGUI txtBtnContinuer;
+    public TextMeshProUGUI txtBtnMenu;
+    public TextMeshProUGUI txtBtnQuitter;
 
     [Header("Audio")]
     public AudioSource sourceAudio;
@@ -75,8 +80,15 @@ public class ResultatsManager : MonoBehaviour
     private int ligneActuelle = 0;
     private bool dejàEnvoye = false;
 
+    // ── Raccourci localisation ────────────────────────────────────────────────
+    string L(string cle, params string[] args)
+        => LocalisationManager.Instance != null
+            ? LocalisationManager.Instance.Get(cle, args)
+            : cle;
+
     void Start()
     {
+        // ── Ardoise selon jeu ─────────────────────────────────────────────────
         if (ardoise != null)
         {
             switch (GameData.jeuActuel)
@@ -95,10 +107,23 @@ public class ResultatsManager : MonoBehaviour
                     break;
             }
         }
+
+        // ── Textes boutons traduits ───────────────────────────────────────────
+        if (txtBtnContinuer != null)
+            txtBtnContinuer.text = L("resultats_btn_continuer");
+        if (txtBtnMenu != null)
+            txtBtnMenu.text = L("resultats_btn_menu");
+        if (txtBtnQuitter != null)
+            txtBtnQuitter.text = L("resultats_btn_quitter");
+
+        // ── Abonne aux changements de langue ──────────────────────────────────
+        if (LocalisationManager.Instance != null)
+            LocalisationManager.Instance.onTraductionsChargees
+                += MettreAJourTextesBoutons;
+
         partie = GameData.dernierePartie;
         if (partie == null) partie = GenererMock();
 
-        // Tableau — trié par playerID
         classes = partie.joueurs
             .OrderBy(j => j.playerID)
             .ToList();
@@ -108,6 +133,23 @@ public class ResultatsManager : MonoBehaviour
         btnQuitter?.onClick.AddListener(Quitter);
 
         StartCoroutine(AfficherResultats());
+    }
+
+    void OnDestroy()
+    {
+        if (LocalisationManager.Instance != null)
+            LocalisationManager.Instance.onTraductionsChargees
+                -= MettreAJourTextesBoutons;
+    }
+
+    void MettreAJourTextesBoutons()
+    {
+        if (txtBtnContinuer != null)
+            txtBtnContinuer.text = L("resultats_btn_continuer");
+        if (txtBtnMenu != null)
+            txtBtnMenu.text = L("resultats_btn_menu");
+        if (txtBtnQuitter != null)
+            txtBtnQuitter.text = L("resultats_btn_quitter");
     }
 
     // ── Séquence principale ───────────────────────────────────────────────────
@@ -127,7 +169,7 @@ public class ResultatsManager : MonoBehaviour
 
         float[] posX = { colLabel, colJ1, colJ2, colJ3, colJ4 };
 
-        // ── En-tête Jx colorés ────────────────────────────────────────────────
+        // ── En-tête joueurs colorés ───────────────────────────────────────────
         for (int j = 0; j < classes.Count; j++)
         {
             PlayerData data = GameData.GetJoueur(classes[j].playerID);
@@ -136,20 +178,22 @@ public class ResultatsManager : MonoBehaviour
 
             TextMeshProUGUI tmp = CreerCell(
                 coul, tailleEntete, posX[j + 1]);
-            tmp.text = $"J{classes[j].playerID}";
+            tmp.text = L("classement_nom",
+                         classes[j].playerID.ToString());
         }
 
         ligneActuelle++;
         yield return new WaitForSeconds(delaiEntreLignes);
 
-        // ── Lignes stats ──────────────────────────────────────────────────────
-        string[] labels = {
-            "Splash !",
-            "Cache !",
-            "Hop !",
-            "Ensemble !",
-            "Mechant !",
-            "Points !"
+        // ── Lignes stats traduites ────────────────────────────────────────────
+        string[] labels =
+        {
+            L("resultats_stat_splash"),
+            L("resultats_stat_cache"),
+            L("resultats_stat_hop"),
+            L("resultats_stat_ensemble"),
+            L("resultats_stat_mechant"),
+            L("resultats_stat_points"),
         };
 
         for (int statIndex = 0; statIndex < 6; statIndex++)
@@ -157,14 +201,12 @@ public class ResultatsManager : MonoBehaviour
             List<TextMeshProUGUI> tmps = new List<TextMeshProUGUI>();
             List<string> textes = new List<string>();
 
-            // Label
             TextMeshProUGUI tmpLabel = CreerCell(
                 couleurOr, tailleJoueurs, posX[0]);
             tmpLabel.text = "";
             tmps.Add(tmpLabel);
             textes.Add(labels[statIndex]);
 
-            // Valeurs joueurs
             for (int j = 0; j < classes.Count; j++)
             {
                 var jr = classes[j];
@@ -232,11 +274,9 @@ public class ResultatsManager : MonoBehaviour
         for (int i = 0; i < maxLen; i++)
         {
             JouerSonCraie();
-
             for (int j = 0; j < tmps.Count; j++)
                 if (i < textes[j].Length)
                     tmps[j].text += textes[j][i];
-
             yield return new WaitForSeconds(vitesseEcriture);
         }
     }
@@ -251,13 +291,11 @@ public class ResultatsManager : MonoBehaviour
     // ── Podium ────────────────────────────────────────────────────────────────
     IEnumerator AnimerPodium()
     {
-        // Tri par score — plus faible en premier
         List<JoueurResultat> parScore = partie.joueurs
             .OrderBy(j => j.score)
             .ThenBy(j => j.stats.tempsMaire)
             .ToList();
 
-        // Spawns actifs selon nb joueurs — plus faible en premier
         List<Transform> spawnsActifs = new List<Transform>();
         int nb = partie.nbJoueurs;
         if (nb >= 4 && spawn4e != null) spawnsActifs.Add(spawn1er);
@@ -273,24 +311,18 @@ public class ResultatsManager : MonoBehaviour
             Transform pos = spawnsActifs[i];
 
             GameObject go = Instantiate(
-                podiumVisuelPrefab,
-                pos.position,
-                Quaternion.identity);
-
+                podiumVisuelPrefab, pos.position, Quaternion.identity);
             go.transform.SetParent(pos, false);
             go.transform.localPosition = Vector3.zero;
             go.transform.localScale = Vector3.zero;
 
             PlayerData data = GameData.GetJoueur(jr.playerID);
             PodiumVisuel pv = go.GetComponent<PodiumVisuel>();
-
-            if (pv != null && data != null)
-                pv.AppliquerData(data);
+            if (pv != null && data != null) pv.AppliquerData(data);
 
             yield return StartCoroutine(
                 ScaleUpBounce(go.transform,
-                Vector3.one * echellePodium, 0.4f));
-
+                              Vector3.one * echellePodium, 0.4f));
             yield return new WaitForSeconds(0.2f);
         }
     }
@@ -304,7 +336,7 @@ public class ResultatsManager : MonoBehaviour
             float s = p < 0.7f
                 ? Mathf.Lerp(0f, cible.x * 1.2f, p / 0.7f)
                 : Mathf.Lerp(cible.x * 1.2f, cible.x,
-                  (p - 0.7f) / 0.3f);
+                             (p - 0.7f) / 0.3f);
             t.localScale = new Vector3(s, s, 1f);
             timer += Time.deltaTime;
             yield return null;
@@ -317,7 +349,6 @@ public class ResultatsManager : MonoBehaviour
     {
         if (conteneurSucette == null) yield break;
 
-        // Gagnant = score le plus haut
         JoueurResultat gagnant = partie.joueurs
             .OrderByDescending(j => j.score)
             .ThenByDescending(j => j.stats.tempsMaire)
@@ -328,7 +359,6 @@ public class ResultatsManager : MonoBehaviour
             ? dataGagnant.GetCouleurDossard() : couleurOr;
         string hex = ColorUtility.ToHtmlStringRGB(coulGagnant);
 
-        // Texte
         GameObject go = new GameObject("TexteSucette");
         go.transform.SetParent(conteneurSucette, false);
         go.transform.localPosition = Vector3.zero;
@@ -340,8 +370,9 @@ public class ResultatsManager : MonoBehaviour
         tmp.alignment = TextAlignmentOptions.Center;
         tmp.text = "";
 
-        string texteBrut =
-            $"J{gagnant.playerID} gagne une sucette en OR !";
+        // Nom sans couleur pour l'écriture lettre par lettre
+        string nomBrut = L("classement_nom", gagnant.playerID.ToString());
+        string texteBrut = L("resultats_sucette", nomBrut);
 
         foreach (char c in texteBrut)
         {
@@ -350,11 +381,11 @@ public class ResultatsManager : MonoBehaviour
             yield return new WaitForSeconds(vitesseEcriture * 0.5f);
         }
 
-        tmp.text =
-            $"<color=#{hex}>J{gagnant.playerID}</color>" +
-            " gagne une sucette en OR !";
+        // Remet le nom en couleur
+        string nomColore = $"<color=#{hex}>{nomBrut}</color>";
+        tmp.text = texteBrut.Replace(nomBrut, nomColore);
 
-        // Prefab sucette
+        // ── Prefab sucette ────────────────────────────────────────────────────
         if (prefabSucetteOr != null)
         {
             GameObject sucette = Instantiate(
@@ -370,7 +401,7 @@ public class ResultatsManager : MonoBehaviour
             {
                 float p = timer / 0.8f;
                 float s = Mathf.Lerp(0f, 1f,
-                            Mathf.Sin(p * Mathf.PI * 0.5f));
+                              Mathf.Sin(p * Mathf.PI * 0.5f));
                 float rot = Mathf.Lerp(-540f, 0f, p);
                 sucette.transform.localScale = new Vector3(s, s, 1f);
                 sucette.transform.localRotation =
@@ -409,10 +440,7 @@ public class ResultatsManager : MonoBehaviour
             }
         }
         else
-        {
-            // Encore des jeux dans cette manche
             SceneManager.LoadScene("Scene_ChoixJeu");
-        }
     }
 
     void RetourMenu()
@@ -432,15 +460,14 @@ public class ResultatsManager : MonoBehaviour
 
     void EnvoyerDonnees()
     {
-        if (dejàEnvoye) return; // ← évite le double envoi
+        if (dejàEnvoye) return;
         dejàEnvoye = true;
-
         GoogleSheetsExporter exporter =
             FindFirstObjectByType<GoogleSheetsExporter>();
         exporter?.Exporter(partie);
     }
 
-    // ── Mock pour tester ──────────────────────────────────────────────────────
+    // ── Mock ──────────────────────────────────────────────────────────────────
     PartieData GenererMock()
     {
         PartieData p = new PartieData();

@@ -59,11 +59,16 @@ public class LocalisationManager : MonoBehaviour
 
         using (UnityWebRequest req = UnityWebRequest.Get(url))
         {
+
             req.timeout = 10;
             yield return req.SendWebRequest();
 
             if (req.result == UnityWebRequest.Result.Success)
             {
+                Debug.Log("[Localisation] Réponse brute : " +
+            req.downloadHandler.text.Substring(0,
+            Mathf.Min(200, req.downloadHandler.text.Length)));
+
                 bool ok = ParseJSON(req.downloadHandler.text);
 
                 if (ok)

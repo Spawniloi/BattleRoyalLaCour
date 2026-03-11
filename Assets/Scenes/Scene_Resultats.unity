@@ -892,6 +892,9 @@ MonoBehaviour:
   btnContinuer: {fileID: 215132784}
   btnMenu: {fileID: 1401383069}
   btnQuitter: {fileID: 389958691}
+  txtBtnContinuer: {fileID: 0}
+  txtBtnMenu: {fileID: 0}
+  txtBtnQuitter: {fileID: 0}
   sourceAudio: {fileID: 1089462186}
   sfxCraie: {fileID: 0}
   vitesseEcriture: 0.03
@@ -1040,7 +1043,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 903165379ad194649b71dfc240f110a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  urlScript: https://script.google.com/macros/s/AKfycbw4QUKLCReJmnyPFP1AgmYgpEO5xcxO4ws0m6AVAmfyOGWExjAX1599uEpCOpiNBS_k/exec
+  urlScript: https://script.google.com/macros/s/AKfycbwngTX60PtzP56UIVN-hOoP0MJ_RR28mSTqrqoT4I2cnL6frSff4YF_ldq_IC6wEuZ_/exec
 --- !u!1 &1200572652
 GameObject:
   m_ObjectHideFlags: 0

@@ -9,6 +9,9 @@ public class HubManager : MonoBehaviour
     [Header("Panel Config")]
     public PanelConfigManager panelConfig;
 
+    [Header("Panel Options")]
+    public OptionsManager panelOptions;
+
     [Header("Boutons")]
     public Button btnJouer;
     public Button btnPerso;
@@ -28,6 +31,12 @@ public class HubManager : MonoBehaviour
     public AudioClip sfxValider;
     public AudioClip sfxRetour;
 
+    // ── Raccourci localisation ────────────────────────────────────────────────
+    string L(string cle, params string[] args)
+        => LocalisationManager.Instance != null
+            ? LocalisationManager.Instance.Get(cle, args)
+            : cle;
+
     void Start()
     {
         // Musique
@@ -45,9 +54,27 @@ public class HubManager : MonoBehaviour
         btnOptions?.onClick.AddListener(AllerOptions);
         btnQuitter?.onClick.AddListener(Quitter);
 
-        // Titre animé
+        // Titre animé traduit
         if (textTitre != null)
-            StartCoroutine(EcrireTitre("BATTLE ROYAL LA COUR"));
+            StartCoroutine(EcrireTitre(L("hub_titre")));
+
+        // Abonne au changement de langue pour le titre
+        if (LocalisationManager.Instance != null)
+            LocalisationManager.Instance.onTraductionsChargees
+                += MettreAJourTitre;
+    }
+
+    void OnDestroy()
+    {
+        if (LocalisationManager.Instance != null)
+            LocalisationManager.Instance.onTraductionsChargees
+                -= MettreAJourTitre;
+    }
+
+    void MettreAJourTitre()
+    {
+        if (textTitre != null)
+            StartCoroutine(EcrireTitre(L("hub_titre")));
     }
 
     // ── Titre effet craie ─────────────────────────────────────────────────────
@@ -89,7 +116,7 @@ public class HubManager : MonoBehaviour
     void AllerOptions()
     {
         JouerSFX(sfxValider);
-        SceneManager.LoadScene("Scene_Options");
+        panelOptions?.Ouvrir();
     }
 
     void Quitter()

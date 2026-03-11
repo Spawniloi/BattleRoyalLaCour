@@ -17,37 +17,42 @@ public class LigneClassement : MonoBehaviour
     public Color couleurAutre = new Color(0.5f, 0.5f, 0.5f, 0.2f);
     public Color couleurZero = new Color(0.3f, 0.3f, 0.3f, 0.15f);
 
+    // ── Raccourci localisation ────────────────────────────────────────────────
+    string L(string cle, params string[] args)
+        => LocalisationManager.Instance != null
+            ? LocalisationManager.Instance.Get(cle, args)
+            : cle;
+
     public void Appliquer(
-        int rang,
-        int playerID,
-        float score,
-        int sucettes)
+        int rang, int playerID, float score, int sucettes)
     {
         PlayerData data = GameData.GetJoueur(playerID);
 
-        // ── Rang ──────────────────────────────────────────────────────────────
+        // ── Rang traduit ──────────────────────────────────────────────────────
         if (txtRang != null)
             txtRang.text = rang switch
             {
-                0 => "-",
-                1 => "1er",
-                2 => "2e",
-                3 => "3e",
-                _ => "4e"
+                0 => L("classement_rang_0"),
+                1 => L("classement_rang_1"),
+                2 => L("classement_rang_2"),
+                3 => L("classement_rang_3"),
+                _ => L("classement_rang_4"),
             };
 
-        // ── Nom coloré ────────────────────────────────────────────────────────
+        // ── Nom coloré traduit ────────────────────────────────────────────────
         if (txtNom != null && data != null)
         {
             string hex = ColorUtility.ToHtmlStringRGB(
                 data.GetCouleurDossard());
-            txtNom.text = $"<color=#{hex}>J{playerID}</color>";
+            string nom = L("classement_nom", playerID.ToString());
+            txtNom.text = $"<color=#{hex}>{nom}</color>";
         }
 
-        // ── Sucettes ──────────────────────────────────────────────────────────
+        // ── Sucettes traduites ────────────────────────────────────────────────
         if (txtSucettes != null)
             txtSucettes.text = sucettes > 0
-                ? $"x{sucettes}" : "0";
+                ? L("classement_sucettes", sucettes.ToString())
+                : L("classement_sucettes_zero");
 
         // ── Fond couleur rang ─────────────────────────────────────────────────
         if (imgFond != null)
@@ -57,7 +62,7 @@ public class LigneClassement : MonoBehaviour
                 1 => couleur1er,
                 2 => couleur2e,
                 3 => couleur3e,
-                _ => couleurAutre
+                _ => couleurAutre,
             };
 
         // ── PodiumVisuel ──────────────────────────────────────────────────────
