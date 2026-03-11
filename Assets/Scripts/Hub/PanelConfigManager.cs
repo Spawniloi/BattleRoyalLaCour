@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
 using TMPro;
 using Unity.VisualScripting;
@@ -53,6 +54,7 @@ public class PanelConfigManager : MonoBehaviour
     private List<BoutonStylee> stylesNav = new List<BoutonStylee>();
     private int indexNav = 2; // Continuer par défaut
     private bool navActif = false;
+    private bool inputBloque = false;
 
     void Awake()
     {
@@ -112,15 +114,48 @@ public class PanelConfigManager : MonoBehaviour
     // ── Ferme ─────────────────────────────────────────────────────────────────
     public void Fermer()
     {
-        JouerSFX(sfxRetour);
         navActif = false;
+        JouerSFX(sfxRetour);
+        StartCoroutine(BloquerInputUnFrame()); // ← nom correct
         panelConfig?.SetActive(false);
+    }
+
+    IEnumerator BloquerInputUnFrame()
+    {
+        inputBloque = true;
+        yield return null;
+
+        bool encoreAppuye = true;
+        while (encoreAppuye)
+        {
+            encoreAppuye = false;
+
+            if (Keyboard.current != null)
+            {
+                if (Keyboard.current.escapeKey.isPressed) encoreAppuye = true;
+                if (Keyboard.current.spaceKey.isPressed) encoreAppuye = true;
+                if (Keyboard.current.enterKey.isPressed) encoreAppuye = true;
+            }
+
+            foreach (var gp in Gamepad.all)
+            {
+                if (gp.startButton.isPressed) encoreAppuye = true;
+                if (gp.buttonEast.isPressed) encoreAppuye = true;
+                if (gp.buttonSouth.isPressed) encoreAppuye = true;
+            }
+
+            if (encoreAppuye) yield return null;
+        }
+
+        yield return null;
+        inputBloque = false;
     }
 
     // ── Update ────────────────────────────────────────────────────────────────
     void Update()
     {
         if (!navActif) return;
+        if (inputBloque) return;
 
         var kb = Keyboard.current;
         var gp = Gamepad.all.Count > 0 ? Gamepad.all[0] : null;
