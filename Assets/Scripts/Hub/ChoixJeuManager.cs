@@ -212,7 +212,7 @@ public class ChoixJeuManager : MonoBehaviour
         string scene = jeu switch
         {
             "maire" => "Scene_MaireCoraille",
-            "ballon" => "Scene_BallonPrisonnier",
+            "ballon" => "Scene_Dodgeball",
             "snake" => "Scene_SnakeRacaille",
             _ => "Scene_MaireCoraille"
         };

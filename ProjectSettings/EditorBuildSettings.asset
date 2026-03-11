@@ -15,6 +15,9 @@ EditorBuildSettings:
     path: Assets/Scenes/Scene_MaireCoraille.unity
     guid: 089c7ef66daec2141b234fdb14956fb8
   - enabled: 1
+    path: Assets/Scenes/Scene_Dodgeball.unity
+    guid: e0b9c339d77b85043bee6a9dc8ea6897
+  - enabled: 1
     path: Assets/Scenes/Scene_Resultats.unity
     guid: 1770b8fc44cb6b14b9dc0294bd75ab34
   - enabled: 1

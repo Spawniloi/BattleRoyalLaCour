@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -70,13 +71,20 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("Game playing");
     }
+
     private void EndGame()
     {
-        ballSpawner.enabled = false;
-        Debug.Log("Game over");
-
+        if (ballSpawner != null) ballSpawner.enabled = false;
         PrintGameSummary();
+        StartCoroutine(AllerChoixJeu());
     }
+
+    IEnumerator AllerChoixJeu()
+    {
+        yield return new WaitForSeconds(1.5f);
+        SceneManager.LoadScene("Scene_ChoixJeu");
+    }
+    
 
     #endregion
 
