@@ -25,10 +25,12 @@ public class IntroManager : MonoBehaviour
         {
             PlayerData data = GameData.GetJoueur(maire.playerID);
             Color coul = data.GetCouleur();
+            string hex = ColorUtility.ToHtmlStringRGB(coul);
+            string annonce = LocalisationManager.Instance != null
+                ? LocalisationManager.Instance.Get("maire_annonce")
+                : "est le 🦈 Requin !";
 
-            labelAnnonce.text = $"<color=#{ColorUtility.ToHtmlStringRGB(coul)}>" +
-                                $"J{maire.playerID}</color>" +
-                                $"\nest le 🦈 Requin !";
+            labelAnnonce.text = $"<color=#{hex}>J{maire.playerID}</color>\n{annonce}";
             labelAnnonce.gameObject.SetActive(true);
         }
 
@@ -42,7 +44,15 @@ public class IntroManager : MonoBehaviour
         if (labelCompte != null)
             labelCompte.gameObject.SetActive(true);
 
-        string[] comptes = { "3", "2", "1", "JOUEZ !" };
+        string[] comptes = LocalisationManager.Instance != null
+    ? new string[]
+    {
+        LocalisationManager.Instance.Get("maire_compte_1"),
+        LocalisationManager.Instance.Get("maire_compte_2"),
+        LocalisationManager.Instance.Get("maire_compte_3"),
+        LocalisationManager.Instance.Get("maire_compte_go"),
+    }
+    : new string[] { "3", "2", "1", "JOUEZ !" };
 
         foreach (string texte in comptes)
         {

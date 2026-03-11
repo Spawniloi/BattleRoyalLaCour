@@ -1331,6 +1331,7 @@ GameObject:
   - component: {fileID: 200285695}
   - component: {fileID: 200285697}
   - component: {fileID: 200285696}
+  - component: {fileID: 200285698}
   m_Layer: 5
   m_Name: LabelJoueur
   m_TagString: Untagged
@@ -1456,6 +1457,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 200285694}
   m_CullTransparentMesh: 1
+--- !u!114 &200285698
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 200285694}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7df693765c409a43809b92da20fd6a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cle: slider_joueur_label
+  parametres: []
 --- !u!1 &223951491
 GameObject:
   m_ObjectHideFlags: 0
@@ -4127,6 +4142,7 @@ GameObject:
   - component: {fileID: 808647788}
   - component: {fileID: 808647790}
   - component: {fileID: 808647789}
+  - component: {fileID: 808647791}
   m_Layer: 5
   m_Name: LabelAnnonce
   m_TagString: Untagged
@@ -4252,6 +4268,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 808647787}
   m_CullTransparentMesh: 1
+--- !u!114 &808647791
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 808647787}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7df693765c409a43809b92da20fd6a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cle: maire_annonce
+  parametres: []
 --- !u!1 &839788527
 GameObject:
   m_ObjectHideFlags: 0
@@ -5129,6 +5159,7 @@ GameObject:
   - component: {fileID: 1071420635}
   - component: {fileID: 1071420637}
   - component: {fileID: 1071420636}
+  - component: {fileID: 1071420638}
   m_Layer: 5
   m_Name: LabelJoueur
   m_TagString: Untagged
@@ -5254,6 +5285,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1071420634}
   m_CullTransparentMesh: 1
+--- !u!114 &1071420638
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1071420634}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7df693765c409a43809b92da20fd6a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cle: slider_joueur_label
+  parametres: []
 --- !u!4 &1073130124 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2978430437475222860, guid: 87b6f2140db5eb24d805f5138da8adc9, type: 3}
@@ -7770,6 +7815,7 @@ GameObject:
   - component: {fileID: 1689429524}
   - component: {fileID: 1689429526}
   - component: {fileID: 1689429525}
+  - component: {fileID: 1689429527}
   m_Layer: 5
   m_Name: LabelJoueur
   m_TagString: Untagged
@@ -7895,6 +7941,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1689429523}
   m_CullTransparentMesh: 1
+--- !u!114 &1689429527
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1689429523}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7df693765c409a43809b92da20fd6a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cle: slider_joueur_label
+  parametres: []
 --- !u!1 &1701078213
 GameObject:
   m_ObjectHideFlags: 0
@@ -9141,6 +9201,7 @@ GameObject:
   - component: {fileID: 2041738506}
   - component: {fileID: 2041738508}
   - component: {fileID: 2041738507}
+  - component: {fileID: 2041738509}
   m_Layer: 5
   m_Name: LabelJoueur
   m_TagString: Untagged
@@ -9266,6 +9327,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2041738505}
   m_CullTransparentMesh: 1
+--- !u!114 &2041738509
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2041738505}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7df693765c409a43809b92da20fd6a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cle: slider_joueur_label
+  parametres: []
 --- !u!1 &2074578137
 GameObject:
   m_ObjectHideFlags: 0
