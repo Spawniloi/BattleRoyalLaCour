@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Unit : MonoBehaviour
 {
@@ -28,7 +28,6 @@ public class Unit : MonoBehaviour
 
     void Start()
     {
-        // Trouve la zone selon teamID
         TeamZones[] zones = FindObjectsOfType<TeamZones>();
         foreach (TeamZones z in zones)
         {
@@ -39,10 +38,22 @@ public class Unit : MonoBehaviour
             }
         }
 
-        // Applique visuel APRES tous les Awake
         PlayerData data = GameData.GetJoueur(teamID + 1);
         if (data != null && dodgeballVisuel != null)
             dodgeballVisuel.AppliquerData(data);
+
+        // ← Couleur dossard sur selectCircle
+        if (selectCircle != null && data != null)
+        {
+            SpriteRenderer srCircle =
+                selectCircle.GetComponent<SpriteRenderer>();
+            if (srCircle != null)
+            {
+                Color c = data.GetCouleurDossard();
+                c.a = 0.5f;
+                srCircle.color = c;
+            }
+        }
     }
 
     void Update()
@@ -62,7 +73,7 @@ public class Unit : MonoBehaviour
         isControlled = value;
         playerController.enabled = value;
         if (dodgeballVisuel != null)
-            dodgeballVisuel.SetControle(value);
+            dodgeballVisuel.SetControle(value); // ← doit être là
         if (selectCircle != null)
             selectCircle.SetActive(value);
     }

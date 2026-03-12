@@ -140,6 +140,7 @@ MonoBehaviour:
   srDossard: {fileID: 7585300170003495421}
   srJambes: {fileID: 7041073312066972720}
   srTete: {fileID: 2799985336653261361}
+  srCercle: {fileID: 4351706578572214400}
   spriteCorps: {fileID: 21300000, guid: 5b8d0a29db19a0147ab90c3cfce7e36a, type: 3}
   spriteDossard: {fileID: 21300000, guid: b823d66016e1ae74798be2f4ea9e2144, type: 3}
   spriteJambes: {fileID: 21300000, guid: afab5ca8cb94d5749b8ee0d0294b833d, type: 3}
@@ -150,8 +151,12 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 5c47632800aaa05479f718fde6f0058d, type: 3}
   - {fileID: 21300000, guid: 120898ad3b1526d418929c158a7569d0, type: 3}
   - {fileID: 21300000, guid: e645fee68a4b7dd4aa1938c2fab2d804, type: 3}
+  framesMarche: []
+  vitesseAnim: 8
   couleurJambes: {r: 0.1, g: 0.15, b: 0.3, a: 1}
-  cercleSel: {fileID: 5185292217263247930}
+  alphaCercle: 0.4
+  forceKnockback: 12
+  dureeKnockback: 0.2
 --- !u!1 &187748243535112782
 GameObject:
   m_ObjectHideFlags: 0
@@ -161,6 +166,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 636320907093685824}
+  - component: {fileID: 7289875938880389252}
   m_Layer: 0
   m_Name: CercleSel
   m_TagString: Untagged
@@ -183,6 +189,61 @@ Transform:
   m_Children: []
   m_Father: {fileID: 8619485167213051037}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!212 &7289875938880389252
+SpriteRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 187748243535112782}
+  m_Enabled: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 0
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_Sprite: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_FlipX: 0
+  m_FlipY: 0
+  m_DrawMode: 0
+  m_Size: {x: 1, y: 1}
+  m_AdaptiveModeThreshold: 0.5
+  m_SpriteTileMode: 0
+  m_WasSpriteAssigned: 0
+  m_MaskInteraction: 0
+  m_SpriteSortPoint: 0
 --- !u!1 &246135332977408544
 GameObject:
   m_ObjectHideFlags: 0
@@ -497,6 +558,7 @@ MonoBehaviour:
   srDossard: {fileID: 7781274118542302513}
   srJambes: {fileID: 1516883053845511906}
   srTete: {fileID: 7501087606263244759}
+  srCercle: {fileID: 7534711958972015568}
   spriteCorps: {fileID: 21300000, guid: 5b8d0a29db19a0147ab90c3cfce7e36a, type: 3}
   spriteDossard: {fileID: 21300000, guid: b823d66016e1ae74798be2f4ea9e2144, type: 3}
   spriteJambes: {fileID: 21300000, guid: afab5ca8cb94d5749b8ee0d0294b833d, type: 3}
@@ -507,8 +569,12 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 5c47632800aaa05479f718fde6f0058d, type: 3}
   - {fileID: 21300000, guid: 120898ad3b1526d418929c158a7569d0, type: 3}
   - {fileID: 21300000, guid: e645fee68a4b7dd4aa1938c2fab2d804, type: 3}
+  framesMarche: []
+  vitesseAnim: 8
   couleurJambes: {r: 0.1, g: 0.15, b: 0.3, a: 1}
-  cercleSel: {fileID: 5771548630076218566}
+  alphaCercle: 0.4
+  forceKnockback: 12
+  dureeKnockback: 0.2
 --- !u!1 &1497125594553236155
 GameObject:
   m_ObjectHideFlags: 0
@@ -1048,6 +1114,7 @@ MonoBehaviour:
   srDossard: {fileID: 9031889430018834144}
   srJambes: {fileID: 1559364568465427673}
   srTete: {fileID: 8181019317570508011}
+  srCercle: {fileID: 216197633148290426}
   spriteCorps: {fileID: 21300000, guid: 5b8d0a29db19a0147ab90c3cfce7e36a, type: 3}
   spriteDossard: {fileID: 21300000, guid: b823d66016e1ae74798be2f4ea9e2144, type: 3}
   spriteJambes: {fileID: 21300000, guid: afab5ca8cb94d5749b8ee0d0294b833d, type: 3}
@@ -1058,8 +1125,12 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 5c47632800aaa05479f718fde6f0058d, type: 3}
   - {fileID: 21300000, guid: 120898ad3b1526d418929c158a7569d0, type: 3}
   - {fileID: 21300000, guid: e645fee68a4b7dd4aa1938c2fab2d804, type: 3}
+  framesMarche: []
+  vitesseAnim: 8
   couleurJambes: {r: 0.1, g: 0.15, b: 0.3, a: 1}
-  cercleSel: {fileID: 4869664713756173929}
+  alphaCercle: 0.4
+  forceKnockback: 12
+  dureeKnockback: 0.2
 --- !u!1 &3428434013956160383
 GameObject:
   m_ObjectHideFlags: 0
@@ -1907,6 +1978,7 @@ MonoBehaviour:
   srDossard: {fileID: 4054800149574507041}
   srJambes: {fileID: 7361091658832495745}
   srTete: {fileID: 9207272111419246392}
+  srCercle: {fileID: 7289875938880389252}
   spriteCorps: {fileID: 21300000, guid: 5b8d0a29db19a0147ab90c3cfce7e36a, type: 3}
   spriteDossard: {fileID: 21300000, guid: b823d66016e1ae74798be2f4ea9e2144, type: 3}
   spriteJambes: {fileID: 21300000, guid: afab5ca8cb94d5749b8ee0d0294b833d, type: 3}
@@ -1917,8 +1989,12 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 5c47632800aaa05479f718fde6f0058d, type: 3}
   - {fileID: 21300000, guid: 120898ad3b1526d418929c158a7569d0, type: 3}
   - {fileID: 21300000, guid: e645fee68a4b7dd4aa1938c2fab2d804, type: 3}
+  framesMarche: []
+  vitesseAnim: 8
   couleurJambes: {r: 0.1, g: 0.15, b: 0.3, a: 1}
-  cercleSel: {fileID: 187748243535112782}
+  alphaCercle: 0.4
+  forceKnockback: 12
+  dureeKnockback: 0.2
 --- !u!1 &4563539522181895004
 GameObject:
   m_ObjectHideFlags: 0
@@ -2189,6 +2265,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1802265718893797784}
+  - component: {fileID: 216197633148290426}
   m_Layer: 0
   m_Name: CercleSel
   m_TagString: Untagged
@@ -2211,6 +2288,61 @@ Transform:
   m_Children: []
   m_Father: {fileID: 5908519648607405975}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!212 &216197633148290426
+SpriteRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4869664713756173929}
+  m_Enabled: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 0
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_Sprite: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_FlipX: 0
+  m_FlipY: 0
+  m_DrawMode: 0
+  m_Size: {x: 1, y: 1}
+  m_AdaptiveModeThreshold: 0.5
+  m_SpriteTileMode: 0
+  m_WasSpriteAssigned: 0
+  m_MaskInteraction: 0
+  m_SpriteSortPoint: 0
 --- !u!1 &4959653109927887194
 GameObject:
   m_ObjectHideFlags: 0
@@ -2307,6 +2439,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 30807865085592841}
+  - component: {fileID: 4351706578572214400}
   m_Layer: 0
   m_Name: CercleSel
   m_TagString: Untagged
@@ -2329,6 +2462,61 @@ Transform:
   m_Children: []
   m_Father: {fileID: 848829968762974962}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!212 &4351706578572214400
+SpriteRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5185292217263247930}
+  m_Enabled: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 0
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_Sprite: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_FlipX: 0
+  m_FlipY: 0
+  m_DrawMode: 0
+  m_Size: {x: 1, y: 1}
+  m_AdaptiveModeThreshold: 0.5
+  m_SpriteTileMode: 0
+  m_WasSpriteAssigned: 0
+  m_MaskInteraction: 0
+  m_SpriteSortPoint: 0
 --- !u!1 &5215340522453794696
 GameObject:
   m_ObjectHideFlags: 0
@@ -2686,6 +2874,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5374549814040601422}
+  - component: {fileID: 7534711958972015568}
   m_Layer: 0
   m_Name: CercleSel
   m_TagString: Untagged
@@ -2708,6 +2897,61 @@ Transform:
   m_Children: []
   m_Father: {fileID: 8740386590775074696}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!212 &7534711958972015568
+SpriteRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5771548630076218566}
+  m_Enabled: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 0
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_Sprite: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_FlipX: 0
+  m_FlipY: 0
+  m_DrawMode: 0
+  m_Size: {x: 1, y: 1}
+  m_AdaptiveModeThreshold: 0.5
+  m_SpriteTileMode: 0
+  m_WasSpriteAssigned: 0
+  m_MaskInteraction: 0
+  m_SpriteSortPoint: 0
 --- !u!1 &5796728203078272507
 GameObject:
   m_ObjectHideFlags: 0
@@ -2717,6 +2961,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3899602341943861453}
+  - component: {fileID: 8926366529764349950}
   m_Layer: 0
   m_Name: CercleSel
   m_TagString: Untagged
@@ -2739,6 +2984,61 @@ Transform:
   m_Children: []
   m_Father: {fileID: 5216245264144677370}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!212 &8926366529764349950
+SpriteRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5796728203078272507}
+  m_Enabled: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 0
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_Sprite: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_FlipX: 0
+  m_FlipY: 0
+  m_DrawMode: 0
+  m_Size: {x: 1, y: 1}
+  m_AdaptiveModeThreshold: 0.5
+  m_SpriteTileMode: 0
+  m_WasSpriteAssigned: 0
+  m_MaskInteraction: 0
+  m_SpriteSortPoint: 0
 --- !u!1 &5840978933543331280
 GameObject:
   m_ObjectHideFlags: 0
@@ -4071,6 +4371,7 @@ MonoBehaviour:
   srDossard: {fileID: 639441891226502094}
   srJambes: {fileID: 6176100624822706511}
   srTete: {fileID: 6969811189983222108}
+  srCercle: {fileID: 8926366529764349950}
   spriteCorps: {fileID: 21300000, guid: 5b8d0a29db19a0147ab90c3cfce7e36a, type: 3}
   spriteDossard: {fileID: 21300000, guid: b823d66016e1ae74798be2f4ea9e2144, type: 3}
   spriteJambes: {fileID: 21300000, guid: afab5ca8cb94d5749b8ee0d0294b833d, type: 3}
@@ -4081,8 +4382,12 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 5c47632800aaa05479f718fde6f0058d, type: 3}
   - {fileID: 21300000, guid: 120898ad3b1526d418929c158a7569d0, type: 3}
   - {fileID: 21300000, guid: e645fee68a4b7dd4aa1938c2fab2d804, type: 3}
+  framesMarche: []
+  vitesseAnim: 8
   couleurJambes: {r: 0.1, g: 0.15, b: 0.3, a: 1}
-  cercleSel: {fileID: 5796728203078272507}
+  alphaCercle: 0.4
+  forceKnockback: 12
+  dureeKnockback: 0.2
 --- !u!1 &8665518003804971213
 GameObject:
   m_ObjectHideFlags: 0
