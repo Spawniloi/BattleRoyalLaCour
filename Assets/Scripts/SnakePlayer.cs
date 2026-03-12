@@ -21,6 +21,8 @@ public class SnakePlayer : MonoBehaviour
 
     public int maxBodySegments = 3;
 
+    ScoreManager scoreManager;
+
     public List<SnakeSegment> _bodySegments =new List<SnakeSegment>();
 
     void Start()
@@ -39,6 +41,8 @@ public class SnakePlayer : MonoBehaviour
             scoreText.gameObject.SetActive(showScore);
             UpdateScoreText();
         }
+
+        scoreManager = ScoreManager.FindFirstObjectByType<ScoreManager>();
 
         //SetupBody();
         //Score();
@@ -137,6 +141,8 @@ public class SnakePlayer : MonoBehaviour
     public void AddScore(int amount)
     {
         score += amount;
+        if (scoreManager != null)
+            scoreManager.AddScoreUI(playerID - 1, amount);
         //scoreText.text = name + " : " + score;
         UpdateScoreText();
         Debug.Log(name + " score :" + score);
