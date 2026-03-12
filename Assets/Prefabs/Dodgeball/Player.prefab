@@ -151,12 +151,19 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 5c47632800aaa05479f718fde6f0058d, type: 3}
   - {fileID: 21300000, guid: 120898ad3b1526d418929c158a7569d0, type: 3}
   - {fileID: 21300000, guid: e645fee68a4b7dd4aa1938c2fab2d804, type: 3}
-  framesMarche: []
+  framesMarche:
+  - {fileID: 21300000, guid: f835fa23186d3e54db4a4be21ffc6491, type: 3}
+  - {fileID: 21300000, guid: 817c8aaf154af3647912e44246301f21, type: 3}
+  - {fileID: 21300000, guid: 590ed3b17106eae4497e13b17e18624f, type: 3}
+  - {fileID: 21300000, guid: e7a02f31078bbee48a5111873ccc3c6a, type: 3}
   vitesseAnim: 8
   couleurJambes: {r: 0.1, g: 0.15, b: 0.3, a: 1}
   alphaCercle: 0.4
+  scaleCercle: 2
   forceKnockback: 12
   dureeKnockback: 0.2
+  scaleRebond: 1.4
+  dureeRebond: 0.15
 --- !u!1 &187748243535112782
 GameObject:
   m_ObjectHideFlags: 0
@@ -569,12 +576,19 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 5c47632800aaa05479f718fde6f0058d, type: 3}
   - {fileID: 21300000, guid: 120898ad3b1526d418929c158a7569d0, type: 3}
   - {fileID: 21300000, guid: e645fee68a4b7dd4aa1938c2fab2d804, type: 3}
-  framesMarche: []
+  framesMarche:
+  - {fileID: 21300000, guid: f835fa23186d3e54db4a4be21ffc6491, type: 3}
+  - {fileID: 21300000, guid: 817c8aaf154af3647912e44246301f21, type: 3}
+  - {fileID: 21300000, guid: 590ed3b17106eae4497e13b17e18624f, type: 3}
+  - {fileID: 21300000, guid: e7a02f31078bbee48a5111873ccc3c6a, type: 3}
   vitesseAnim: 8
   couleurJambes: {r: 0.1, g: 0.15, b: 0.3, a: 1}
   alphaCercle: 0.4
+  scaleCercle: 2
   forceKnockback: 12
   dureeKnockback: 0.2
+  scaleRebond: 1.4
+  dureeRebond: 0.15
 --- !u!1 &1497125594553236155
 GameObject:
   m_ObjectHideFlags: 0
@@ -1125,12 +1139,19 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 5c47632800aaa05479f718fde6f0058d, type: 3}
   - {fileID: 21300000, guid: 120898ad3b1526d418929c158a7569d0, type: 3}
   - {fileID: 21300000, guid: e645fee68a4b7dd4aa1938c2fab2d804, type: 3}
-  framesMarche: []
+  framesMarche:
+  - {fileID: 21300000, guid: f835fa23186d3e54db4a4be21ffc6491, type: 3}
+  - {fileID: 21300000, guid: 817c8aaf154af3647912e44246301f21, type: 3}
+  - {fileID: 21300000, guid: 590ed3b17106eae4497e13b17e18624f, type: 3}
+  - {fileID: 21300000, guid: e7a02f31078bbee48a5111873ccc3c6a, type: 3}
   vitesseAnim: 8
   couleurJambes: {r: 0.1, g: 0.15, b: 0.3, a: 1}
   alphaCercle: 0.4
+  scaleCercle: 2
   forceKnockback: 12
   dureeKnockback: 0.2
+  scaleRebond: 1.4
+  dureeRebond: 0.15
 --- !u!1 &3428434013956160383
 GameObject:
   m_ObjectHideFlags: 0
@@ -1989,12 +2010,19 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 5c47632800aaa05479f718fde6f0058d, type: 3}
   - {fileID: 21300000, guid: 120898ad3b1526d418929c158a7569d0, type: 3}
   - {fileID: 21300000, guid: e645fee68a4b7dd4aa1938c2fab2d804, type: 3}
-  framesMarche: []
+  framesMarche:
+  - {fileID: 21300000, guid: f835fa23186d3e54db4a4be21ffc6491, type: 3}
+  - {fileID: 21300000, guid: 817c8aaf154af3647912e44246301f21, type: 3}
+  - {fileID: 21300000, guid: 590ed3b17106eae4497e13b17e18624f, type: 3}
+  - {fileID: 21300000, guid: e7a02f31078bbee48a5111873ccc3c6a, type: 3}
   vitesseAnim: 8
   couleurJambes: {r: 0.1, g: 0.15, b: 0.3, a: 1}
   alphaCercle: 0.4
+  scaleCercle: 2
   forceKnockback: 12
   dureeKnockback: 0.2
+  scaleRebond: 1.4
+  dureeRebond: 0.15
 --- !u!1 &4563539522181895004
 GameObject:
   m_ObjectHideFlags: 0
@@ -4382,12 +4410,19 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 5c47632800aaa05479f718fde6f0058d, type: 3}
   - {fileID: 21300000, guid: 120898ad3b1526d418929c158a7569d0, type: 3}
   - {fileID: 21300000, guid: e645fee68a4b7dd4aa1938c2fab2d804, type: 3}
-  framesMarche: []
+  framesMarche:
+  - {fileID: 21300000, guid: f835fa23186d3e54db4a4be21ffc6491, type: 3}
+  - {fileID: 21300000, guid: 817c8aaf154af3647912e44246301f21, type: 3}
+  - {fileID: 21300000, guid: 590ed3b17106eae4497e13b17e18624f, type: 3}
+  - {fileID: 21300000, guid: e7a02f31078bbee48a5111873ccc3c6a, type: 3}
   vitesseAnim: 8
   couleurJambes: {r: 0.1, g: 0.15, b: 0.3, a: 1}
   alphaCercle: 0.4
+  scaleCercle: 2
   forceKnockback: 12
   dureeKnockback: 0.2
+  scaleRebond: 1.4
+  dureeRebond: 0.15
 --- !u!1 &8665518003804971213
 GameObject:
   m_ObjectHideFlags: 0
