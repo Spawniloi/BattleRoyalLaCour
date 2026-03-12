@@ -193,18 +193,14 @@ public class GameManager : MonoBehaviour
 
     void LoadMapForPlayerCount(int count)
     {
-        if (currentMap != null)
-            Destroy(currentMap);
+        if (currentMap != null) Destroy(currentMap);
 
-        if (count == 2)
-            currentMap = Instantiate(map2Players);
-
-        else if (count == 3)
-            currentMap = Instantiate(map3Players);
-
-        else if (count == 4)
-            currentMap = Instantiate(map4Players);
-
+        if (count == 2) currentMap = Instantiate(map2Players);
+        else if (count == 3) currentMap = Instantiate(map3Players);
+        else if (count == 4) currentMap = Instantiate(map4Players);
+        
+        //NOTE : OldMap is required because Units are Clamped into their zones, and if the map disappear before the new one arrives some Unit will Teleport 
+        
         StartCoroutine(DelayedReposition());
     }
 
@@ -218,6 +214,7 @@ public class GameManager : MonoBehaviour
     {
         TeamZones[] zones = FindObjectsOfType<TeamZones>();
         PlayerManager[] players = FindObjectsOfType<PlayerManager>();
+        //print($"{players.Length}"); // DEBUG
 
         System.Array.Sort(players, (a, b) => a.teamID.CompareTo(b.teamID));
         System.Array.Sort(zones, (a, b) => a.TeamID.CompareTo(b.TeamID));
@@ -228,14 +225,15 @@ public class GameManager : MonoBehaviour
             PlayerManager player = players[i];
 
             print(zone.name);
-            players[i].transform.position = zone.GetSpawnPosition();
 
             foreach (Unit u in player.units)
             {
+                //print($"{u.teamID} took {zone.name}"); // DEBUG
                 u.SetZone(zone);
                 u.GetComponent<UnitAI>().ChooseNewTarget();
                 //u.transform.position = zone.GetRandomPoint(); // ADD A RANDOM SPAWN LOCATION TO ALL UNIT IN THEIR OWN ZONE
             }
+            players[i].transform.position = zone.GetSpawnPosition();
         }
     }
 

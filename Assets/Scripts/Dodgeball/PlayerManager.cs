@@ -63,6 +63,8 @@ public class PlayerManager : MonoBehaviour
         PlayerInput input = GetComponentInChildren<PlayerInput>(); 
         if (input.playerIndex == 0) teamID = 0;
         if (input.playerIndex == 1) teamID = 1;
+        if (input.playerIndex == 2) teamID = 2;
+        if (input.playerIndex == 3) teamID = 3;
     }
 
     private void TeamInitialize()

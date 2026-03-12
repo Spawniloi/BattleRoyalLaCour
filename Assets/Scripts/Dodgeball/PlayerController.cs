@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 public class PlayerController : MonoBehaviour
 {
     TeamZones zone;
-    Unit Unit;
+    Unit unit;
 
     Vector2 moveInput;
     public Vector2 lastDirection = Vector2.right;
@@ -13,12 +13,12 @@ public class PlayerController : MonoBehaviour
 
     void Awake()
     {
-        Unit = GetComponent<Unit>();
+        unit = GetComponent<Unit>();
     }
 
     private void Start()
     {
-        zone = Unit.zone;
+        zone = unit.zone;
     }
     void Update()
     {
@@ -42,10 +42,9 @@ public class PlayerController : MonoBehaviour
         Vector3 movement = new Vector3(moveInput.x, moveInput.y, 0);
         Vector3 newPos = transform.position + movement * speed * Time.deltaTime;
 
-        // Clamp dans la zone si elle est définie
-        if (zone != null)
+        if (unit.zone != null)
         {
-            newPos = (Vector3)zone.ClampPosition(newPos);
+            newPos = unit.zone.ClampPosition(newPos);
         }
 
         transform.position = newPos;

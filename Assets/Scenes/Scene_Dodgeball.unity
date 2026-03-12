@@ -359,9 +359,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e033a755f2aeba6468965b0e18814ea0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerSpawns:
-  - {fileID: 0}
-  - {fileID: 0}
+  playerSpawns: []
   map2Players: {fileID: 2127211358413171696, guid: 58aa06794f9014f41b74b89116981433, type: 3}
   map3Players: {fileID: 5290011760548705993, guid: 0f6cece47d8d4554096c490e5d810010, type: 3}
   map4Players: {fileID: 2508037114341554521, guid: f4bd643695cb9204f873679f4c5e3dee, type: 3}
@@ -479,7 +477,7 @@ Transform:
   m_GameObject: {fileID: 1483525092}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2.1834128, y: -7.1251745, z: -0.18528324}
+  m_LocalPosition: {x: 0.05, y: -7.1251745, z: -0.18528324}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
