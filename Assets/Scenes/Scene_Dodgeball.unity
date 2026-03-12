@@ -493,11 +493,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e033a755f2aeba6468965b0e18814ea0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentState: 0
-  allowJoin: 1
   playerSpawns:
   - {fileID: 1207194683}
   - {fileID: 920714143}
+  currentState: 0
+  allowJoin: 1
 --- !u!4 &1086334438
 Transform:
   m_ObjectHideFlags: 0
@@ -589,7 +589,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_NotificationBehavior: 2
-  m_MaxPlayerCount: 2
+  m_MaxPlayerCount: 4
   m_AllowJoining: 1
   m_JoinBehavior: 2
   m_PlayerJoinedEvent:
