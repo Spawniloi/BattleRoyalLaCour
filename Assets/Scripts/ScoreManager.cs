@@ -21,10 +21,10 @@ public class ScoreManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+       
     }
 
-    public void AddScore(int player, int points)
+    public void AddScoreUI(int player, int points)
     {
         scores[player] += points;
         UpdateScoreUI();
