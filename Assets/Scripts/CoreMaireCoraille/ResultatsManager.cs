@@ -1,10 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+
 
 public class ResultatsManager : MonoBehaviour
 {
@@ -15,20 +17,20 @@ public class ResultatsManager : MonoBehaviour
     public Sprite ardoiseJeu3;
 
     [Header("Tailles texte")]
-    public float tailleEntete = 28f;
-    public float tailleJoueurs = 26f;
+    public float tailleEntete = 20f;
+    public float tailleJoueurs = 22f;
     public float tailleSucette = 26f;
 
     [Header("Positions colonnes X")]
     public float colLabel = 0f;
     public float colJ1 = 200f;
-    public float colJ2 = 310f;
-    public float colJ3 = 420f;
-    public float colJ4 = 530f;
+    public float colJ2 = 290f;
+    public float colJ3 = 380f;
+    public float colJ4 = 470f;
 
     [Header("Largeur colonnes")]
     public float largeurLabel = 180f;
-    public float largeurValeur = 100f;
+    public float largeurValeur = 80f;
 
     [Header("Espacement lignes")]
     public float hauteurLigne = 40f;
@@ -80,15 +82,16 @@ public class ResultatsManager : MonoBehaviour
     private int ligneActuelle = 0;
     private bool dejàEnvoye = false;
 
-    // ── Raccourci localisation ────────────────────────────────────────────────
+    // ── Localisation ──────────────────────────────────────────────────────────
     string L(string cle, params string[] args)
         => LocalisationManager.Instance != null
             ? LocalisationManager.Instance.Get(cle, args)
             : cle;
 
+    // ── Start ─────────────────────────────────────────────────────────────────
     void Start()
     {
-        // ── Ardoise selon jeu ─────────────────────────────────────────────────
+        // Ardoise selon jeu
         if (ardoise != null)
         {
             switch (GameData.jeuActuel)
@@ -97,26 +100,19 @@ public class ResultatsManager : MonoBehaviour
                     if (ardoiseMaireCoraille != null)
                         ardoise.sprite = ardoiseMaireCoraille;
                     break;
-                case "Jeu2":
+                case "BallonPrisonnier":
                     if (ardoiseJeu2 != null)
                         ardoise.sprite = ardoiseJeu2;
                     break;
-                case "Jeu3":
+                case "SnakeRacaille":
                     if (ardoiseJeu3 != null)
                         ardoise.sprite = ardoiseJeu3;
                     break;
             }
         }
 
-        // ── Textes boutons traduits ───────────────────────────────────────────
-        if (txtBtnContinuer != null)
-            txtBtnContinuer.text = L("resultats_btn_continuer");
-        if (txtBtnMenu != null)
-            txtBtnMenu.text = L("resultats_btn_menu");
-        if (txtBtnQuitter != null)
-            txtBtnQuitter.text = L("resultats_btn_quitter");
+        MettreAJourTextesBoutons();
 
-        // ── Abonne aux changements de langue ──────────────────────────────────
         if (LocalisationManager.Instance != null)
             LocalisationManager.Instance.onTraductionsChargees
                 += MettreAJourTextesBoutons;
@@ -169,7 +165,7 @@ public class ResultatsManager : MonoBehaviour
 
         float[] posX = { colLabel, colJ1, colJ2, colJ3, colJ4 };
 
-        // ── En-tête joueurs colorés ───────────────────────────────────────────
+        // En-tête joueurs — J1, J2, J3, J4
         for (int j = 0; j < classes.Count; j++)
         {
             PlayerData data = GameData.GetJoueur(classes[j].playerID);
@@ -185,17 +181,28 @@ public class ResultatsManager : MonoBehaviour
         ligneActuelle++;
         yield return new WaitForSeconds(delaiEntreLignes);
 
-        // ── Lignes stats traduites ────────────────────────────────────────────
-        string[] labels =
-        {
-            L("resultats_stat_splash"),
-            L("resultats_stat_cache"),
-            L("resultats_stat_hop"),
-            L("resultats_stat_ensemble"),
-            L("resultats_stat_mechant"),
-            L("resultats_stat_points"),
-        };
+        // Labels selon jeu
+        string[] labels = GameData.jeuActuel == "BallonPrisonnier"
+            ? new string[]
+            {
+                L("resultats_stat_elim"),
+                L("resultats_stat_ballon"),
+                L("resultats_stat_lance"),
+                L("resultats_stat_vivant"),
+                L("resultats_stat_points"),
+                L("resultats_stat_points"),
+            }
+            : new string[]
+            {
+                L("resultats_stat_splash"),
+                L("resultats_stat_cache"),
+                L("resultats_stat_hop"),
+                L("resultats_stat_ensemble"),
+                L("resultats_stat_mechant"),
+                L("resultats_stat_points"),
+            };
 
+        // Valeurs selon jeu
         for (int statIndex = 0; statIndex < 6; statIndex++)
         {
             List<TextMeshProUGUI> tmps = new List<TextMeshProUGUI>();
@@ -210,16 +217,35 @@ public class ResultatsManager : MonoBehaviour
             for (int j = 0; j < classes.Count; j++)
             {
                 var jr = classes[j];
-                string valeur = statIndex switch
+
+                string valeur;
+
+                if (GameData.jeuActuel == "BallonPrisonnier")
                 {
-                    0 => $"{jr.stats.distanceParcourue:F0}u",
-                    1 => $"{jr.stats.tempsPoissonMax:F1}s",
-                    2 => $"{jr.stats.nbRebonds}",
-                    3 => $"{jr.stats.nbPassagesCoraille}",
-                    4 => $"{jr.stats.tempsMaire:F1}",
-                    5 => $"{jr.score:F0}pts",
-                    _ => ""
-                };
+                    valeur = statIndex switch
+                    {
+                        0 => $"{jr.stats.distanceParcourue:F0}",  // eliminations
+                        1 => $"{jr.stats.tempsPoissonMax:F0}",    // balles ramassées
+                        2 => $"{jr.stats.nbRebonds}",             // balles lancées
+                        3 => $"{jr.stats.nbPassagesCoraille}",    // unités vivantes
+                        4 => $"{jr.score:F0}",                    // score
+                        5 => $"{jr.score:F0}pts",                 // score final
+                        _ => ""
+                    };
+                }
+                else
+                {
+                    valeur = statIndex switch
+                    {
+                        0 => $"{jr.stats.distanceParcourue:F0}u",
+                        1 => $"{jr.stats.tempsPoissonMax:F1}s",
+                        2 => $"{jr.stats.nbRebonds}",
+                        3 => $"{jr.stats.nbPassagesCoraille}",
+                        4 => $"{jr.stats.tempsMaire:F1}",
+                        5 => $"{jr.score:F0}pts",
+                        _ => ""
+                    };
+                }
 
                 PlayerData data = GameData.GetJoueur(jr.playerID);
                 Color coul = data != null
@@ -238,7 +264,7 @@ public class ResultatsManager : MonoBehaviour
         }
     }
 
-    // ── Cellule à position absolue ────────────────────────────────────────────
+    // ── Cellule ───────────────────────────────────────────────────────────────
     TextMeshProUGUI CreerCell(Color couleur, float taille, float posX)
     {
         GameObject go = new GameObject("Cell");
@@ -264,7 +290,7 @@ public class ResultatsManager : MonoBehaviour
         return tmp;
     }
 
-    // ── Écriture parallèle lettre par lettre ──────────────────────────────────
+    // ── Écriture parallèle ────────────────────────────────────────────────────
     IEnumerator EcrireParallele(
         List<TextMeshProUGUI> tmps,
         List<string> textes)
@@ -291,6 +317,7 @@ public class ResultatsManager : MonoBehaviour
     // ── Podium ────────────────────────────────────────────────────────────────
     IEnumerator AnimerPodium()
     {
+        // Trie du moins bon au meilleur
         List<JoueurResultat> parScore = partie.joueurs
             .OrderBy(j => j.score)
             .ThenBy(j => j.stats.tempsMaire)
@@ -311,7 +338,9 @@ public class ResultatsManager : MonoBehaviour
             Transform pos = spawnsActifs[i];
 
             GameObject go = Instantiate(
-                podiumVisuelPrefab, pos.position, Quaternion.identity);
+                podiumVisuelPrefab,
+                pos.position,
+                Quaternion.identity);
             go.transform.SetParent(pos, false);
             go.transform.localPosition = Vector3.zero;
             go.transform.localScale = Vector3.zero;
@@ -349,10 +378,15 @@ public class ResultatsManager : MonoBehaviour
     {
         if (conteneurSucette == null) yield break;
 
+        // Gagnant = meilleur score
         JoueurResultat gagnant = partie.joueurs
             .OrderByDescending(j => j.score)
             .ThenByDescending(j => j.stats.tempsMaire)
             .First();
+
+        // Donne la sucette au gagnant dans la session
+        
+        GameData.sucettesOr++;
 
         PlayerData dataGagnant = GameData.GetJoueur(gagnant.playerID);
         Color coulGagnant = dataGagnant != null
@@ -370,7 +404,6 @@ public class ResultatsManager : MonoBehaviour
         tmp.alignment = TextAlignmentOptions.Center;
         tmp.text = "";
 
-        // Nom sans couleur pour l'écriture lettre par lettre
         string nomBrut = L("classement_nom", gagnant.playerID.ToString());
         string texteBrut = L("resultats_sucette", nomBrut);
 
@@ -381,11 +414,9 @@ public class ResultatsManager : MonoBehaviour
             yield return new WaitForSeconds(vitesseEcriture * 0.5f);
         }
 
-        // Remet le nom en couleur
         string nomColore = $"<color=#{hex}>{nomBrut}</color>";
         tmp.text = texteBrut.Replace(nomBrut, nomColore);
 
-        // ── Prefab sucette ────────────────────────────────────────────────────
         if (prefabSucetteOr != null)
         {
             GameObject sucette = Instantiate(
@@ -401,7 +432,7 @@ public class ResultatsManager : MonoBehaviour
             {
                 float p = timer / 0.8f;
                 float s = Mathf.Lerp(0f, 1f,
-                              Mathf.Sin(p * Mathf.PI * 0.5f));
+                                Mathf.Sin(p * Mathf.PI * 0.5f));
                 float rot = Mathf.Lerp(-540f, 0f, p);
                 sucette.transform.localScale = new Vector3(s, s, 1f);
                 sucette.transform.localRotation =
@@ -412,8 +443,6 @@ public class ResultatsManager : MonoBehaviour
             sucette.transform.localScale = Vector3.one;
             sucette.transform.localRotation = Quaternion.identity;
         }
-
-        GameData.sucettesOr++;
     }
 
     // ── Boutons ───────────────────────────────────────────────────────────────
@@ -446,7 +475,7 @@ public class ResultatsManager : MonoBehaviour
     void RetourMenu()
     {
         EnvoyerDonnees();
-        SceneManager.LoadScene("Scene_Menu");
+        SceneManager.LoadScene("Scene_Hub");
     }
 
     void Quitter()
