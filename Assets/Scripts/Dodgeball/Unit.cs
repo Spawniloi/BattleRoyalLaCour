@@ -28,6 +28,7 @@ public class Unit : MonoBehaviour
 
     void Start()
     {
+        /*     
         TeamZones[] zones = FindObjectsOfType<TeamZones>();
         foreach (TeamZones z in zones)
         {
@@ -36,7 +37,7 @@ public class Unit : MonoBehaviour
                 zone = z;
                 break;
             }
-        }
+        }*/
 
         PlayerData data = GameData.GetJoueur(teamID + 1);
         if (data != null && dodgeballVisuel != null)
@@ -66,6 +67,11 @@ public class Unit : MonoBehaviour
     {
         if (dodgeballVisuel != null)
             dodgeballVisuel.AppliquerData(data);
+    }
+
+    public void SetZone(TeamZones newZone)
+    {
+        zone = newZone;
     }
 
     public void SetControlled(bool value)

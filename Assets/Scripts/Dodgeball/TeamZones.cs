@@ -5,6 +5,7 @@ public class TeamZones : MonoBehaviour
     public int TeamID;
 
     public BoxCollider2D area;
+    public Transform spawnPoint;
 
     public Vector2 GetRandomPoint()
     {
@@ -16,16 +17,13 @@ public class TeamZones : MonoBehaviour
         return new Vector2(x, y);
     }
 
-    public Vector2 GetRandomSpawnPosition()
+    public Vector2 GetSpawnPosition()
     {
-        Vector2 min = area.bounds.min;
-        Vector2 max = area.bounds.max;
+        if (spawnPoint != null) return spawnPoint.position;
 
-        return new Vector2(
-            Random.Range(min.x, max.x),
-            Random.Range(min.y, max.y)
-        );
+        return GetRandomPoint();
     }
+
 
     public Vector2 ClampPosition(Vector2 position)
     {
@@ -35,5 +33,15 @@ public class TeamZones : MonoBehaviour
         float clampedY = Mathf.Clamp(position.y, bounds.min.y, bounds.max.y);
 
         return new Vector2(clampedX, clampedY);
+    }
+    public Vector2 GetRandomSpawnPosition()
+    {
+        Vector2 min = area.bounds.min;
+        Vector2 max = area.bounds.max;
+
+        return new Vector2(
+            Random.Range(min.x, max.x),
+            Random.Range(min.y, max.y)
+        );
     }
 }

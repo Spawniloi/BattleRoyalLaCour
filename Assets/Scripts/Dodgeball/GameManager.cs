@@ -10,6 +10,12 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance;
     private BallSpawner ballSpawner;
     [SerializeField] Transform[] playerSpawns;
+    
+    // MAPS
+    public GameObject map2Players;
+    public GameObject map3Players;
+    public GameObject map4Players;
+    GameObject currentMap;
 
     public enum GameState
     {
@@ -86,54 +92,27 @@ public class GameManager : MonoBehaviour
         SceneManager.LoadScene("Scene_Resultats");
     }
 
-    private void BuildAndSendPartieData()
+    IEnumerator GameStarting()
     {
-        // Trouve le gagnant
-        TeamScore winner = null;
-        foreach (TeamScore ts in teamScores.Values)
-            if (winner == null || ts.TotalScore > winner.TotalScore)
-                winner = ts;
+        Debug.Log("GAME LAUNCHING IN 3 SECONDS");
+        yield return new WaitForSeconds(5f);
+        SetGameState(GameState.Playing);
+    }
+    public void CheckVictory()
+    {
+        Unit[] units = FindObjectsOfType<Unit>();
+        HashSet<int> aliveTeams = new HashSet<int>();
 
-        float duree = Time.time - tempsDebut;
+        foreach (Unit u in units)
+            if (u.isAlive) aliveTeams.Add(u.teamID);
 
-        PartieData partie = new PartieData();
-        partie.partieId = System.Guid.NewGuid().ToString();
-        partie.jeuActuel = "BallonPrisonnier";
-        partie.nbJoueurs = teamScores.Count;
-        partie.dureePartie = duree;
-        partie.gagnant = winner != null ? winner.teamID + 1 : -1;
-
-        foreach (var kvp in teamScores)
+        if (aliveTeams.Count <= 1)
         {
-            int teamIdx = kvp.Key;
-            TeamScore ts = kvp.Value;
+            foreach (int team in aliveTeams)
+                Debug.Log("TEAM " + team + " WINS!");
 
-            JoueurResultat jr = new JoueurResultat();
-            jr.playerID = teamIdx + 1;
-            jr.score = ts.TotalScore;
-            jr.stats = new StatsJoueur();
-            jr.stats.distanceParcourue = ts.eliminations;
-            jr.stats.tempsPoissonMax = ts.ballsPicked;
-            jr.stats.nbRebonds = ts.ballsThrown;
-            jr.stats.nbPassagesCoraille = ts.unitsRemaining;
-            jr.stats.tempsMaire = ts.TotalScore;
-
-            partie.joueurs.Add(jr);
+            SetGameState(GameState.GameOver);
         }
-
-        GameData.dernierePartie = partie;
-        GameData.jeuActuel = "BallonPrisonnier";
-
-        GameSessionManager.Instance?.EnregistrerPartie(partie);
-
-        Debug.Log($"[Dodgeball] Gagnant J{partie.gagnant}");
-        foreach (var ts in teamScores.Values)
-            Debug.Log($"J{ts.teamID + 1} — " +
-                      $"Elim:{ts.eliminations} " +
-                      $"Ramassées:{ts.ballsPicked} " +
-                      $"Lancées:{ts.ballsThrown} " +
-                      $"Unités:{ts.unitsRemaining} " +
-                      $"Score:{ts.TotalScore}");
     }
     #endregion
 
@@ -186,6 +165,9 @@ public class GameManager : MonoBehaviour
 
         PlayerInputManager.instance.JoinPlayer(-1, -1, null, device);
         joinedDevices.Add(device);
+
+        if(joinedDevices.Count < 2) return;
+        LoadMapForPlayerCount(joinedDevices.Count);
     }
 
     public void OnPlayerJoined(PlayerInput player)
@@ -193,16 +175,14 @@ public class GameManager : MonoBehaviour
         int index = player.playerIndex;
         Transform root = player.transform.root;
 
-        if (index < playerSpawns.Length)
-            root.position = playerSpawns[index].position;
+        if (index < playerSpawns.Length) root.position = playerSpawns[index].position;
 
         Debug.Log("Player " + index + " joined with " + player.devices[0]);
 
         InitializeScores();
 
         PlayerManager manager = player.GetComponent<PlayerManager>();
-        if (manager != null)
-            manager.teamID = index;
+        if (manager != null) manager.teamID = index;
 
         if (PlayerInput.all.Count >= 2)
         {
@@ -211,29 +191,54 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    IEnumerator GameStarting()
+    void LoadMapForPlayerCount(int count)
     {
-        Debug.Log("GAME LAUNCHING IN 3 SECONDS");
-        yield return new WaitForSeconds(3f);
-        SetGameState(GameState.Playing);
+        if (currentMap != null)
+            Destroy(currentMap);
+
+        if (count == 2)
+            currentMap = Instantiate(map2Players);
+
+        else if (count == 3)
+            currentMap = Instantiate(map3Players);
+
+        else if (count == 4)
+            currentMap = Instantiate(map4Players);
+
+        StartCoroutine(DelayedReposition());
     }
 
-    public void CheckVictory()
+    IEnumerator DelayedReposition()
     {
-        Unit[] units = FindObjectsOfType<Unit>();
-        HashSet<int> aliveTeams = new HashSet<int>();
+        yield return null;
+        RepositionPlayers();
+    }
 
-        foreach (Unit u in units)
-            if (u.isAlive) aliveTeams.Add(u.teamID);
+    void RepositionPlayers()
+    {
+        TeamZones[] zones = FindObjectsOfType<TeamZones>();
+        PlayerManager[] players = FindObjectsOfType<PlayerManager>();
 
-        if (aliveTeams.Count <= 1)
+        System.Array.Sort(players, (a, b) => a.teamID.CompareTo(b.teamID));
+        System.Array.Sort(zones, (a, b) => a.TeamID.CompareTo(b.TeamID));
+        
+        for (int i = 0; i < players.Length; i++)
         {
-            foreach (int team in aliveTeams)
-                Debug.Log("TEAM " + team + " WINS!");
+            TeamZones zone = zones[i];
+            PlayerManager player = players[i];
 
-            SetGameState(GameState.GameOver);
+            print(zone.name);
+            players[i].transform.position = zone.GetSpawnPosition();
+
+            foreach (Unit u in player.units)
+            {
+                u.SetZone(zone);
+                u.GetComponent<UnitAI>().ChooseNewTarget();
+                //u.transform.position = zone.GetRandomPoint(); // ADD A RANDOM SPAWN LOCATION TO ALL UNIT IN THEIR OWN ZONE
+            }
         }
     }
+
     #endregion
 
     #region SCORES
@@ -257,6 +262,55 @@ public class GameManager : MonoBehaviour
         foreach (Unit u in allUnits)
             if (u.isAlive && teamScores.ContainsKey(u.teamID))
                 teamScores[u.teamID].unitsRemaining++;
+    }
+    private void BuildAndSendPartieData()
+    {
+        // Trouve le gagnant
+        TeamScore winner = null;
+        foreach (TeamScore ts in teamScores.Values)
+            if (winner == null || ts.TotalScore > winner.TotalScore)
+                winner = ts;
+
+        float duree = Time.time - tempsDebut;
+
+        PartieData partie = new PartieData();
+        partie.partieId = System.Guid.NewGuid().ToString();
+        partie.jeuActuel = "BallonPrisonnier";
+        partie.nbJoueurs = teamScores.Count;
+        partie.dureePartie = duree;
+        partie.gagnant = winner != null ? winner.teamID + 1 : -1;
+
+        foreach (var kvp in teamScores)
+        {
+            int teamIdx = kvp.Key;
+            TeamScore ts = kvp.Value;
+
+            JoueurResultat jr = new JoueurResultat();
+            jr.playerID = teamIdx + 1;
+            jr.score = ts.TotalScore;
+            jr.stats = new StatsJoueur();
+            jr.stats.distanceParcourue = ts.eliminations;
+            jr.stats.tempsPoissonMax = ts.ballsPicked;
+            jr.stats.nbRebonds = ts.ballsThrown;
+            jr.stats.nbPassagesCoraille = ts.unitsRemaining;
+            jr.stats.tempsMaire = ts.TotalScore;
+
+            partie.joueurs.Add(jr);
+        }
+
+        GameData.dernierePartie = partie;
+        GameData.jeuActuel = "BallonPrisonnier";
+
+        GameSessionManager.Instance?.EnregistrerPartie(partie);
+
+        Debug.Log($"[Dodgeball] Gagnant J{partie.gagnant}");
+        foreach (var ts in teamScores.Values)
+            Debug.Log($"J{ts.teamID + 1} — " +
+                      $"Elim:{ts.eliminations} " +
+                      $"Ramassées:{ts.ballsPicked} " +
+                      $"Lancées:{ts.ballsThrown} " +
+                      $"Unités:{ts.unitsRemaining} " +
+                      $"Score:{ts.TotalScore}");
     }
     #endregion
 }

@@ -54,7 +54,7 @@ public class UnitAI : MonoBehaviour
         }
     }
 
-    private void ChooseNewTarget()
+    public void ChooseNewTarget()
     {
         if (_unit.zone != null)
         {
