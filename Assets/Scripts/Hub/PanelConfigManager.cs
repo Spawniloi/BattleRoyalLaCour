@@ -104,11 +104,17 @@ public class PanelConfigManager : MonoBehaviour
         nbManches = manchesDefaut;
         sliderManches.value = manchesDefaut;
         MettreAJourBoutonsJoueurs();
-        MettreAJourTexteManches(); // ← s'assure que le texte est correct dès l'ouverture
+        MettreAJourTexteManches();
         MasquerAvertissement();
         navActif = true;
         indexNav = 2;
         SurlígnerNav(indexNav);
+
+        // Met à jour le texte quand les traductions sont prêtes
+        if (LocalisationManager.Instance != null &&
+            !LocalisationManager.Instance.EstCharge())
+            LocalisationManager.Instance.onTraductionsChargees
+                += MettreAJourTexteManches;
     }
 
     // ── Ferme ─────────────────────────────────────────────────────────────────
@@ -303,11 +309,18 @@ public class PanelConfigManager : MonoBehaviour
     void MettreAJourTexteManches()
     {
         if (txtManches == null) return;
-        string texte = LocalisationManager.Instance != null
-            ? LocalisationManager.Instance.Get(
-                "config_manches", nbManches.ToString())
-            : $"Manches : {nbManches}";
-        txtManches.text = texte;
+
+        if (LocalisationManager.Instance != null &&
+            LocalisationManager.Instance.EstCharge())
+        {
+            txtManches.text = LocalisationManager.Instance.Get(
+                "config_manches", nbManches.ToString());
+        }
+        else
+        {
+            // Fallback direct sans localisation
+            txtManches.text = $"Manches : {nbManches}";
+        }
     }
 
     // ── Mode test ─────────────────────────────────────────────────────────────
