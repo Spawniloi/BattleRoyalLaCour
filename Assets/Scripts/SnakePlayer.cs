@@ -61,7 +61,15 @@ public class SnakePlayer : MonoBehaviour
         //else if(segment == body2) body2 = null;
         //else if(segment == body3) body3 = null;
 
+
+        // _bodySegments.Remove(segment);
+        //->
+        int index = _bodySegments.IndexOf(segment);
         _bodySegments.Remove(segment);
+
+        GetComponent<SnakeBodyFollow>()._segments.RemoveAt(index);
+
+
         if(player != null)
         {
             player.AddScore(segment.scoreValue);
@@ -136,7 +144,7 @@ public class SnakePlayer : MonoBehaviour
 
         _bodySegments.Add(newSegment);
 
-        GetComponent<SnakeBodyFollow>()._segments.Insert(_bodySegments.Count - 1, newSegment.transform);
+        GetComponent<SnakeBodyFollow>()._segments.Add(newSegment.transform);//_segments.Insert(_bodySegments.Count - 1, newSegment.transform);
 
         AddScore(newSegment.scoreValue);
         Debug.Log("Segment ajouté!");
