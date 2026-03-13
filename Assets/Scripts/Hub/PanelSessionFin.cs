@@ -64,16 +64,16 @@ public class PanelSessionFin : MonoBehaviour
     void Start()
     {
         panelFin?.SetActive(false);
-
         btnMenu?.onClick.AddListener(RetourMenu);
         btnQuitter?.onClick.AddListener(Quitter);
 
-        // Vérifie si session terminée
-        if (GameSessionManager.Instance != null &&
-            GameSessionManager.Instance.SessionTerminee())
-        {
+        bool sessionFinie = GameSessionManager.Instance != null &&
+                            GameSessionManager.Instance.SessionTerminee();
+
+        Debug.Log($"[PanelFin] SessionTerminee = {sessionFinie}");
+
+        if (sessionFinie)
             StartCoroutine(AfficherApresDelai());
-        }
     }
 
     IEnumerator AfficherApresDelai()
@@ -103,39 +103,35 @@ public class PanelSessionFin : MonoBehaviour
     {
         if (GameSessionManager.Instance == null) yield break;
 
-        var classement =
-            GameSessionManager.Instance.GetClassementFinal();
+        var classement = GameSessionManager.Instance.GetClassementFinal();
 
-        // Spawns dans l'ordre visuel podium :
-        // index 0 = dernier, dernier spawn = 1er
-        List<Transform> spawns = new List<Transform>();
-        int nb = classement.Count;
-        if (nb >= 4 && spawn4e != null) spawns.Add(spawn4e);
-        if (nb >= 3 && spawn3e != null) spawns.Add(spawn3e);
-        if (nb >= 2 && spawn2e != null) spawns.Add(spawn2e);
-        if (spawn1er != null) spawns.Add(spawn1er);
-
-        // Trie du moins bon au meilleur pour animer du bas vers le haut
-        var parScore = new List<(int playerID, float score, int sucettes)>(
-            classement);
+        // Même logique que ResultatsManager — du moins bon au meilleur
+        var parScore = new List<(int playerID, float score, int sucettes)>(classement);
         parScore.Sort((a, b) => a.score.CompareTo(b.score));
+
+        // Spawns dans le même ordre que ResultatsManager
+        List<Transform> spawnsActifs = new List<Transform>();
+        int nb = parScore.Count;
+        if (nb >= 4 && spawn4e != null) spawnsActifs.Add(spawn1er);
+        if (nb >= 3 && spawn3e != null) spawnsActifs.Add(spawn2e);
+        if (nb >= 2 && spawn2e != null) spawnsActifs.Add(spawn3e);
+        if (spawn1er != null) spawnsActifs.Add(spawn4e);
 
         TextMeshProUGUI[] txtMedailles =
         {
-            txtMedaille4e,
-            txtMedaille3e,
-            txtMedaille2e,
-            txtMedaille1er
-        };
+        txtMedaille4e,
+        txtMedaille3e,
+        txtMedaille2e,
+        txtMedaille1er
+    };
 
         for (int i = 0; i < parScore.Count; i++)
         {
-            if (i >= spawns.Count) break;
+            if (i >= spawnsActifs.Count) continue;
 
             var (playerID, score, sucettes) = parScore[i];
-            Transform pos = spawns[i];
+            Transform pos = spawnsActifs[i];
 
-            // Prefab podium
             GameObject go = Instantiate(
                 podiumVisuelPrefab,
                 pos.position,
@@ -146,21 +142,18 @@ public class PanelSessionFin : MonoBehaviour
 
             PlayerData data = GameData.GetJoueur(playerID);
             PodiumVisuel pv = go.GetComponent<PodiumVisuel>();
-            if (pv != null && data != null)
-                pv.AppliquerData(data);
+            if (pv != null && data != null) pv.AppliquerData(data);
 
             yield return StartCoroutine(
                 ScaleUpBounce(go.transform,
                               Vector3.one * echellePodium, 0.4f));
 
-            // Texte médailles à côté
+            // Médailles
             if (i < txtMedailles.Length && txtMedailles[i] != null)
             {
                 string nomJ = L("classement_nom", playerID.ToString());
-                txtMedailles[i].text =
-                    $"{nomJ}  🏅 x{sucettes}";
+                txtMedailles[i].text = $"{nomJ}  🏅 x{sucettes}";
 
-                // Couleur selon rang (du haut vers bas = i inversé)
                 int rang = parScore.Count - 1 - i;
                 txtMedailles[i].color = rang == 0 ? couleurOr
                                       : rang == 1 ? couleurArgent
@@ -171,7 +164,6 @@ public class PanelSessionFin : MonoBehaviour
             yield return new WaitForSeconds(0.2f);
         }
 
-        // Texte gagnant
         yield return new WaitForSeconds(0.3f);
         AfficherGagnant(classement);
     }
@@ -273,7 +265,7 @@ public class PanelSessionFin : MonoBehaviour
     {
         JouerSFX(sfxValider);
         Time.timeScale = 1f;
-        SceneManager.LoadScene("Scene_Hub");
+        SceneManager.LoadScene("Scene_Menu");
     }
 
     void Quitter()

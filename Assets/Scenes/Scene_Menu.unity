@@ -3195,6 +3195,7 @@ GameObject:
   m_Component:
   - component: {fileID: 473296801}
   - component: {fileID: 473296802}
+  - component: {fileID: 473296803}
   m_Layer: 5
   m_Name: SliderManches
   m_TagString: Untagged
@@ -3275,6 +3276,32 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &473296803
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 473296800}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c9e4a72a3f4100943a321aea2152aa55, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  imgFond: {fileID: 0}
+  imgContour: {fileID: 0}
+  txtLabel: {fileID: 0}
+  couleurFondNormal: {r: 0.2, g: 0.2, b: 0.2, a: 0.8}
+  couleurContourNormal: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  couleurTexteNormal: {r: 1, g: 1, b: 1, a: 1}
+  couleurFondSelect: {r: 0.15, g: 0.15, b: 0.15, a: 0.95}
+  couleurContourSelect: {r: 1, g: 0.84, b: 0, a: 1}
+  couleurTexteSelect: {r: 1, g: 0.84, b: 0, a: 1}
+  echelleNormal: 1
+  echelleSelect: 1.08
+  vitesseAnimation: 8
+  epaisseurNormal: 2
+  epaisseurSelect: 4
 --- !u!1001 &480926714
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3703,6 +3730,7 @@ MonoBehaviour:
   styleBtn2J: {fileID: 2096783466}
   styleBtn3J: {fileID: 2080877302}
   styleBtn4J: {fileID: 319655832}
+  styleSliderManches: {fileID: 473296803}
   btnModeTest: {fileID: 89270109}
   btnRetour: {fileID: 1959106259}
   btnContinuer: {fileID: 1331144998}
@@ -4082,6 +4110,7 @@ MonoBehaviour:
   panelOptions: {fileID: 686687269}
   sliderMusique: {fileID: 165612877}
   sliderVFX: {fileID: 1369204424}
+  scaleSlider: {x: 4.65, y: 4.65, z: 4.65}
   btnsLangue:
   - {fileID: 1476776971}
   - {fileID: 373172405}

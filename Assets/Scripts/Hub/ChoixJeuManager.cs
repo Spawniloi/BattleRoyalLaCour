@@ -47,6 +47,11 @@ public class ChoixJeuManager : MonoBehaviour
     private List<Button> boutons = new List<Button>();
     private int indexActuel = 0;
 
+    string L(string cle, params string[] args)
+    => LocalisationManager.Instance != null
+        ? LocalisationManager.Instance.Get(cle, args)
+        : cle;
+
     void Start()
     {
         AfficherProgression();
@@ -63,13 +68,14 @@ public class ChoixJeuManager : MonoBehaviour
         if (GameSessionManager.Instance == null ||
             GameSessionManager.Instance.EstEntrainement())
         {
-            txtProgression.text = "MODE TEST";
+            txtProgression.text = L("choix_progression_test");
             return;
         }
 
         var session = GameSessionManager.Instance.session;
-        txtProgression.text =
-            $"Manche {session.mancheActuelle} / {session.nombreManches}";
+        txtProgression.text = L("choix_progression_manche",
+            session.mancheActuelle.ToString(),
+            session.nombreManches.ToString());
     }
 
     // ── Classement ────────────────────────────────────────────────────────────

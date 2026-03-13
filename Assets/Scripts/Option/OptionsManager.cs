@@ -16,6 +16,9 @@ public class OptionsManager : MonoBehaviour
     public Slider sliderMusique;
     public Slider sliderVFX;
 
+    [Header("Scale sliders")]
+    public Vector3 scaleSlider = new Vector3(4.65f, 4.65f, 4.65f);
+
     [Header("Carousel langue")]
     public List<Button> btnsLangue = new List<Button>();
     public List<BoutonStylee> stylesLangue = new List<BoutonStylee>();
@@ -100,7 +103,6 @@ public class OptionsManager : MonoBehaviour
 
     void Update()
     {
-        // Bloque pendant 0.3s après fermeture
         if (Time.unscaledTime < tempsDeblocage) return;
 
         var kb = Keyboard.current;
@@ -231,10 +233,10 @@ public class OptionsManager : MonoBehaviour
         AudioManager.Instance?.Sauvegarder();
         JouerSFX(sfxRetour);
         panelOptions?.SetActive(false);
-        tempsDeblocage = Time.unscaledTime + 0.3f; // bloque 0.3s
+        tempsDeblocage = Time.unscaledTime + 0.3f;
     }
 
-    // ── Quitter vers Hub ──────────────────────────────────────────────────────
+    // ── Quitter ───────────────────────────────────────────────────────────────
     void QuitterJeu()
     {
         Time.timeScale = 1f;
@@ -242,7 +244,10 @@ public class OptionsManager : MonoBehaviour
         AudioManager.Instance?.Sauvegarder();
         panelOptions?.SetActive(false);
         JouerSFX(sfxValider);
-        SceneManager.LoadScene("Scene_Hub");
+        Application.Quit();
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#endif
     }
 
     // ── Navigation ───────────────────────────────────────────────────────────
@@ -274,11 +279,14 @@ public class OptionsManager : MonoBehaviour
     void SurlígnerNav()
     {
         if (sliderMusique != null)
-            sliderMusique.transform.localScale =
-                navIndex == 0 ? Vector3.one * 1.05f : Vector3.one;
+            sliderMusique.transform.localScale = navIndex == 0
+                ? scaleSlider * 1.2f
+                : scaleSlider;
+
         if (sliderVFX != null)
-            sliderVFX.transform.localScale =
-                navIndex == 1 ? Vector3.one * 1.05f : Vector3.one;
+            sliderVFX.transform.localScale = navIndex == 1
+                ? scaleSlider * 1.2f
+                : scaleSlider;
 
         string langueActuelle =
             LocalisationManager.Instance?.GetLangueActuelle() ?? "fr";

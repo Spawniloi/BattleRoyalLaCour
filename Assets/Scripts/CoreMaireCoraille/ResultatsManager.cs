@@ -450,7 +450,8 @@ public class ResultatsManager : MonoBehaviour
     {
         EnvoyerDonnees();
 
-        if (GameSessionManager.Instance == null)
+        if (GameSessionManager.Instance == null ||
+            GameSessionManager.Instance.EstEntrainement())
         {
             SceneManager.LoadScene("Scene_ChoixJeu");
             return;
@@ -458,18 +459,13 @@ public class ResultatsManager : MonoBehaviour
 
         var gsm = GameSessionManager.Instance;
 
-        if (gsm.MancheTerminee())
-        {
-            if (gsm.SessionTerminee())
-                SceneManager.LoadScene("Scene_ClassementFinal");
-            else
-            {
-                gsm.MancheSuivante();
-                SceneManager.LoadScene("Scene_ChoixJeu");
-            }
-        }
-        else
-            SceneManager.LoadScene("Scene_ChoixJeu");
+        gsm.MancheSuivante();
+
+        Debug.Log($"[Continuer] manche={gsm.session.mancheActuelle} " +
+                  $"max={gsm.session.nombreManches} " +
+                  $"SessionTerminee={gsm.SessionTerminee()}");
+
+        SceneManager.LoadScene("Scene_ChoixJeu");
     }
 
     void RetourMenu()

@@ -21,16 +21,9 @@ public class GameSessionManager : MonoBehaviour
 
     public SessionData session = new SessionData();
 
-    private Queue<string> fileJeux = new Queue<string>();
-
     void Awake()
     {
-        if (Instance != null)
-        {
-            Destroy(gameObject);
-            return;
-        }
-
+        if (Instance != null) { Destroy(gameObject); return; }
         Instance = this;
         DontDestroyOnLoad(gameObject);
     }
@@ -46,9 +39,7 @@ public class GameSessionManager : MonoBehaviour
             session.scores[i] = 0f;
             session.sucettesOr[i] = 0;
         }
-
-        Debug.Log($"[Session] Scores init pour " +
-                  $"{GameData.nombreJoueurs} joueurs");
+        Debug.Log($"[Session] Scores init pour {GameData.nombreJoueurs} joueurs");
     }
 
     // ── Démarre session ───────────────────────────────────────────────────────
@@ -65,50 +56,11 @@ public class GameSessionManager : MonoBehaviour
         session.ordreAleatoire = aleatoire;
 
         InitScores();
-        PreparerFileJeux();
 
         Debug.Log($"[Session] Démarrage mode:{mode} " +
                   $"manches:{nombreManches} " +
                   $"jeux:{string.Join(",", jeux)}");
     }
-
-    // ── File des jeux ─────────────────────────────────────────────────────────
-    void PreparerFileJeux()
-    {
-        fileJeux.Clear();
-
-        List<string> liste = new List<string>(session.jeuxSelectionnes);
-
-        if (session.ordreAleatoire)
-            Melanger(liste);
-
-        foreach (string jeu in liste)
-            fileJeux.Enqueue(jeu);
-    }
-
-    void Melanger(List<string> liste)
-    {
-        for (int i = liste.Count - 1; i > 0; i--)
-        {
-            int j = Random.Range(0, i + 1);
-            string tmp = liste[i];
-            liste[i] = liste[j];
-            liste[j] = tmp;
-        }
-    }
-
-    public string ProchainJeu()
-    {
-        if (fileJeux.Count == 0)
-            PreparerFileJeux();
-
-        return fileJeux.Count > 0
-            ? fileJeux.Dequeue()
-            : null;
-    }
-
-    public bool MancheTerminee()
-        => fileJeux.Count == 0;
 
     // ── Enregistre une partie ─────────────────────────────────────────────────
     public void EnregistrerPartie(PartieData partie)
@@ -117,7 +69,6 @@ public class GameSessionManager : MonoBehaviour
         {
             if (!session.scores.ContainsKey(jr.playerID))
                 session.scores[jr.playerID] = 0f;
-
             session.scores[jr.playerID] += jr.score;
         }
 
@@ -125,36 +76,40 @@ public class GameSessionManager : MonoBehaviour
         {
             if (!session.sucettesOr.ContainsKey(partie.gagnant))
                 session.sucettesOr[partie.gagnant] = 0;
-
             session.sucettesOr[partie.gagnant]++;
         }
 
-        Debug.Log($"[Session] Partie enregistrée — " +
-                  $"gagnant J{partie.gagnant}");
+        Debug.Log($"[Session] Partie enregistrée — gagnant J{partie.gagnant} " +
+                  $"manche {session.mancheActuelle}/{session.nombreManches}");
     }
 
     // ── Manche suivante ───────────────────────────────────────────────────────
     public void MancheSuivante()
     {
         session.mancheActuelle++;
-        PreparerFileJeux();
-
-        Debug.Log($"[Session] Manche " +
-                  $"{session.mancheActuelle}/{session.nombreManches}");
+        Debug.Log($"[Session] Manche {session.mancheActuelle}/{session.nombreManches}");
     }
 
+    // ── 1 partie = 1 manche ───────────────────────────────────────────────────
     public bool SessionTerminee()
-        => session.mancheActuelle > session.nombreManches;
+    => session.mancheActuelle > session.nombreManches;
 
     public bool EstEntrainement()
         => session.mode == "entrainement";
+
+    // ── Jeu aléatoire parmi la liste ──────────────────────────────────────────
+    public string ProchainJeu()
+    {
+        if (session.jeuxSelectionnes.Count == 0) return "maire";
+        return session.jeuxSelectionnes[
+            Random.Range(0, session.jeuxSelectionnes.Count)];
+    }
 
     // ── Classement ────────────────────────────────────────────────────────────
     public List<(int playerID, float score, int sucettes)> GetClassementFinal()
     {
         var classement = new List<(int, float, int)>();
 
-        // Scores vides — fallback tous les joueurs actifs à 0
         if (session.scores.Count == 0)
         {
             for (int i = 1; i <= GameData.nombreJoueurs; i++)
@@ -168,11 +123,9 @@ public class GameSessionManager : MonoBehaviour
             float score = kvp.Value;
             int sucettes = session.sucettesOr.ContainsKey(id)
                 ? session.sucettesOr[id] : 0;
-
             classement.Add((id, score, sucettes));
         }
 
-        // Tri score desc, sucettes desc, playerID asc
         classement.Sort((a, b) => {
             int cmp = b.Item2.CompareTo(a.Item2);
             if (cmp != 0) return cmp;
@@ -190,26 +143,9 @@ public class GameSessionManager : MonoBehaviour
         return jeu switch
         {
             "maire" => "Scene_MaireCoraille",
-            "ballon" => "Scene_BallonPrisonnier",
+            "ballon" => "Scene_Dodgeball",
             "snake" => "Scene_SnakeRacaille",
             _ => "Scene_Hub"
         };
-    }
-
-    // ── Lance prochain jeu ────────────────────────────────────────────────────
-    public void LancerProchainJeu()
-    {
-        // Retourne toujours à ChoixJeu pour que le joueur choisisse
-        SceneManager.LoadScene("Scene_ChoixJeu");
-    }
-
-    // ── Lance un jeu spécifique ───────────────────────────────────────────────
-    public void LancerJeu(string jeu)
-    {
-        string scene = GetNomScene(jeu);
-        GameData.jeuActuel = jeu;
-
-        Debug.Log($"[Session] Lancement {jeu} → {scene}");
-        SceneManager.LoadScene(scene);
     }
 }

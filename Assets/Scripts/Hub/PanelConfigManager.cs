@@ -1,8 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -33,6 +31,9 @@ public class PanelConfigManager : MonoBehaviour
     public BoutonStylee styleBtn3J;
     public BoutonStylee styleBtn4J;
 
+    [Header("Style slider manches")]
+    public BoutonStylee styleSliderManches;
+
     [Header("Boutons bas — dans l'ordre : ModeTest, Retour, Continuer")]
     public Button btnModeTest;
     public Button btnRetour;
@@ -50,9 +51,8 @@ public class PanelConfigManager : MonoBehaviour
     private int nbJoueurs = 2;
     private int nbManches = 3;
 
-    private List<Button> boutonsNav = new List<Button>();
-    private List<BoutonStylee> stylesNav = new List<BoutonStylee>();
-    private int indexNav = 2; // Continuer par défaut
+    // indexNav : 0=slider  1=ModeTest  2=Retour  3=Continuer
+    private int indexNav = 3;
     private bool navActif = false;
     private bool inputBloque = false;
 
@@ -63,34 +63,21 @@ public class PanelConfigManager : MonoBehaviour
 
     void Start()
     {
-        // Slider
         sliderManches.minValue = manchesMin;
         sliderManches.maxValue = manchesMax;
         sliderManches.wholeNumbers = true;
         sliderManches.value = manchesDefaut;
+        sliderManches.interactable = true; // ← on laisse interactable
         sliderManches.onValueChanged.AddListener(OnSliderChange);
         MettreAJourTexteManches();
-        sliderManches.interactable = false;
 
-        // Boutons joueurs
         btn2J?.onClick.AddListener(() => SelectionnerJoueurs(2));
         btn3J?.onClick.AddListener(() => SelectionnerJoueurs(3));
         btn4J?.onClick.AddListener(() => SelectionnerJoueurs(4));
 
-        // Boutons bas
         btnModeTest?.onClick.AddListener(LancerModeTest);
         btnRetour?.onClick.AddListener(Fermer);
         btnContinuer?.onClick.AddListener(Continuer);
-
-        // Navigation bas — ModeTest / Retour / Continuer
-        boutonsNav.Clear();
-        stylesNav.Clear();
-        boutonsNav.Add(btnModeTest);
-        boutonsNav.Add(btnRetour);
-        boutonsNav.Add(btnContinuer);
-        stylesNav.Add(styleBtnModeTest);
-        stylesNav.Add(styleBtnRetour);
-        stylesNav.Add(styleBtnContinuer);
 
         MettreAJourBoutonsJoueurs();
         MasquerAvertissement();
@@ -107,10 +94,9 @@ public class PanelConfigManager : MonoBehaviour
         MettreAJourTexteManches();
         MasquerAvertissement();
         navActif = true;
-        indexNav = 2;
-        SurlígnerNav(indexNav);
+        indexNav = 3; // Continuer par défaut
+        SurlígnerNav();
 
-        // Met à jour le texte quand les traductions sont prêtes
         if (LocalisationManager.Instance != null &&
             !LocalisationManager.Instance.EstCharge())
             LocalisationManager.Instance.onTraductionsChargees
@@ -122,7 +108,7 @@ public class PanelConfigManager : MonoBehaviour
     {
         navActif = false;
         JouerSFX(sfxRetour);
-        StartCoroutine(BloquerInputUnFrame()); // ← nom correct
+        StartCoroutine(BloquerInputUnFrame());
         panelConfig?.SetActive(false);
     }
 
@@ -135,21 +121,18 @@ public class PanelConfigManager : MonoBehaviour
         while (encoreAppuye)
         {
             encoreAppuye = false;
-
             if (Keyboard.current != null)
             {
                 if (Keyboard.current.escapeKey.isPressed) encoreAppuye = true;
                 if (Keyboard.current.spaceKey.isPressed) encoreAppuye = true;
                 if (Keyboard.current.enterKey.isPressed) encoreAppuye = true;
             }
-
             foreach (var gp in Gamepad.all)
             {
                 if (gp.startButton.isPressed) encoreAppuye = true;
                 if (gp.buttonEast.isPressed) encoreAppuye = true;
                 if (gp.buttonSouth.isPressed) encoreAppuye = true;
             }
-
             if (encoreAppuye) yield return null;
         }
 
@@ -169,7 +152,6 @@ public class PanelConfigManager : MonoBehaviour
         bool gauche = false, droite = false;
         bool haut = false, bas = false;
         bool valider = false, retour = false;
-        float sliderDelta = 0f;
 
         if (kb != null)
         {
@@ -184,103 +166,99 @@ public class PanelConfigManager : MonoBehaviour
             valider = kb.spaceKey.wasPressedThisFrame
                    || kb.enterKey.wasPressedThisFrame;
             retour = kb.escapeKey.wasPressedThisFrame;
-
-            if (kb.eKey.isPressed) sliderDelta = 1f;
-            if (kb.aKey.isPressed) sliderDelta = -1f;
         }
 
         if (gp != null)
         {
-            // Joueurs nb — stick gauche gauche/droite
             gauche = gauche || gp.leftStick.left.wasPressedThisFrame
-                             || gp.dpad.left.wasPressedThisFrame;
+                              || gp.dpad.left.wasPressedThisFrame;
             droite = droite || gp.leftStick.right.wasPressedThisFrame
-                             || gp.dpad.right.wasPressedThisFrame;
-
-            // Boutons bas — stick gauche haut/bas
+                              || gp.dpad.right.wasPressedThisFrame;
             haut = haut || gp.leftStick.up.wasPressedThisFrame
-                           || gp.dpad.up.wasPressedThisFrame;
+                              || gp.dpad.up.wasPressedThisFrame;
             bas = bas || gp.leftStick.down.wasPressedThisFrame
-                           || gp.dpad.down.wasPressedThisFrame;
-
+                              || gp.dpad.down.wasPressedThisFrame;
             valider = valider || gp.buttonSouth.wasPressedThisFrame;
             retour = retour || gp.buttonEast.wasPressedThisFrame;
-
-            // Slider — bumpers R1/L1 (plus simple et fiable)
-            if (gp.rightShoulder.wasPressedThisFrame)
-            {
-                sliderManches.value = Mathf.Min(
-                    sliderManches.value + 1,
-                    manchesMax);
-                JouerSFX(sfxFocus);
-            }
-            if (gp.leftShoulder.wasPressedThisFrame)
-            {
-                sliderManches.value = Mathf.Max(
-                    sliderManches.value - 1,
-                    manchesMin);
-                JouerSFX(sfxFocus);
-            }
-        }
-        // Clavier — même chose
-        if (kb != null)
-        {
-            if (kb.eKey.wasPressedThisFrame)
-            {
-                sliderManches.value = Mathf.Min(
-                    sliderManches.value + 1,
-                    manchesMax);
-                JouerSFX(sfxFocus);
-            }
-            if (kb.aKey.wasPressedThisFrame)
-            {
-                sliderManches.value = Mathf.Max(
-                    sliderManches.value - 1,
-                    manchesMin);
-                JouerSFX(sfxFocus);
-            }
-        }
-        // Nb joueurs ←/→
-        if (gauche)
-        {
-            int nouveau = nbJoueurs - 1;
-            if (nouveau < 2) nouveau = 4;
-            SelectionnerJoueurs(nouveau);
-        }
-        if (droite)
-        {
-            int nouveau = nbJoueurs + 1;
-            if (nouveau > 4) nouveau = 2;
-            SelectionnerJoueurs(nouveau);
         }
 
-        // Boutons bas ↑/↓
+        // ── Slider sélectionné (indexNav == 0) — gachettes / Q+D ─────────────
+        if (indexNav == 0)
+        {
+            bool plus = false;
+            bool moins = false;
+
+            if (gp != null)
+            {
+                plus = gp.rightShoulder.wasPressedThisFrame;
+                moins = gp.leftShoulder.wasPressedThisFrame;
+            }
+            if (kb != null)
+            {
+                plus = plus || droite;
+                moins = moins || gauche;
+            }
+
+            if (plus)
+            {
+                sliderManches.value = Mathf.Min(sliderManches.value + 1, manchesMax);
+                JouerSFX(sfxFocus);
+            }
+            if (moins)
+            {
+                sliderManches.value = Mathf.Max(sliderManches.value - 1, manchesMin);
+                JouerSFX(sfxFocus);
+            }
+        }
+        else
+        {
+            // ── Nb joueurs ←/→ (seulement si slider pas sélectionné) ──────────
+            if (gauche)
+            {
+                int nouveau = nbJoueurs - 1;
+                if (nouveau < 2) nouveau = 4;
+                SelectionnerJoueurs(nouveau);
+            }
+            if (droite)
+            {
+                int nouveau = nbJoueurs + 1;
+                if (nouveau > 4) nouveau = 2;
+                SelectionnerJoueurs(nouveau);
+            }
+        }
+
         if (haut) Naviguer(-1);
         if (bas) Naviguer(1);
         if (valider) ValiderNav();
         if (retour) Fermer();
-
-        // Slider manches — gâchettes
-        if (Mathf.Abs(sliderDelta) > 0.05f)
-            sliderManches.value += sliderDelta * Time.deltaTime * 5f;
     }
 
+    // ── Navigation ────────────────────────────────────────────────────────────
+    // 0=slider  1=ModeTest  2=Retour  3=Continuer
     void Naviguer(int dir)
     {
-        indexNav = (indexNav + dir + boutonsNav.Count) % boutonsNav.Count;
-        SurlígnerNav(indexNav);
+        indexNav = (indexNav + dir + 4) % 4;
+        SurlígnerNav();
         JouerSFX(sfxFocus);
     }
 
     void ValiderNav()
     {
-        boutonsNav[indexNav]?.onClick.Invoke();
+        switch (indexNav)
+        {
+            case 1: LancerModeTest(); break;
+            case 2: Fermer(); break;
+            case 3: Continuer(); break;
+                // case 0 : slider — rien à valider
+        }
     }
 
-    void SurlígnerNav(int index)
+    void SurlígnerNav()
     {
-        for (int i = 0; i < stylesNav.Count; i++)
-            stylesNav[i]?.SetSelectionne(i == index);
+        styleSliderManches?.SetSelectionne(indexNav == 0);
+        styleBtnModeTest?.SetSelectionne(indexNav == 1);
+        styleBtnRetour?.SetSelectionne(indexNav == 2);
+        styleBtnContinuer?.SetSelectionne(indexNav == 3);
     }
 
     // ── Joueurs ───────────────────────────────────────────────────────────────
@@ -318,7 +296,6 @@ public class PanelConfigManager : MonoBehaviour
         }
         else
         {
-            // Fallback direct sans localisation
             txtManches.text = $"Manches : {nbManches}";
         }
     }
@@ -333,12 +310,10 @@ public class PanelConfigManager : MonoBehaviour
         }
 
         JouerSFX(sfxValider);
-
         GameData.nombreJoueurs = nbJoueurs;
 
         GameSessionManager.Instance?.DemarrerSession(
-            "entrainement",
-            1,
+            "entrainement", 1,
             new List<string> { "maire", "ballon", "snake" },
             true);
 
@@ -357,12 +332,12 @@ public class PanelConfigManager : MonoBehaviour
         }
 
         JouerSFX(sfxValider);
-
         GameData.nombreJoueurs = nbJoueurs;
 
+        Debug.Log($"[Config] DemarrerSession manches={nbManches} joueurs={nbJoueurs}");
+
         GameSessionManager.Instance?.DemarrerSession(
-            "manche",
-            nbManches,
+            "manche", nbManches,
             new List<string> { "maire", "ballon", "snake" },
             true);
 
