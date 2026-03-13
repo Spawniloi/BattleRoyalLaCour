@@ -8,6 +8,9 @@ public class UnitAI : MonoBehaviour
     public float patrolSpeed = 1.5f;
     Vector2 targetPosition;
 
+    //Ball Seeking
+    private float ballDetectionRadius = 3f;
+    Ball targetBall;
     void Awake()
     {
         _unit = GetComponent<Unit>();
@@ -25,8 +28,22 @@ public class UnitAI : MonoBehaviour
         ClampInsideZone();
 
         if (_unit.isControlled || !_unit.isAlive) return;
-        if (_unit.HasBall) return;
 
+        
+
+        // Seek Ball
+        if (!_unit.HasBall)
+        {
+            targetBall = FindNearbyBall();
+
+            if (targetBall != null)
+            {
+                GoToBall();
+                return;
+            }
+        }
+
+        if (_unit.HasBall) return;
         Patrol();
     }
 
@@ -69,6 +86,55 @@ public class UnitAI : MonoBehaviour
         }
     }
 
+    Ball FindNearbyBall()
+    {
+        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, ballDetectionRadius);
+
+        Ball closest = null;
+        float dist = Mathf.Infinity;
+
+        foreach (Collider2D hit in hits)
+        {
+            Ball ball = hit.GetComponent<Ball>();
+
+            if (ball == null || ball.isHeld) continue;
+
+            float d = Vector2.Distance(transform.position, ball.transform.position);
+
+            if (d < dist)
+            {
+                dist = d;
+                closest = ball;
+            }
+        }
+
+        return closest;
+    }
+
+    void GoToBall()
+    {
+        if (targetBall == null) return;
+
+        Vector2 newPos = Vector2.MoveTowards(
+            transform.position,
+            targetBall.transform.position,
+            patrolSpeed * Time.deltaTime
+        );
+
+        if (_unit.zone != null)
+            newPos = _unit.zone.ClampPosition(newPos);
+
+        transform.position = newPos;
+
+        Vector2 dir = (targetBall.transform.position - transform.position).normalized;
+
+        if (dir != Vector2.zero)
+        {
+            float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+            transform.rotation = Quaternion.Euler(0, 0, angle);
+        }
+    }
+
     void ClampInsideZone()
     {
         if (_unit.zone == null) return;
@@ -81,5 +147,8 @@ public class UnitAI : MonoBehaviour
     {
         Gizmos.color = Color.yellow;
         Gizmos.DrawSphere(targetPosition, 0.2f);
+
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawWireSphere(transform.position, ballDetectionRadius);
     }
 }

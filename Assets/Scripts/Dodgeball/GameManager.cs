@@ -37,6 +37,9 @@ public class GameManager : MonoBehaviour
     // Temps
     private float tempsDebut;
 
+    public float gameDuration = 150f; // 2 minutes 30
+    private float remainingTime;
+
     #region STATES
     public void SetGameState(GameState newState)
     {
@@ -69,7 +72,10 @@ public class GameManager : MonoBehaviour
     {
         allowJoin = false;
         ballSpawner.enabled = true;
+        
         tempsDebut = Time.time;
+        remainingTime = gameDuration;
+
         Debug.Log("Game starting");
     }
 
@@ -85,6 +91,15 @@ public class GameManager : MonoBehaviour
         BuildAndSendPartieData();
         StartCoroutine(AllerResultats());
     }
+    public bool IsEndGamePhase()
+    {
+        return remainingTime <= 60f;
+    }
+
+    public float GetRemainingTime()
+{
+    return remainingTime;
+}
 
     IEnumerator AllerResultats()
     {
@@ -144,6 +159,21 @@ public class GameManager : MonoBehaviour
     private void Update()
     {
         ManualJoin();
+        if (currentState == GameState.Playing)
+        {
+            UpdateTimer();
+        }
+    }
+
+    void UpdateTimer()
+    {
+        remainingTime -= Time.deltaTime;
+
+        if (remainingTime <= 0f)
+        {
+            remainingTime = 0f;
+            SetGameState(GameState.GameOver);
+        }
     }
     #endregion
 
@@ -184,7 +214,9 @@ public class GameManager : MonoBehaviour
         PlayerManager manager = player.GetComponent<PlayerManager>();
         if (manager != null) manager.teamID = index;
 
-        if (PlayerInput.all.Count >= 2)
+        //if (PlayerInput.all.Count == 2)
+        if (PlayerInput.all.Count == GameData.nombreJoueurs)
+
         {
             SetGameState(GameState.StartingGame);
             StartCoroutine(GameStarting());
@@ -198,8 +230,6 @@ public class GameManager : MonoBehaviour
         if (count == 2) currentMap = Instantiate(map2Players);
         else if (count == 3) currentMap = Instantiate(map3Players);
         else if (count == 4) currentMap = Instantiate(map4Players);
-        
-        //NOTE : OldMap is required because Units are Clamped into their zones, and if the map disappear before the new one arrives some Unit will Teleport 
         
         StartCoroutine(DelayedReposition());
     }
