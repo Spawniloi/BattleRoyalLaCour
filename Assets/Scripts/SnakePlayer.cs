@@ -11,7 +11,7 @@ public class SnakePlayer : MonoBehaviour
 
     public int playerID;
     public int score = 0;
-    public TextMeshProUGUI scoreText;
+    ///public TextMeshProUGUI scoreText;
     public bool showScore = true;
 
     [Header("Body Prefabs")]
@@ -21,8 +21,6 @@ public class SnakePlayer : MonoBehaviour
 
     public int maxBodySegments = 3;
 
-    ScoreManager scoreManager;
-
     public List<SnakeSegment> _bodySegments =new List<SnakeSegment>();
 
     void Start()
@@ -31,18 +29,16 @@ public class SnakePlayer : MonoBehaviour
         //score = 0;
         //scoreText.text = name + " : " + score;
 
-        if(scoreText == null)
-        {
-            scoreText = GetComponentInChildren<TextMeshProUGUI>();
-        }
+        //if(scoreText == null)
+        //{
+        //    scoreText = GetComponentInChildren<TextMeshProUGUI>();
+        //}
 
-        if(scoreText != null)
-        {
-            scoreText.gameObject.SetActive(showScore);
-            UpdateScoreText();
-        }
-
-        scoreManager = ScoreManager.FindFirstObjectByType<ScoreManager>();
+        //if(scoreText != null)
+        //{
+        //    scoreText.gameObject.SetActive(showScore);
+        //    //UpdateScoreText();
+        //}
 
         //SetupBody();
         //Score();
@@ -70,9 +66,10 @@ public class SnakePlayer : MonoBehaviour
         {
             player.AddScore(segment.scoreValue);
         }
-        
+
         //AddScore(-segment);
-        Destroy(segment.gameObject);
+        //Destroy(segment.gameObject);
+        segment.ShowSegment(false);
         CheckIfDead();
     }
 
@@ -92,11 +89,19 @@ public class SnakePlayer : MonoBehaviour
     void Die()
     {
         Debug.Log(name + " est éliminé !");
+        
+        GameManager.Instance.PlayerDied(this);
+
+        //foreach(var player in GameManager.Instance.alivePlayers)
+        //{
+        //    player.enabled = false;
+        //}
 
         Destroy(_head.gameObject);
         Destroy(_tail.gameObject);
 
         Destroy(gameObject);
+
     }
 
     public bool TryAddBodySegments()
@@ -141,18 +146,25 @@ public class SnakePlayer : MonoBehaviour
     public void AddScore(int amount)
     {
         score += amount;
-        if (scoreManager != null)
-            scoreManager.AddScoreUI(playerID - 1, amount);
+        //if (scoreManager != null)
+        //    scoreManager.AddScoreUI(playerID - 1, amount);
+
+        ScoreManager.Instance.AddScoreUI(playerID - 1, amount);
         //scoreText.text = name + " : " + score;
-        UpdateScoreText();
-        Debug.Log(name + " score :" + score);
+        //UpdateScoreText();
+
+        Debug.Log("Player " + playerID + " score : " + score);
+        //Debug.Log(name + " score :" + score);
     }
 
-    void UpdateScoreText()
-    {
-        if(scoreText != null)
-            scoreText.text = "P" + playerID + " : " + score;
-    }
+    //void UpdateScoreText()
+    //{
+    //    if(scoreText != null)
+    //        scoreText.text = "P" + playerID + " : " + score;
+    //}
+
+
+    
 
     //void Score()
     //{

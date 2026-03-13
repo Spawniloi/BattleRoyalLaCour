@@ -1,21 +1,49 @@
 using UnityEngine;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public class ScoreManager : MonoBehaviour
 {
     public int numberOfPlayers; //= 2;//
     public int[] scores = new int[4];
-    public TextMeshProUGUI[] playerTexts;
+    public TextMeshProUGUI[] playerTexts = new TextMeshProUGUI[4];
+
+    public static ScoreManager Instance;
+
     //public TextMeshProUGUI player1Text;
     //public TextMeshProUGUI player2Text;
     //public TextMeshProUGUI player3Text;
     //public TextMeshProUGUI player4Text;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
+
+    void Awake()
+    {
+
+        //foreach(var text in playerTexts)
+        //    text.gameObject.SetActive(false);
+
+        if(Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+
+        SceneManager.sceneLoaded += OnSceneLoaded;
+        Debug.Log("ScoreManager Awake");
+
+        //player1Text.gameObject.SetActive(false);
+        //player2Text.gameObject.SetActive(false);
+        //player3Text.gameObject.SetActive(false);
+        //player4Text.gameObject.SetActive(false);
+    }
     void Start()
     {
         numberOfPlayers = GameSettings.Instance.playerCount;
-        UpdateScoreUI();
+        //SetupUI();
+        //UpdateScoreUI();
         
     }
 
@@ -25,32 +53,89 @@ public class ScoreManager : MonoBehaviour
        
     }
 
-    void Awake()
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        foreach(var text in playerTexts)
-            text.gameObject.SetActive(false);
-        //player1Text.gameObject.SetActive(false);
-        //player2Text.gameObject.SetActive(false);
-        //player3Text.gameObject.SetActive(false);
-        //player4Text.gameObject.SetActive(false);
+        Debug.Log("SceneLoaded detected -> reconnect UI");
+        //Invoke(nameof(SetupUI), 0.1f);
+        SetupUI();  
+    }
+
+    void SetupUI()
+    {
+        Debug.Log("SetupUI connected");
+        FindScoreUI();
+        UpdateScoreUI();
+    }
+
+    void FindScoreUI()
+    {
+
+        Debug.Log("Searching score UI");
+
+        Canvas canvas = GameObject.FindFirstObjectByType<Canvas>();
+
+        if(canvas != null)
+        {
+            playerTexts[0] = canvas.transform.Find("P1Score")?.GetComponent<TextMeshProUGUI>();
+            playerTexts[1] = canvas.transform.Find("P2Score")?.GetComponent<TextMeshProUGUI>();
+            playerTexts[2] = canvas.transform.Find("P3Score")?.GetComponent<TextMeshProUGUI>();
+            playerTexts[3] = canvas.transform.Find("P4Score")?.GetComponent<TextMeshProUGUI>();
+
+        }
+
+        //playerTexts = new TextMeshProUGUI[4];
+
+        //for (int i = 0; i < playerTexts.Length; i++)
+        //{
+        //    GameObject obj = GameObject.Find("P" + (i + 1) + "Score");
+        //    if (obj != null)
+        //        playerTexts[i] = obj.GetComponent<TextMeshProUGUI>();
+        //}
     }
 
     public void AddScoreUI(int player, int points)
     {
         scores[player] += points;
+
+        Debug.Log("Score added to P" + (player + 1) + " : " + scores[player]);
         UpdateScoreUI();
     }
 
     void UpdateScoreUI()
     {
-
-        for (int i = 0; i < playerTexts.Length; i++)
+        bool needReconnect = false;
+        for(int i = 0; i < numberOfPlayers; i++)
         {
-            bool active = i < numberOfPlayers;
-            playerTexts[i].gameObject.SetActive(active);
+            if(playerTexts[i] == null)
+            {
+                needReconnect = true;
+                break;
+            }
+        }
 
-            if (active)
-                playerTexts[i].text = "P" + (i + 1) + ":" + scores[i];
+        if (needReconnect)
+        {
+            FindScoreUI();
+        }
+
+
+        for (int i = 0; i < numberOfPlayers; i++) //playerTexts.Length
+        {
+
+            if (playerTexts[i] != null)
+            {
+                playerTexts[i].gameObject.SetActive(true);
+                playerTexts[i].text = "P" + (i+1) + " : " + scores[i];
+            }
+
+
+            //if (playerTexts[i] != null)
+            //    continue;
+            //bool active = i < numberOfPlayers;
+            //playerTexts[i].gameObject.SetActive(active);
+
+            //if (active)
+            //    playerTexts[i].text = "P" + (i + 1) + ":" + scores[i];
         }
 
         //player1Text.text = "P1 : " + scores[0];

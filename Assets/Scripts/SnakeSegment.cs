@@ -12,4 +12,10 @@ public class SnakeSegment : MonoBehaviour
     }
     public SegmentType segmentType;
 
+    public void ShowSegment(bool enabled)
+    {
+        GetComponent<SpriteRenderer>().enabled = enabled;
+        GetComponent<Collider2D>().enabled = enabled;
+    }
+
 }

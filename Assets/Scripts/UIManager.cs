@@ -86,6 +86,7 @@
 
 
 using UnityEngine;
+using TMPro;
 using UnityEngine.SceneManagement;
 
 public class UIManager : MonoBehaviour
@@ -96,15 +97,29 @@ public class UIManager : MonoBehaviour
     public GameObject startMenu;
     public GameObject mainMenu;
     public GameObject pauseMenu;
+    public GameObject menuCanvas;
+
+    [Header("Ecran de fin")]
     public GameObject endMenu;
 
-    public GameObject menuCanvas;
+
+    [Header("End Screen")]
+    public TextMeshProUGUI winnerText;
+    public TextMeshProUGUI finalScoresText;
 
     bool isPaused;
 
     void Awake()
     {
-        Instance = this;
+        if(Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(transform.parent.gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
     void Start()
@@ -135,10 +150,10 @@ public class UIManager : MonoBehaviour
         pauseMenu.SetActive(false);
         endMenu.SetActive(false);
 
-        Time.timeScale = 0f;
+        //Time.timeScale = 0f;
         GameSettings.Instance.playerCount = playerCount;
         SceneManager.LoadScene("SampleScene");
-        menuCanvas.SetActive(false);
+        //menuCanvas.SetActive(false);
     }
 
     //___Menu Principal___//
@@ -182,19 +197,56 @@ public class UIManager : MonoBehaviour
         Time.timeScale = isPaused ? 0 : 1;
     }
 
+    public void QuitGame()
+    {
+        Application.Quit();
+    }
+
     // -------- END --------
 
-    public void ShowEndGame()
+    public void ShowEndGame(int winnerID)
     {
+        Time.timeScale = 0f;
+        //SceneManager.LoadScene("MenuScene");
+        Debug.Log("UIManager.Instance = " + UIManager.Instance);
+        Debug.Log("EndMenu" + endMenu);
+
         startMenu.SetActive(false);
         mainMenu.SetActive(false);
         pauseMenu.SetActive(false);
+        Debug.Log("end !");
         endMenu.SetActive(true);
-        if (endMenu == null) return;
+        Debug.Log("EndMenu.activeSelf = " + endMenu.activeSelf);
+        endMenu.transform.SetAsLastSibling();
 
-        endMenu.SetActive(true);
-        Time.timeScale = 0;
+        winnerText.text = winnerID > 0 ? "Player " + winnerID + " wins !" : "draw !";
+        if (winnerID > 0)
+            winnerText.text = "PLAYER " + winnerID + " WINS !";
+
+        DisplayFinalScores();
+
     }
+
+    void DisplayFinalScores()
+    {
+        ScoreManager sm = ScoreManager.Instance;
+
+        string result = "";
+
+        for (int i = 0; i < sm.numberOfPlayers; i++)
+        {
+            result += "P" + (i + 1) + " : " + sm.scores[i] + "\n";
+        }
+
+        finalScoresText.text = result;  
+
+    }
+
+    //public void BackToMenu()
+    //{
+    //    Time.timeScale = 1f;
+    //    SceneManager.LoadScene("MenuScene");
+    //}
 }
 
 

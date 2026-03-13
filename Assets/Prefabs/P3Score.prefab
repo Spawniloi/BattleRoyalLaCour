@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 5435180509942027797}
   - component: {fileID: 6139857487021358208}
   m_Layer: 5
-  m_Name: P3 1
+  m_Name: P3Score
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
