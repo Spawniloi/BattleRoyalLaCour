@@ -6,8 +6,9 @@ public class PlayerController : MonoBehaviour
     TeamZones zone;
     Unit Unit;
 
-    Vector2 moveInput;
+    public Vector2 moveInput;
     public Vector2 lastDirection = Vector2.right;
+
 
     public float speed = 5f;
 

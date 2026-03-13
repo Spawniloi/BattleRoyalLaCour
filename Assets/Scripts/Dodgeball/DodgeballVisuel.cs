@@ -37,19 +37,25 @@ public class DodgeballVisuel : MonoBehaviour
     public float dureeRebond = 0.15f;
 
     private Rigidbody2D rb;
+    private Collider2D col;
+    private PlayerController pc;
     private bool dataAppliquee = false;
     private Color couleurDossard = Color.white;
     private Color couleurPeau = Color.white;
     private int frameActuelle = 0;
     private float tempsFrame = 0f;
+    private Vector3 lastPosition;
 
     void Awake()
     {
         rb = GetComponentInParent<Rigidbody2D>();
+        col = GetComponentInParent<Collider2D>();
+        pc = GetComponentInParent<PlayerController>();
     }
 
     void Start()
     {
+        lastPosition = transform.position;
         if (!dataAppliquee)
         {
             if (srCorps != null) srCorps.enabled = false;
@@ -58,7 +64,6 @@ public class DodgeballVisuel : MonoBehaviour
             if (srTete != null) srTete.enabled = false;
         }
 
-        // Cercle — caché au départ
         if (srCercle != null)
         {
             srCercle.enabled = false;
@@ -72,13 +77,22 @@ public class DodgeballVisuel : MonoBehaviour
         AnimerMarche();
     }
 
-    // ── Animation marche ──────────────────────────────────────────────────────
+    // ── Animation marche — utilise moveInput du PlayerController ─────────────
     void AnimerMarche()
     {
-        if (srCorps == null || rb == null) return;
+        if (srCorps == null) return;
         if (framesMarche == null || framesMarche.Length == 0) return;
 
-        bool bouge = rb.linearVelocity.magnitude > 0.3f;
+        // Détecte mouvement par différence de position — marche pour AI et joueur
+        float deplacement = Vector3.Distance(
+            transform.position, lastPosition) / Time.deltaTime;
+        lastPosition = transform.position;
+
+        bool bouge = deplacement > 0.1f;
+
+        // Si c'est un joueur controlé — utilise moveInput
+        if (pc != null && GetComponentInParent<Unit>()?.isControlled == true)
+            bouge = pc.moveInput.magnitude > 0.1f;
 
         if (bouge)
         {
@@ -108,7 +122,6 @@ public class DodgeballVisuel : MonoBehaviour
         couleurDossard = data.GetCouleurDossard();
         couleurPeau = data.GetCouleurPeau();
 
-        // Corps
         if (srCorps != null)
         {
             srCorps.enabled = true;
@@ -121,7 +134,6 @@ public class DodgeballVisuel : MonoBehaviour
             srCorps.color = couleurPeau;
         }
 
-        // Dossard
         if (srDossard != null)
         {
             srDossard.enabled = true;
@@ -130,7 +142,6 @@ public class DodgeballVisuel : MonoBehaviour
             srDossard.color = couleurDossard;
         }
 
-        // Jambes
         if (srJambes != null)
         {
             srJambes.enabled = true;
@@ -139,7 +150,6 @@ public class DodgeballVisuel : MonoBehaviour
             srJambes.color = couleurJambes;
         }
 
-        // Tete
         if (srTete != null)
         {
             if (data.indexTete <= 0)
@@ -157,7 +167,6 @@ public class DodgeballVisuel : MonoBehaviour
             }
         }
 
-        // Cercle — couleur dossard + transparent
         if (srCercle != null)
         {
             Color c = couleurDossard;
@@ -174,8 +183,6 @@ public class DodgeballVisuel : MonoBehaviour
     {
         if (srCercle == null) return;
         srCercle.enabled = value;
-
-        // Petit pop quand on active
         if (value) StartCoroutine(PopCercle());
     }
 
@@ -194,7 +201,6 @@ public class DodgeballVisuel : MonoBehaviour
             t += Time.deltaTime;
             yield return null;
         }
-
         t = 0f;
         while (t < duree / 2f)
         {
@@ -204,13 +210,11 @@ public class DodgeballVisuel : MonoBehaviour
             t += Time.deltaTime;
             yield return null;
         }
-
         if (srCercle != null)
-            srCercle.transform.localScale =
-                new Vector3(cible, cible, 1f);
+            srCercle.transform.localScale = new Vector3(cible, cible, 1f);
     }
 
-    // ── Rebond quand touché par balle ─────────────────────────────────────────
+    // ── Rebond scale ──────────────────────────────────────────────────────────
     public void JouerRebond()
     {
         StopCoroutine("EffetRebond");
@@ -238,16 +242,19 @@ public class DodgeballVisuel : MonoBehaviour
         transform.localScale = Vector3.one;
     }
 
-    // ── Knockback + flash ─────────────────────────────────────────────────────
+    // ── Knockback + flash + collider off ─────────────────────────────────────
     public void JouerKnockback(Vector2 direction)
     {
         if (rb == null) return;
-        JouerRebond(); // rebond visuel en même temps
+        JouerRebond();
         StartCoroutine(EffetKnockback(direction));
     }
 
     IEnumerator EffetKnockback(Vector2 direction)
     {
+        // Désactive collider pendant knockback
+        if (col != null) col.enabled = false;
+
         rb.linearVelocity = Vector2.zero;
         rb.AddForce(direction.normalized * forceKnockback,
                     ForceMode2D.Impulse);
@@ -266,8 +273,12 @@ public class DodgeballVisuel : MonoBehaviour
             yield return null;
         }
 
+        // Remet couleurs
         if (srCorps != null) srCorps.color = couleurPeau;
         if (srDossard != null) srDossard.color = couleurDossard;
         if (srJambes != null) srJambes.color = couleurJambes;
+
+        // Réactive collider
+        if (col != null) col.enabled = true;
     }
 }
