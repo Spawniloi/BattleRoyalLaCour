@@ -184,7 +184,9 @@ public class GameManager : MonoBehaviour
         PlayerManager manager = player.GetComponent<PlayerManager>();
         if (manager != null) manager.teamID = index;
 
-        if (PlayerInput.all.Count >= 2)
+        //if (PlayerInput.all.Count == 2)
+        if (PlayerInput.all.Count == GameData.nombreJoueurs)
+
         {
             SetGameState(GameState.StartingGame);
             StartCoroutine(GameStarting());
@@ -198,8 +200,6 @@ public class GameManager : MonoBehaviour
         if (count == 2) currentMap = Instantiate(map2Players);
         else if (count == 3) currentMap = Instantiate(map3Players);
         else if (count == 4) currentMap = Instantiate(map4Players);
-        
-        //NOTE : OldMap is required because Units are Clamped into their zones, and if the map disappear before the new one arrives some Unit will Teleport 
         
         StartCoroutine(DelayedReposition());
     }
