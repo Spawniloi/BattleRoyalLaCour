@@ -42,9 +42,12 @@ public class PlayerController : MonoBehaviour
         Vector3 movement = new Vector3(moveInput.x, moveInput.y, 0);
         Vector3 newPos = transform.position + movement * speed * Time.deltaTime;
 
-        if (unit.zone != null)
+        if (GameManager.Instance.currentState == GameManager.GameState.Playing) // Clamp while the is Playing otherwise when the map Update there's some Teleportation
         {
-            newPos = unit.zone.ClampPosition(newPos);
+            if (unit.zone != null)
+            {
+                newPos = unit.zone.ClampPosition(newPos);
+            }
         }
 
         transform.position = newPos;

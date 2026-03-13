@@ -22,6 +22,8 @@ public class UnitAI : MonoBehaviour
     {
         if (GameManager.Instance.currentState != GameState.Playing) return;
 
+        ClampInsideZone();
+
         if (_unit.isControlled || !_unit.isAlive) return;
         if (_unit.HasBall) return;
 
@@ -65,6 +67,14 @@ public class UnitAI : MonoBehaviour
             // fallback si pas de zone
             targetPosition = (Vector2)transform.position;
         }
+    }
+
+    void ClampInsideZone()
+    {
+        if (_unit.zone == null) return;
+
+        Vector2 clamped = _unit.zone.ClampPosition(transform.position);
+        transform.position = clamped;
     }
 
     void OnDrawGizmos()

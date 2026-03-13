@@ -95,7 +95,7 @@ public class GameManager : MonoBehaviour
     IEnumerator GameStarting()
     {
         Debug.Log("GAME LAUNCHING IN 3 SECONDS");
-        yield return new WaitForSeconds(5f);
+        yield return new WaitForSeconds(3f);
         SetGameState(GameState.Playing);
     }
     public void CheckVictory()
