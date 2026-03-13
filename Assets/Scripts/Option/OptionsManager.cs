@@ -53,7 +53,6 @@ public class OptionsManager : MonoBehaviour
 
     void Awake()
     {
-
         if (Instance != null) { Destroy(gameObject); return; }
         Instance = this;
         DontDestroyOnLoad(gameObject);
@@ -101,7 +100,6 @@ public class OptionsManager : MonoBehaviour
 
     void Update()
     {
-        Debug.Log("OptionsManager Update");
         if (inputBloque) return;
 
         var kb = Keyboard.current;
@@ -123,90 +121,87 @@ public class OptionsManager : MonoBehaviour
             return;
         }
 
-        // ── Panel ouvert — navigation ─────────────────────────────────────────
+        // ── Inputs navigation ─────────────────────────────────────────────────
         bool haut = false, bas = false;
         bool valider = false, fermer = false;
-        bool dpadGauche = false, dpadDroite = false;
 
         if (kb != null)
         {
             haut = kb.upArrowKey.wasPressedThisFrame
-                      || kb.zKey.wasPressedThisFrame;
+                   || kb.zKey.wasPressedThisFrame;
             bas = kb.downArrowKey.wasPressedThisFrame
-                      || kb.sKey.wasPressedThisFrame;
-            dpadGauche = kb.leftArrowKey.wasPressedThisFrame
-                      || kb.qKey.wasPressedThisFrame;
-            dpadDroite = kb.rightArrowKey.wasPressedThisFrame
-                      || kb.dKey.wasPressedThisFrame;
+                   || kb.sKey.wasPressedThisFrame;
             valider = kb.spaceKey.wasPressedThisFrame
-                      || kb.enterKey.wasPressedThisFrame;
+                   || kb.enterKey.wasPressedThisFrame;
             fermer = kb.escapeKey.wasPressedThisFrame;
         }
 
         if (gp0 != null)
         {
             haut = haut || gp0.dpad.up.wasPressedThisFrame
-                               || gp0.leftStick.up.wasPressedThisFrame;
+                              || gp0.leftStick.up.wasPressedThisFrame;
             bas = bas || gp0.dpad.down.wasPressedThisFrame
-                               || gp0.leftStick.down.wasPressedThisFrame;
-            dpadGauche = dpadGauche || gp0.dpad.left.wasPressedThisFrame;
-            dpadDroite = dpadDroite || gp0.dpad.right.wasPressedThisFrame;
+                              || gp0.leftStick.down.wasPressedThisFrame;
             valider = valider || gp0.buttonSouth.wasPressedThisFrame;
             fermer = fermer || gp0.buttonEast.wasPressedThisFrame
-                               || gp0.startButton.wasPressedThisFrame;
+                              || gp0.startButton.wasPressedThisFrame;
         }
 
-        // ── LB/RB pour sliders — par clic ────────────────────────────────────
+        // ── Gachettes LB/RB + clavier A/E — sliders et langue ────────────────
         if (gp0 != null)
         {
+            bool lb = gp0.leftShoulder.wasPressedThisFrame;
+            bool rb = gp0.rightShoulder.wasPressedThisFrame;
+
             if (navIndex == 0 && sliderMusique != null)
             {
-                if (gp0.rightShoulder.wasPressedThisFrame)
-                    sliderMusique.value =
-                        Mathf.Clamp01(sliderMusique.value + 0.05f);
-                if (gp0.leftShoulder.wasPressedThisFrame)
-                    sliderMusique.value =
-                        Mathf.Clamp01(sliderMusique.value - 0.05f);
+                if (rb) sliderMusique.value =
+                    Mathf.Clamp01(sliderMusique.value + 0.05f);
+                if (lb) sliderMusique.value =
+                    Mathf.Clamp01(sliderMusique.value - 0.05f);
             }
             if (navIndex == 1 && sliderVFX != null)
             {
-                if (gp0.rightShoulder.wasPressedThisFrame)
-                    sliderVFX.value =
-                        Mathf.Clamp01(sliderVFX.value + 0.05f);
-                if (gp0.leftShoulder.wasPressedThisFrame)
-                    sliderVFX.value =
-                        Mathf.Clamp01(sliderVFX.value - 0.05f);
+                if (rb) sliderVFX.value =
+                    Mathf.Clamp01(sliderVFX.value + 0.05f);
+                if (lb) sliderVFX.value =
+                    Mathf.Clamp01(sliderVFX.value - 0.05f);
+            }
+            if (navIndex == 2)
+            {
+                if (rb) NaviguerLangue(1);
+                if (lb) NaviguerLangue(-1);
             }
         }
 
-        // Clavier A/E pour sliders
         if (kb != null)
         {
+            bool gauche = kb.aKey.wasPressedThisFrame
+                       || kb.leftArrowKey.wasPressedThisFrame
+                       || kb.qKey.wasPressedThisFrame;
+            bool droite = kb.eKey.wasPressedThisFrame
+                       || kb.rightArrowKey.wasPressedThisFrame
+                       || kb.dKey.wasPressedThisFrame;
+
             if (navIndex == 0 && sliderMusique != null)
             {
-                if (kb.eKey.wasPressedThisFrame)
-                    sliderMusique.value =
-                        Mathf.Clamp01(sliderMusique.value + 0.05f);
-                if (kb.aKey.wasPressedThisFrame)
-                    sliderMusique.value =
-                        Mathf.Clamp01(sliderMusique.value - 0.05f);
+                if (droite) sliderMusique.value =
+                    Mathf.Clamp01(sliderMusique.value + 0.05f);
+                if (gauche) sliderMusique.value =
+                    Mathf.Clamp01(sliderMusique.value - 0.05f);
             }
             if (navIndex == 1 && sliderVFX != null)
             {
-                if (kb.eKey.wasPressedThisFrame)
-                    sliderVFX.value =
-                        Mathf.Clamp01(sliderVFX.value + 0.05f);
-                if (kb.aKey.wasPressedThisFrame)
-                    sliderVFX.value =
-                        Mathf.Clamp01(sliderVFX.value - 0.05f);
+                if (droite) sliderVFX.value =
+                    Mathf.Clamp01(sliderVFX.value + 0.05f);
+                if (gauche) sliderVFX.value =
+                    Mathf.Clamp01(sliderVFX.value - 0.05f);
             }
-        }
-
-        // ── Langue — dpad ←/→ seulement ──────────────────────────────────────
-        if (navIndex == 2)
-        {
-            if (dpadGauche) NaviguerLangue(-1);
-            if (dpadDroite) NaviguerLangue(1);
+            if (navIndex == 2)
+            {
+                if (droite) NaviguerLangue(1);
+                if (gauche) NaviguerLangue(-1);
+            }
         }
 
         // ── Navigation ↑↓ ────────────────────────────────────────────────────
@@ -246,8 +241,8 @@ public class OptionsManager : MonoBehaviour
         if (etaitEnJeu) Time.timeScale = 1f;
         AudioManager.Instance?.Sauvegarder();
         JouerSFX(sfxRetour);
-        StartCoroutine(BloquerJusquAuRelachement()); // ← AVANT SetActive(false)
-        panelOptions?.SetActive(false);              // ← APRÈS
+        StartCoroutine(BloquerJusquAuRelachement());
+        panelOptions?.SetActive(false);
     }
 
     IEnumerator BloquerJusquAuRelachement()
@@ -255,7 +250,6 @@ public class OptionsManager : MonoBehaviour
         inputBloque = true;
         yield return null;
 
-        // Attend que tous les boutons soient relâchés
         bool encoreAppuye = true;
         while (encoreAppuye)
         {
@@ -278,11 +272,11 @@ public class OptionsManager : MonoBehaviour
             if (encoreAppuye) yield return null;
         }
 
-        yield return null; // sécurité
+        yield return null;
         inputBloque = false;
     }
 
-    // ── Quitter le jeu ────────────────────────────────────────────────────────
+    // ── Quitter vers Hub ──────────────────────────────────────────────────────
     void QuitterJeu()
     {
         Time.timeScale = 1f;
@@ -293,6 +287,7 @@ public class OptionsManager : MonoBehaviour
         JouerSFX(sfxValider);
     }
 
+    // ── Navigation ───────────────────────────────────────────────────────────
     void Naviguer(int dir)
     {
         int max = etaitEnJeu ? 4 : 3;
@@ -320,13 +315,30 @@ public class OptionsManager : MonoBehaviour
 
     void SurlígnerNav()
     {
+        // Sliders
         if (sliderMusique != null)
             sliderMusique.transform.localScale =
                 navIndex == 0 ? Vector3.one * 1.05f : Vector3.one;
-
         if (sliderVFX != null)
             sliderVFX.transform.localScale =
                 navIndex == 1 ? Vector3.one * 1.05f : Vector3.one;
+
+        // Boutons langue — tous grossissent quand navIndex == 2
+        string langueActuelle =
+            LocalisationManager.Instance?.GetLangueActuelle() ?? "fr";
+
+        for (int i = 0; i < btnsLangue.Count; i++)
+        {
+            if (btnsLangue[i] != null)
+                btnsLangue[i].transform.localScale =
+                    navIndex == 2 ? Vector3.one * 1.08f : Vector3.one;
+
+            if (i < stylesLangue.Count)
+                stylesLangue[i]?.SetSelectionne(
+                    navIndex == 2 &&
+                    i < codesLangue.Count &&
+                    codesLangue[i] == langueActuelle);
+        }
 
         styleBtnRetour?.SetSelectionne(navIndex == 3);
         styleBtnQuitterJeu?.SetSelectionne(navIndex == 4);
