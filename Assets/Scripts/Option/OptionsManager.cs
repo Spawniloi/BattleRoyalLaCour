@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -38,11 +37,12 @@ public class OptionsManager : MonoBehaviour
     public AudioClip sfxValider;
     public AudioClip sfxRetour;
 
-    // 0=sliderMusique 1=sliderVFX 2=langue 3=retour 4=quitterJeu
     private int navIndex = 3;
     private bool estOuvert = false;
     private bool etaitEnJeu = false;
-    private bool inputBloque = false;
+    private float tempsDeblocage = 0f;
+
+    public bool EstOuvert() => estOuvert;
 
     private static readonly HashSet<string> scenesJeu = new HashSet<string>
     {
@@ -100,7 +100,8 @@ public class OptionsManager : MonoBehaviour
 
     void Update()
     {
-        if (inputBloque) return;
+        // Bloque pendant 0.3s après fermeture
+        if (Time.unscaledTime < tempsDeblocage) return;
 
         var kb = Keyboard.current;
         var gp0 = Gamepad.all.Count > 0 ? Gamepad.all[0] : null;
@@ -109,19 +110,16 @@ public class OptionsManager : MonoBehaviour
         if (!estOuvert)
         {
             bool ouvrir = false;
-
             if (kb != null && kb.escapeKey.wasPressedThisFrame)
                 ouvrir = true;
-
             foreach (var gp in Gamepad.all)
                 if (gp.startButton.wasPressedThisFrame)
                     ouvrir = true;
-
             if (ouvrir) Ouvrir();
             return;
         }
 
-        // ── Inputs navigation ─────────────────────────────────────────────────
+        // ── Panel ouvert — navigation ─────────────────────────────────────────
         bool haut = false, bas = false;
         bool valider = false, fermer = false;
 
@@ -147,7 +145,7 @@ public class OptionsManager : MonoBehaviour
                               || gp0.startButton.wasPressedThisFrame;
         }
 
-        // ── Gachettes LB/RB + clavier A/E — sliders et langue ────────────────
+        // ── Gachettes + clavier ←/→ ───────────────────────────────────────────
         if (gp0 != null)
         {
             bool lb = gp0.leftShoulder.wasPressedThisFrame;
@@ -155,17 +153,13 @@ public class OptionsManager : MonoBehaviour
 
             if (navIndex == 0 && sliderMusique != null)
             {
-                if (rb) sliderMusique.value =
-                    Mathf.Clamp01(sliderMusique.value + 0.05f);
-                if (lb) sliderMusique.value =
-                    Mathf.Clamp01(sliderMusique.value - 0.05f);
+                if (rb) sliderMusique.value = Mathf.Clamp01(sliderMusique.value + 0.05f);
+                if (lb) sliderMusique.value = Mathf.Clamp01(sliderMusique.value - 0.05f);
             }
             if (navIndex == 1 && sliderVFX != null)
             {
-                if (rb) sliderVFX.value =
-                    Mathf.Clamp01(sliderVFX.value + 0.05f);
-                if (lb) sliderVFX.value =
-                    Mathf.Clamp01(sliderVFX.value - 0.05f);
+                if (rb) sliderVFX.value = Mathf.Clamp01(sliderVFX.value + 0.05f);
+                if (lb) sliderVFX.value = Mathf.Clamp01(sliderVFX.value - 0.05f);
             }
             if (navIndex == 2)
             {
@@ -185,17 +179,13 @@ public class OptionsManager : MonoBehaviour
 
             if (navIndex == 0 && sliderMusique != null)
             {
-                if (droite) sliderMusique.value =
-                    Mathf.Clamp01(sliderMusique.value + 0.05f);
-                if (gauche) sliderMusique.value =
-                    Mathf.Clamp01(sliderMusique.value - 0.05f);
+                if (droite) sliderMusique.value = Mathf.Clamp01(sliderMusique.value + 0.05f);
+                if (gauche) sliderMusique.value = Mathf.Clamp01(sliderMusique.value - 0.05f);
             }
             if (navIndex == 1 && sliderVFX != null)
             {
-                if (droite) sliderVFX.value =
-                    Mathf.Clamp01(sliderVFX.value + 0.05f);
-                if (gauche) sliderVFX.value =
-                    Mathf.Clamp01(sliderVFX.value - 0.05f);
+                if (droite) sliderVFX.value = Mathf.Clamp01(sliderVFX.value + 0.05f);
+                if (gauche) sliderVFX.value = Mathf.Clamp01(sliderVFX.value - 0.05f);
             }
             if (navIndex == 2)
             {
@@ -204,7 +194,6 @@ public class OptionsManager : MonoBehaviour
             }
         }
 
-        // ── Navigation ↑↓ ────────────────────────────────────────────────────
         if (haut) Naviguer(-1);
         if (bas) Naviguer(1);
         if (valider) ValiderNav();
@@ -241,39 +230,8 @@ public class OptionsManager : MonoBehaviour
         if (etaitEnJeu) Time.timeScale = 1f;
         AudioManager.Instance?.Sauvegarder();
         JouerSFX(sfxRetour);
-        StartCoroutine(BloquerJusquAuRelachement());
         panelOptions?.SetActive(false);
-    }
-
-    IEnumerator BloquerJusquAuRelachement()
-    {
-        inputBloque = true;
-        yield return null;
-
-        bool encoreAppuye = true;
-        while (encoreAppuye)
-        {
-            encoreAppuye = false;
-
-            if (Keyboard.current != null)
-            {
-                if (Keyboard.current.escapeKey.isPressed) encoreAppuye = true;
-                if (Keyboard.current.spaceKey.isPressed) encoreAppuye = true;
-                if (Keyboard.current.enterKey.isPressed) encoreAppuye = true;
-            }
-
-            foreach (var gp in Gamepad.all)
-            {
-                if (gp.startButton.isPressed) encoreAppuye = true;
-                if (gp.buttonEast.isPressed) encoreAppuye = true;
-                if (gp.buttonSouth.isPressed) encoreAppuye = true;
-            }
-
-            if (encoreAppuye) yield return null;
-        }
-
-        yield return null;
-        inputBloque = false;
+        tempsDeblocage = Time.unscaledTime + 0.3f; // bloque 0.3s
     }
 
     // ── Quitter vers Hub ──────────────────────────────────────────────────────
@@ -283,8 +241,8 @@ public class OptionsManager : MonoBehaviour
         estOuvert = false;
         AudioManager.Instance?.Sauvegarder();
         panelOptions?.SetActive(false);
-        SceneManager.LoadScene("Scene_Hub");
         JouerSFX(sfxValider);
+        SceneManager.LoadScene("Scene_Hub");
     }
 
     // ── Navigation ───────────────────────────────────────────────────────────
@@ -315,7 +273,6 @@ public class OptionsManager : MonoBehaviour
 
     void SurlígnerNav()
     {
-        // Sliders
         if (sliderMusique != null)
             sliderMusique.transform.localScale =
                 navIndex == 0 ? Vector3.one * 1.05f : Vector3.one;
@@ -323,7 +280,6 @@ public class OptionsManager : MonoBehaviour
             sliderVFX.transform.localScale =
                 navIndex == 1 ? Vector3.one * 1.05f : Vector3.one;
 
-        // Boutons langue — tous grossissent quand navIndex == 2
         string langueActuelle =
             LocalisationManager.Instance?.GetLangueActuelle() ?? "fr";
 

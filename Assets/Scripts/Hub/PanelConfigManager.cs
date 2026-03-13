@@ -104,10 +104,10 @@ public class PanelConfigManager : MonoBehaviour
         nbManches = manchesDefaut;
         sliderManches.value = manchesDefaut;
         MettreAJourBoutonsJoueurs();
-        MettreAJourTexteManches();
+        MettreAJourTexteManches(); // ← s'assure que le texte est correct dès l'ouverture
         MasquerAvertissement();
         navActif = true;
-        indexNav = 2; // Continuer sélectionné par défaut
+        indexNav = 2;
         SurlígnerNav(indexNav);
     }
 
@@ -303,7 +303,11 @@ public class PanelConfigManager : MonoBehaviour
     void MettreAJourTexteManches()
     {
         if (txtManches == null) return;
-        txtManches.text = $"Manches : {nbManches}";
+        string texte = LocalisationManager.Instance != null
+            ? LocalisationManager.Instance.Get(
+                "config_manches", nbManches.ToString())
+            : $"Manches : {nbManches}";
+        txtManches.text = texte;
     }
 
     // ── Mode test ─────────────────────────────────────────────────────────────

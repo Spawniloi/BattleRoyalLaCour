@@ -31,7 +31,6 @@ public class HubManager : MonoBehaviour
     public AudioClip sfxValider;
     public AudioClip sfxRetour;
 
-    // ── Raccourci localisation ────────────────────────────────────────────────
     string L(string cle, params string[] args)
         => LocalisationManager.Instance != null
             ? LocalisationManager.Instance.Get(cle, args)
@@ -54,30 +53,31 @@ public class HubManager : MonoBehaviour
         btnOptions?.onClick.AddListener(AllerOptions);
         btnQuitter?.onClick.AddListener(Quitter);
 
-        // Titre animé traduit
-        if (textTitre != null)
-            StartCoroutine(EcrireTitre(L("hub_titre")));
+        // Titre — attend que les traductions soient prêtes
+        if (LocalisationManager.Instance != null)
+        {
+            if (LocalisationManager.Instance.EstCharge())
+                LancerEcriture();
+            else
+                LocalisationManager.Instance.onTraductionsChargees
+                    += LancerEcriture;
+        }
+    }
 
-        // Abonne au changement de langue pour le titre
+    // ── Titre — écrit une seule fois quand prêt ───────────────────────────────
+    void LancerEcriture()
+    {
+        // Se désabonne immédiatement — ne se relance pas
         if (LocalisationManager.Instance != null)
             LocalisationManager.Instance.onTraductionsChargees
-                += MettreAJourTitre;
+                -= LancerEcriture;
+
+        if (textTitre == null) return;
+
+        StopAllCoroutines();
+        StartCoroutine(EcrireTitre(L("hub_titre")));
     }
 
-    void OnDestroy()
-    {
-        if (LocalisationManager.Instance != null)
-            LocalisationManager.Instance.onTraductionsChargees
-                -= MettreAJourTitre;
-    }
-
-    void MettreAJourTitre()
-    {
-        if (textTitre != null)
-            StartCoroutine(EcrireTitre(L("hub_titre")));
-    }
-
-    // ── Titre effet craie ─────────────────────────────────────────────────────
     IEnumerator EcrireTitre(string texte)
     {
         textTitre.text = "";
@@ -88,13 +88,21 @@ public class HubManager : MonoBehaviour
         }
     }
 
-    // ── Navigation ────────────────────────────────────────────────────────────
+    void OnDestroy()
+    {
+        if (LocalisationManager.Instance != null)
+            LocalisationManager.Instance.onTraductionsChargees
+                -= LancerEcriture;
+    }
+
+    // ── Audio ─────────────────────────────────────────────────────────────────
     public void JouerSFX(AudioClip clip)
     {
         if (sourceSFX != null && clip != null)
             sourceSFX.PlayOneShot(clip);
     }
 
+    // ── Boutons ───────────────────────────────────────────────────────────────
     void AllerJouer()
     {
         JouerSFX(sfxValider);

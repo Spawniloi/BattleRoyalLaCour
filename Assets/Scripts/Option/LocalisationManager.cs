@@ -25,18 +25,22 @@ public class LocalisationManager : MonoBehaviour
 
     void Awake()
     {
-        if (Instance != null)
-        {
-            Destroy(gameObject);
-            return;
-        }
-
+        if (Instance != null) { Destroy(gameObject); return; }
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
-        // Charge langue sauvegardée
-        langueActuelle = PlayerPrefs.GetString(
-            "langue", langueDefaut);
+        langueActuelle = PlayerPrefs.GetString("langue", langueDefaut);
+
+        // ← Charge le JSON local immédiatement
+        ChargerFallbackSilencieux();
+    }
+
+    void ChargerFallbackSilencieux()
+    {
+        TextAsset asset = Resources.Load<TextAsset>("languages");
+        if (asset == null) return;
+        ParseJSON(asset.text);
+        // Pas de TerminerChargement() ici — juste les données
     }
 
     void Start()
@@ -233,24 +237,21 @@ public class LocalisationManager : MonoBehaviour
     // ── API publique ──────────────────────────────────────────────────────────
     public string Get(string cle, params string[] args)
     {
-        if (!chargementTermine)
-            return cle;
+        string texte = cle; // fallback ultime = la clé
 
-        string texte = cle; // fallback = la clé elle-même
-
+        // Cherche dans la langue actuelle
         if (traductions.ContainsKey(langueActuelle) &&
             traductions[langueActuelle].ContainsKey(cle))
         {
             texte = traductions[langueActuelle][cle];
         }
+        // Fallback FR
         else if (traductions.ContainsKey("fr") &&
                  traductions["fr"].ContainsKey(cle))
         {
-            // Fallback FR si clé manquante dans langue actuelle
             texte = traductions["fr"][cle];
         }
 
-        // Remplace les paramètres {0}, {1}, etc.
         for (int i = 0; i < args.Length; i++)
             texte = texte.Replace("{" + i + "}", args[i]);
 
