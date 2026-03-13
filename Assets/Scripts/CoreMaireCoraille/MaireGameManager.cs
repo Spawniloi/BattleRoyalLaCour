@@ -56,7 +56,7 @@ public class MaireGameManager : MonoBehaviour
 
     void Update()
     {
-        if (partieEnCours)
+        if (partieEnCours && Time.timeScale > 0f)
             StatsTracker.Instance?.Tick(joueursActifs);
     }
 

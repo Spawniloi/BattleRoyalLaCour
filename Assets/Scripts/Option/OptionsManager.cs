@@ -47,12 +47,13 @@ public class OptionsManager : MonoBehaviour
     private static readonly HashSet<string> scenesJeu = new HashSet<string>
     {
         "Scene_MaireCoraille",
-        "Scene_BallonPrisonnier",
+        "Scene_Dodgeball",
         "Scene_SnakeRacaille"
     };
 
     void Awake()
     {
+
         if (Instance != null) { Destroy(gameObject); return; }
         Instance = this;
         DontDestroyOnLoad(gameObject);
@@ -100,6 +101,7 @@ public class OptionsManager : MonoBehaviour
 
     void Update()
     {
+        Debug.Log("OptionsManager Update");
         if (inputBloque) return;
 
         var kb = Keyboard.current;
