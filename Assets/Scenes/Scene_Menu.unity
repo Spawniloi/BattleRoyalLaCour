@@ -4128,6 +4128,7 @@ MonoBehaviour:
   styleBtnRetour: {fileID: 89868879}
   styleBtnQuitterJeu: {fileID: 1376519886}
   zoneQuitterJeu: {fileID: 480926717}
+  estDansSceneJeu: 0
   sourceAudio: {fileID: 0}
   sfxFocus: {fileID: 0}
   sfxValider: {fileID: 0}

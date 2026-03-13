@@ -22,8 +22,7 @@ public class OptionsManager : MonoBehaviour
     [Header("Carousel langue")]
     public List<Button> btnsLangue = new List<Button>();
     public List<BoutonStylee> stylesLangue = new List<BoutonStylee>();
-    public List<string> codesLangue = new List<string>()
-        { "fr", "en", "cr" };
+    public List<string> codesLangue = new List<string>() { "fr", "en", "cr" };
 
     [Header("Boutons")]
     public Button btnRetour;
@@ -34,6 +33,9 @@ public class OptionsManager : MonoBehaviour
     [Header("Texte quitter (caché hors jeu)")]
     public GameObject zoneQuitterJeu;
 
+    [Header("Est en jeu (cocher si scène de jeu)")]
+    public bool estDansSceneJeu = false;
+
     [Header("Audio")]
     public AudioSource sourceAudio;
     public AudioClip sfxFocus;
@@ -42,23 +44,13 @@ public class OptionsManager : MonoBehaviour
 
     private int navIndex = 3;
     private bool estOuvert = false;
-    private bool etaitEnJeu = false;
     private float tempsDeblocage = 0f;
 
     public bool EstOuvert() => estOuvert;
 
-    private static readonly HashSet<string> scenesJeu = new HashSet<string>
-    {
-        "Scene_MaireCoraille",
-        "Scene_Dodgeball",
-        "Scene_SnakeRacaille"
-    };
-
     void Awake()
     {
-        if (Instance != null) { Destroy(gameObject); return; }
         Instance = this;
-        DontDestroyOnLoad(gameObject);
     }
 
     void Start()
@@ -98,7 +90,14 @@ public class OptionsManager : MonoBehaviour
 
         btnRetour?.onClick.AddListener(Fermer);
         btnQuitterJeu?.onClick.AddListener(QuitterJeu);
+
+        zoneQuitterJeu?.SetActive(estDansSceneJeu);
         MettreAJourLangueVisuel();
+    }
+
+    void OnDestroy()
+    {
+        if (Instance == this) Instance = null;
     }
 
     void Update()
@@ -206,12 +205,10 @@ public class OptionsManager : MonoBehaviour
     public void Ouvrir()
     {
         estOuvert = true;
-        string scene = SceneManager.GetActiveScene().name;
-        etaitEnJeu = scenesJeu.Contains(scene);
 
-        if (etaitEnJeu) Time.timeScale = 0f;
+        if (estDansSceneJeu) Time.timeScale = 0f;
 
-        zoneQuitterJeu?.SetActive(etaitEnJeu);
+        zoneQuitterJeu?.SetActive(estDansSceneJeu);
         panelOptions?.SetActive(true);
 
         if (sliderMusique != null && AudioManager.Instance != null)
@@ -229,7 +226,7 @@ public class OptionsManager : MonoBehaviour
     public void Fermer()
     {
         estOuvert = false;
-        if (etaitEnJeu) Time.timeScale = 1f;
+        if (estDansSceneJeu) Time.timeScale = 1f;
         AudioManager.Instance?.Sauvegarder();
         JouerSFX(sfxRetour);
         panelOptions?.SetActive(false);
@@ -250,10 +247,10 @@ public class OptionsManager : MonoBehaviour
 #endif
     }
 
-    // ── Navigation ───────────────────────────────────────────────────────────
+    // ── Navigation ────────────────────────────────────────────────────────────
     void Naviguer(int dir)
     {
-        int max = etaitEnJeu ? 4 : 3;
+        int max = estDansSceneJeu ? 4 : 3;
         navIndex = (navIndex + dir + max + 1) % (max + 1);
         SurlígnerNav();
         JouerSFX(sfxFocus);
@@ -280,13 +277,11 @@ public class OptionsManager : MonoBehaviour
     {
         if (sliderMusique != null)
             sliderMusique.transform.localScale = navIndex == 0
-                ? scaleSlider * 1.2f
-                : scaleSlider;
+                ? scaleSlider * 1.2f : scaleSlider;
 
         if (sliderVFX != null)
             sliderVFX.transform.localScale = navIndex == 1
-                ? scaleSlider * 1.2f
-                : scaleSlider;
+                ? scaleSlider * 1.2f : scaleSlider;
 
         string langueActuelle =
             LocalisationManager.Instance?.GetLangueActuelle() ?? "fr";
