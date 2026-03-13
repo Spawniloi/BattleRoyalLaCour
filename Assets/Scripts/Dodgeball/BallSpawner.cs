@@ -10,8 +10,11 @@ public class BallSpawner : MonoBehaviour
     float minY;
     float maxY;
 
-    public float spawnDelay = 3f;
+    private float spawnDelay = 2.5f;
     public float mapSize = 20f;
+
+    private float endGameSpawnDelay = 1.25f;
+    bool frenzyStarted = false;
 
     void Start()
     {
@@ -29,22 +32,37 @@ public class BallSpawner : MonoBehaviour
 
         InvokeRepeating(nameof(SpawnBall), 2f, spawnDelay);
     }
-
+    private void Update()
+    {       
+        if (!frenzyStarted && GameManager.Instance.IsEndGamePhase())
+        {
+            StartFinalMinute();
+        }
+    }
     private void OnDisable()
     {
         CancelInvoke(nameof(SpawnBall));
     }
 
     void SpawnBall()
-{
-    Vector2 spawnPos = RandomEdgePosition();
-    GameObject ball = Instantiate(ballPrefab, spawnPos, Quaternion.identity);
-    Vector2 center = Vector2.zero;
-    Vector2 dir = (center - spawnPos).normalized;
+    {
+        Vector2 spawnPos = RandomEdgePosition();
+        GameObject ball = Instantiate(ballPrefab, spawnPos, Quaternion.identity);
+        Vector2 center = Vector2.zero;
+        Vector2 dir = (center - spawnPos).normalized;
 
-    ball.GetComponent<Ball>().Initialize(dir);
-}
+        ball.GetComponent<Ball>().Initialize(dir);
+    }
 
+    void StartFinalMinute()
+    {
+        frenzyStarted = true;
+
+        CancelInvoke(nameof(SpawnBall));
+        InvokeRepeating(nameof(SpawnBall), 0f, endGameSpawnDelay);
+
+        Debug.Log("FINAL MINUTE - BALL FRENZY");
+    }
     Vector2 RandomEdgePosition()
     {
         int side = Random.Range(0, 4);

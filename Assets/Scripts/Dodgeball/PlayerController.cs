@@ -41,7 +41,6 @@ public class PlayerController : MonoBehaviour
     public void Move()
     {
         Vector3 movement = new Vector3(moveInput.x, moveInput.y, 0);
-        if (movement != Vector3.zero) print(movement);
         Vector3 newPos = transform.position + movement * speed * Time.deltaTime;
 
         if (GameManager.Instance.currentState == GameManager.GameState.Playing) // Clamp while the is Playing otherwise when the map Update there's some Teleportation

@@ -37,6 +37,9 @@ public class GameManager : MonoBehaviour
     // Temps
     private float tempsDebut;
 
+    public float gameDuration = 150f; // 2 minutes 30
+    private float remainingTime;
+
     #region STATES
     public void SetGameState(GameState newState)
     {
@@ -69,7 +72,10 @@ public class GameManager : MonoBehaviour
     {
         allowJoin = false;
         ballSpawner.enabled = true;
+        
         tempsDebut = Time.time;
+        remainingTime = gameDuration;
+
         Debug.Log("Game starting");
     }
 
@@ -85,6 +91,15 @@ public class GameManager : MonoBehaviour
         BuildAndSendPartieData();
         StartCoroutine(AllerResultats());
     }
+    public bool IsEndGamePhase()
+    {
+        return remainingTime <= 60f;
+    }
+
+    public float GetRemainingTime()
+{
+    return remainingTime;
+}
 
     IEnumerator AllerResultats()
     {
@@ -144,6 +159,21 @@ public class GameManager : MonoBehaviour
     private void Update()
     {
         ManualJoin();
+        if (currentState == GameState.Playing)
+        {
+            UpdateTimer();
+        }
+    }
+
+    void UpdateTimer()
+    {
+        remainingTime -= Time.deltaTime;
+
+        if (remainingTime <= 0f)
+        {
+            remainingTime = 0f;
+            SetGameState(GameState.GameOver);
+        }
     }
     #endregion
 
