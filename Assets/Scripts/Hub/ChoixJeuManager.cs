@@ -16,6 +16,9 @@ public class ChoixJeuManager : MonoBehaviour
     public RectTransform conteneurClassement;
     public GameObject prefabLigneClassement;
 
+    [Header("Classement — points de spawn")]
+    public Transform[] spawnsClassement;
+
     [Header("Boutons jeux")]
     public Button btnMaireCoraille;
     public Button btnBallonPrisonnier;
@@ -70,10 +73,11 @@ public class ChoixJeuManager : MonoBehaviour
     }
 
     // ── Classement ────────────────────────────────────────────────────────────
+
     void AfficherClassement()
     {
-        if (conteneurClassement == null ||
-            prefabLigneClassement == null) return;
+        if (spawnsClassement == null || spawnsClassement.Length == 0) return;
+        if (prefabLigneClassement == null) return;
 
         List<(int playerID, float score, int sucettes)> classement;
 
@@ -81,7 +85,6 @@ public class ChoixJeuManager : MonoBehaviour
             classement = GameSessionManager.Instance.GetClassementFinal();
         else
         {
-            // Fallback — tous à égalité avec 1 sucette
             classement = new List<(int, float, int)>();
             for (int i = 1; i <= GameData.nombreJoueurs; i++)
                 classement.Add((i, 0f, 1));
@@ -89,15 +92,19 @@ public class ChoixJeuManager : MonoBehaviour
 
         for (int i = 0; i < classement.Count; i++)
         {
+            if (i >= spawnsClassement.Length) break;
+
             var (playerID, score, sucettes) = classement[i];
 
             GameObject go = Instantiate(
                 prefabLigneClassement,
-                conteneurClassement);
+                spawnsClassement[i].position,
+                Quaternion.identity);
 
-            LigneClassement ligne =
-                go.GetComponent<LigneClassement>();
+            go.transform.SetParent(spawnsClassement[i], false);
+            go.transform.localPosition = Vector3.zero;
 
+            LigneClassement ligne = go.GetComponent<LigneClassement>();
             ligne?.Appliquer(i + 1, playerID, score, sucettes);
         }
     }
